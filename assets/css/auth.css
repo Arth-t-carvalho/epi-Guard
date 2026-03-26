@@ -1,0 +1,553 @@
+:root {
+    --facchini-red: #cc1d24;
+    --facchini-dark-red: #8b1418;
+    --sidebar-bg: #2d2d2d;
+    --white: #FFFFFF;
+    --bg-light: #f8fafc;
+    --text-dark: #1a1d23;
+    --text-muted: #64748b;
+    --login-btn: #ce1709;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: #8b1418;
+    /* Base sólida */
+}
+
+/* Camada de Gradiente Suave */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(-45deg, #1f0102, #6b0c10, #c4141a, #8f1014, #2a0304);
+    background-size: 400% 400%;
+    animation: gradientAnimation 25s ease infinite;
+    z-index: -2;
+}
+
+/* Camada de Padrão Corp Tech (Pontos) */
+body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px);
+    background-size: 35px 35px;
+    animation: patternMove 100s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes patternMove {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 1000px 1000px;
+    }
+}
+
+/* Splash Screen */
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--facchini-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.splash-screen.hidden {
+    transform: translateX(100%);
+}
+
+.splash-content {
+    text-align: center;
+    color: var(--white);
+}
+
+.facchini-logo {
+    font-family: 'Outfit', sans-serif;
+    font-size: 5rem;
+    font-weight: 800;
+    letter-spacing: 5px;
+}
+
+.loading-container {
+    width: 300px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    margin: 20px auto;
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--white);
+}
+
+/* Main Container */
+.login-container {
+    height: 100vh;
+    width: 100vw;
+    background: transparent;
+}
+
+.login-container.hidden {
+    display: none;
+}
+
+.login-wrapper {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+/* Sidebar */
+.login-sidebar {
+    flex: 0 0 50%;
+    width: 50%;
+    background: transparent;
+    /* Mostra o fundo animado */
+    color: var(--white);
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: flex 1s cubic-bezier(0.77, 0, 0.175, 1),
+        width 1s cubic-bezier(0.77, 0, 0.175, 1),
+        padding 1s cubic-bezier(0.77, 0, 0.175, 1),
+        opacity 0.6s ease;
+    overflow: hidden;
+}
+
+.sidebar-content {
+    min-width: 450px;
+}
+
+.brand-group {
+    margin-bottom: 40px;
+}
+
+.facchini-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 4rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    line-height: 1;
+    text-align: center;
+    align-items: center;
+    font-size: 5rem;
+}
+
+.facchini-subtitle {
+    font-size: 0.9rem;
+    letter-spacing: 4px;
+    font-weight: 600;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.facchini-subtitle::before {
+    content: '';
+    width: 30px;
+    height: 2px;
+    background: var(--white);
+    margin-right: 13px;
+}
+
+.facchini-subtitle::after {
+    content: '';
+    width: 30px;
+    height: 2px;
+    background: var(--white);
+    margin-left: 13px;
+}
+
+/* Carousel Section */
+.carousel-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.carousel-container {
+    width: 100%;
+    max-width: 600px;
+    border: 2px solid var(--white);
+    border-radius: 40px;
+    overflow: hidden;
+    background: var(--white);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.carousel-slide {
+    flex: 0 0 100%;
+    height: 350px;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.carousel-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: var(--white);
+    width: 25px;
+    border-radius: 10px;
+}
+
+/* Tag */
+.tag-group {
+    margin-bottom: 40px;
+}
+
+.epi-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.epi-tag i {
+    color: var(--white);
+}
+
+/* Quote */
+.quote-section {
+    max-width: 450px;
+}
+
+.main-quote {
+    font-size: 1.8rem;
+    line-height: 1.3;
+    margin-bottom: 15px;
+}
+
+.main-quote strong {
+    font-weight: 800;
+    display: block;
+}
+
+.sub-quote {
+    font-size: 0.95rem;
+    opacity: 0.7;
+    line-height: 1.6;
+}
+
+/* Form Area */
+.login-form-area {
+    flex: 0 0 50%;
+    width: 50%;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10%;
+    border-top-left-radius: 60px;
+    /* Arredondamento conforme imagem */
+    border-bottom-left-radius: 60px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transition: flex 1s cubic-bezier(0.77, 0, 0.175, 1),
+        width 1s cubic-bezier(0.77, 0, 0.175, 1),
+        border-radius 1s cubic-bezier(0.77, 0, 0.175, 1),
+        padding 1s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.form-container {
+    width: 100%;
+    max-width: 480px;
+
+}
+
+.form-header {
+    margin-bottom: 40px;
+}
+
+.form-header h2 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.form-header p {
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-size: 1.05rem;
+}
+
+.input-group {
+    margin-bottom: 25px;
+
+}
+
+.label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.input-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.link-forgot {
+    font-size: 0.8rem;
+    color: var(--facchini-red);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 18px;
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 16px 16px 16px 50px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0, 0, 0.5, 0.2);
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--facchini-red);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(227, 30, 36, 0.1);
+}
+
+.toggle-password {
+    position: absolute;
+    right: 18px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 18px;
+    background: var(--login-btn);
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: #8b1418;
+}
+
+.form-footer {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.form-footer p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.link-register {
+    color: var(--login-btn);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 2px solid var(--login-btn);
+    padding-bottom: 2px;
+}
+
+/* Estilos extras para alertas e inputs de seleção no NAP */
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fee2e2;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #dcfce7;
+}
+
+.input-group select {
+    width: 100%;
+    padding: 16px 16px 16px 50px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    appearance: none;
+    cursor: pointer;
+}
+
+.input-group select:focus {
+    outline: none;
+    border-color: var(--facchini-red);
+    background: var(--white);
+}
+
+@media (max-width: 1024px) {
+    .login-sidebar {
+        display: none;
+    }
+
+    .login-form-area {
+        flex: 0 0 100%;
+    }
+}
+
+/* =========================================================
+   Transições Fluidas (Deslize de Painéis)
+ ========================================================= */
+
+/* Layout Reverso (Cadastro: Vermelho na Direita, Branco na Esquerda) */
+.login-wrapper.reverse-layout {
+    flex-direction: row-reverse;
+}
+
+.login-wrapper.reverse-layout .login-form-area {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 60px;
+    border-bottom-right-radius: 60px;
+}
+
+/* Ocultar barra lateral e expandir formulário para 100% */
+html.auth-transition-active .login-sidebar,
+html.entering-transition .login-sidebar {
+    flex: 0 0 0% !important;
+    width: 0% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    opacity: 0 !important;
+}
+
+html.auth-transition-active .login-form-area,
+html.entering-transition .login-form-area {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+}
+
+/* Remove a transição durante a entrada para que comece do frame certo imediatamente */
+html.entering-transition .login-sidebar,
+html.entering-transition .login-form-area {
+    transition: none !important;
+}
