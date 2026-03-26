@@ -30,7 +30,7 @@ ob_start();
             <input type="text" name="search" id="searchInput" placeholder="🔍 Buscar funcionário ou setor..." value="<?= htmlspecialchars($filters['search']) ?>">
         </div>
         <div class="filter-group">
-            <select name="periodo" id="filterPeriodo">
+            <select name="periodo" id="filterPeriodo" onchange="this.form.submit()">
                 <option value="todos" <?= $filters['periodo'] === 'todos' ? 'selected' : '' ?>>Todos os períodos</option>
                 <option value="hoje" <?= $filters['periodo'] === 'hoje' ? 'selected' : '' ?>>Hoje</option>
                 <option value="semana" <?= $filters['periodo'] === 'semana' ? 'selected' : '' ?>>Esta Semana</option>
@@ -38,14 +38,14 @@ ob_start();
             </select>
         </div>
         <div class="filter-group">
-            <select name="status" id="filterStatus">
+            <select name="status" id="filterStatus" onchange="this.form.submit()">
                 <option value="todos" <?= $filters['status'] === 'todos' ? 'selected' : '' ?>>Todos os Status</option>
                 <option value="pendente" <?= $filters['status'] === 'pendente' ? 'selected' : '' ?>>Pendente</option>
                 <option value="resolvido" <?= $filters['status'] === 'resolvido' ? 'selected' : '' ?>>Resolvido</option>
             </select>
         </div>
         <div class="filter-group">
-            <select name="epi" id="filterEpi">
+            <select name="epi" id="filterEpi" onchange="this.form.submit()">
                 <option value="todos" <?= $filters['epi'] === 'todos' ? 'selected' : '' ?>>Todos os EPIs</option>
                 <?php foreach ($episList as $epiItem): ?>
                     <option value="<?= htmlspecialchars($epiItem->getName()) ?>" <?= $filters['epi'] === $epiItem->getName() ? 'selected' : '' ?>>
@@ -55,7 +55,7 @@ ob_start();
             </select>
         </div>
         <div class="filter-group">
-            <select name="visualizacao" id="filterVisualizacao">
+            <select name="visualizacao" id="filterVisualizacao" onchange="this.form.submit()">
                 <option value="nome" <?= $filters['visualizacao'] === 'nome' ? 'selected' : '' ?>>Exibir Nome</option>
                 <option value="cards" <?= $filters['visualizacao'] === 'cards' ? 'selected' : '' ?>>Exibir Cards</option>
             </select>
@@ -99,6 +99,8 @@ ob_start();
                             </div>
                             <div class="card-footer-premium">
                                 <button class="btn-card-action" title="Ver detalhes"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn-card-action secondary" title="Salvar para revisão"><i class="fa-solid fa-bookmark"></i></button>
+                                <button class="btn-card-action info" title="Assinar Ocorrência"><i class="fa-solid fa-signature"></i></button>
                                 <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
                                     <button class="btn-card-action success" title="Resolver"><i class="fa-solid fa-check"></i></button>
                                 <?php endif; ?>
@@ -153,8 +155,10 @@ ob_start();
                                 <td>
                                     <div class="table-actions">
                                         <button class="btn-action" title="Ver detalhes"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="btn-action secondary" title="Salvar para revisão"><i class="fa-solid fa-bookmark"></i></button>
+                                        <button class="btn-action info" title="Assinar Ocorrência"><i class="fa-solid fa-signature"></i></button>
                                         <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                            <button class="btn-action" title="Resolver"><i class="fa-solid fa-check"></i></button>
+                                            <button class="btn-action success" title="Resolver"><i class="fa-solid fa-check"></i></button>
                                         <?php endif; ?>
                                         <button class="btn-action danger" title="Excluir" onclick="deleteInfraction(<?= $infraction['id'] ?>, this)"><i class="fa-solid fa-trash"></i></button>
                                     </div>

@@ -7,8 +7,8 @@
 
         <!-- Notificações -->
         <button class="header-icon-btn notification-btn">
-            <i data-lucide="bell"></i>
-            <span class="notification-badge">3</span>
+            <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge hidden" id="bell-badge">0</span>
         </button>
 
         <!-- Configurações -->

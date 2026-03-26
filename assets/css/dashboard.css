@@ -291,6 +291,23 @@ body {
     border-radius: 50%;
     border: 2px solid white;
     box-shadow: 0 2px 4px rgba(227, 6, 19, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.notification-badge.hidden {
+    opacity: 0;
+    transform: scale(0);
+    pointer-events: none;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(227, 6, 19, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(227, 6, 19, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(227, 6, 19, 0); }
+}
+
+.notification-badge:not(.hidden) {
+    animation: pulse-red 2s infinite;
 }
 
 /* USER PROFILE */
@@ -4920,47 +4937,213 @@ body {
     animation: fadeInSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes fadeInSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* =========================================
+   SISTEMA DE NOTIFICAÇÕES (ALERTA EPI)
+   ========================================= */
+#notification-container {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    pointer-events: none;
 }
 
-/* CARD ACTIONS PREMIUM */
-.btn-card-action {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+.epi-alert-toast {
+    width: 380px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    pointer-events: auto;
+    animation: toastSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.epi-alert-toast.leaving {
+    animation: toastSlideOut 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+.toast-icon-wrapper {
+    width: 65px;
+    height: 65px;
+    background: linear-gradient(135deg, #e30613 0%, #a3040d 100%);
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 16px rgba(227, 6, 19, 0.3);
 }
 
-.btn-card-action:hover {
-    background: white;
-    color: var(--primary);
-    border-color: var(--primary);
-    transform: translateY(-3px) rotate(5deg);
-    box-shadow: 0 8px 15px rgba(227, 6, 19, 0.15);
+.toast-icon-wrapper i {
+    color: white;
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
-.btn-card-action.success:hover {
-    color: #10b981;
-    border-color: #10b981;
-    box-shadow: 0 8px 15px rgba(16, 185, 129, 0.15);
+.toast-content {
+    flex: 1;
 }
 
-.btn-card-action i {
+.toast-title {
+    display: block;
     font-size: 14px;
+    font-weight: 800;
+    color: #e30613;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
 }
+
+.toast-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.toast-detail {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.toast-detail span {
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #e30613;
+    width: 100%;
+}
+
+@keyframes toastSlideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes progressShrink {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+
+/* =========================================
+   CARDS DE INFRAÇÕES (GRID)
+   ========================================= */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 15px;
+}
+
+.infraction-card {
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.infraction-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+    border-color: #e2e8f0;
+}
+
+.card-image-box {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+.card-employee-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.infraction-card:hover .card-employee-photo {
+    transform: scale(1.08);
+}
+
+.card-content-premium {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.employee-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+}
+
+.info-row-premium {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #475569;
+    font-weight: 600;
+}
+
+.info-row-premium i {
+    width: 16px;
+    color: #94a3b8;
+}
+
+.card-footer-premium {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* BOTÕES DE AÇÃO ESPECÍFICOS */
+.btn-card-action.secondary:hover {
+    color: #3b82f6;
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.btn-card-action.info:hover {
+    color: #6366f1;
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.btn-action.secondary:hover { color: #3b82f6; }
+.btn-action.info:hover { color: #6366f1; }
+.btn-action.success:hover { color: #10b981; }

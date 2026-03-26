@@ -35,6 +35,7 @@
             lucide.createIcons();
         }
     </script>
+    <script src="<?= BASE_PATH ?>/assets/js/notifications.js"></script>
     <?= $extraScripts ?? '' ?>
 </body>
 

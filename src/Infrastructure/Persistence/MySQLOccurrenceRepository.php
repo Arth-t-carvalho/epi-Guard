@@ -453,6 +453,38 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         return $data;
     }
 
+    public function findNewInfractions(int $lastId): array
+    {
+        $where = ($lastId === -1) 
+            ? "o.data_hora >= DATE_SUB(NOW(), INTERVAL 24 HOUR)" 
+            : "o.id > ?";
+
+        $sql = "SELECT o.id, f.nome as funcionario_nome, s.sigla as setor_sigla, e.nome as epi_nome, o.data_hora
+                FROM ocorrencias o
+                JOIN funcionarios f ON o.funcionario_id = f.id
+                LEFT JOIN setores s ON f.setor_id = s.id
+                LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
+                LEFT JOIN epis e ON oe.epi_id = e.id
+                WHERE {$where} AND o.tipo = 'INFRACAO'
+                ORDER BY o.id ASC";
+
+        $stmt = $this->db->prepare($sql);
+        
+        if ($lastId !== -1) {
+            $stmt->bind_param('i', $lastId);
+        }
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $data = [];
+        while ($row = $result->fetch_assoc()) {
+            $data[] = $row;
+        }
+        return $data;
+    }
+
+
     private function hydrate(array $row): Occurrence
     {
         $employee = $this->employeeRepository->findById((int) $row['funcionario_id']);
