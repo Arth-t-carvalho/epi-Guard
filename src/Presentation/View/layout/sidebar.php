@@ -66,7 +66,7 @@ $currentRoute = str_replace($basePath, '', $currentPath);
     </div>
 </aside>
 
-<script src="<?= BASE_PATH ?>/assets/js/navigation.js"></script>
+<!-- Removido navigation.js pois o arquivo não existe e a lógica está consolidada abaixo -->
 
 <script>
     // --- AI Chat Toggle ---
@@ -128,7 +128,7 @@ $currentRoute = str_replace($basePath, '', $currentPath);
         setTimeout(() => {
             const botMsg = document.createElement('div');
             botMsg.className = 'ai-message bot';
-            botMsg.textContent = 'Entendido! Estou processando sua solicitação...';
+            botMsg.textContent = '<?= __('Entendido! Estou processando sua solicitação...') ?>';
             messagesDiv.appendChild(botMsg);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }, 800);

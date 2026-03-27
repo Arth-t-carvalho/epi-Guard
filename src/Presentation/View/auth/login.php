@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <?php require_once __DIR__ . '/../../../../src/Application/helpers.php'; ?>
-<html lang="pt-br">
+<html lang="<?= ($_COOKIE['epiguard-lang'] ?? 'pt-br') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>epiGuard - Autenticação Facchini</title>
+    <title><?= __('epiGuard - Autenticação Facchini') ?></title>
     <script>
         if (sessionStorage.getItem('auth-transition') === 'true') {
             document.documentElement.classList.add('entering-transition');
@@ -22,7 +22,7 @@
     <div id="splash-screen" class="splash-screen hidden">
         <div class="splash-content">
             <h1 class="facchini-logo">FACCHINI</h1>
-            <p class="splash-subtitle">AUTENTICAR SISTEMA</p>
+            <p class="splash-subtitle"><?= __('AUTENTICAR SISTEMA') ?></p>
             <div class="loading-container">
                 <div id="progress-bar" class="progress-bar"></div>
             </div>
@@ -35,7 +35,7 @@
                 <div class="sidebar-content">
                     <div class="brand-group">
                         <h1 class="facchini-title">FACCHINI</h1>
-                        <p class="facchini-subtitle">DIVISÃO DE SEGURANÇA</p>
+                        <p class="facchini-subtitle"><?= __('DIVISÃO DE SEGURANÇA') ?></p>
                     </div>
 
                     <div class="carousel-section">
@@ -67,8 +67,8 @@
                     </div>
 
                     <div class="quote-section">
-                        <p class="main-quote">O nosso maior patrimônio são as <strong>pessoas.</strong></p>
-                        <p class="sub-quote">Com prevenção, o futuro avança, pois a Segurança é o melhor implemento da nossa vida.</p>
+                        <p class="main-quote"><?= __('O nosso maior patrimônio são as <strong>pessoas.</strong>') ?></p>
+                        <p class="sub-quote"><?= __('Com prevenção, o futuro avança, pois a Segurança é o melhor implemento da nossa vida.') ?></p>
                     </div>
                 </div>
             </div>
@@ -99,14 +99,14 @@
                             <label for="username"><?= __('E-MAIL OU CPF') ?></label>
                             <div class="input-wrapper">
                                 <i class="fa-regular fa-envelope input-icon"></i>
-                                <input type="text" id="username" name="usuario" placeholder="exemplo@facchini.com.br" required>
+                                <input type="text" id="username" name="usuario" placeholder="<?= __('exemplo@facchini.com.br') ?>" required>
                             </div>
                         </div>
 
                         <div class="input-group">
                             <div class="label-row">
                                 <label for="password"><?= __('SENHA') ?></label>
-                                <a href="<?= BASE_PATH ?>/recuperar-senha" class="link-forgot"><?= __('Recuperar senha?') ?></a>
+                                <a href="<?= BASE_PATH ?>/reset-password" class="link-forgot"><?= __('Recuperar senha?') ?></a>
                             </div>
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-lock input-icon"></i>
@@ -122,7 +122,7 @@
                         </button>
 
                         <div class="form-footer">
-                            <p><?= __('Ainda não possui acesso?') ?> <a href="<?= BASE_PATH ?>/cadastro" class="link-register"><?= __('Solicitar Registro') ?></a></p>
+                            <p><?= __('Ainda não possui acesso?') ?> <a href="<?= BASE_PATH ?>/register" class="link-register"><?= __('Solicitar Registro') ?></a></p>
                         </div>
                     </form>
                 </div>

@@ -25,6 +25,7 @@ class InfractionController
     public function index()
     {
         $filters = [
+            'id' => $_GET['id'] ?? null,
             'search' => $_GET['search'] ?? '',
             'periodo' => $_GET['periodo'] ?? 'todos',
             'status' => $_GET['status'] ?? 'todos',

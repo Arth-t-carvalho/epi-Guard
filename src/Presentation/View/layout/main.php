@@ -10,8 +10,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/common.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/sidebar.css">
-    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/dashboard-main.css">
-    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/management.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/dashboard.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/modal.css">
+    
+    <?php 
+    // Carregar CSS específico da rota
+    $path = defined('CURRENT_ROUTE') ? CURRENT_ROUTE : (str_replace(BASE_PATH, '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)));
+    $path = rtrim($path, '/'); // Normalizar: remover barra final se existir
+    
+    if ($path === '/infractions' || strpos($path, '/management') === 0) {
+        echo '<link rel="stylesheet" href="'.BASE_PATH.'/assets/css/management.css">';
+    }
+    if ($path === '/infractions') echo '<link rel="stylesheet" href="'.BASE_PATH.'/assets/css/infractions.css">';
+    if ($path === '/monitoring') echo '<link rel="stylesheet" href="'.BASE_PATH.'/assets/css/monitoring.css">';
+    if ($path === '/occurrences') echo '<link rel="stylesheet" href="'.BASE_PATH.'/assets/css/reports.css">';
+    ?>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         (function() {
@@ -20,6 +33,9 @@
                 document.documentElement.classList.add("dark-theme");
             }
         })();
+    </script>
+    <script>
+        window.BASE_PATH = '<?= BASE_PATH ?>';
     </script>
     <?= $extraHead ?? '' ?>
 </head>

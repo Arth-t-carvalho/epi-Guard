@@ -5,7 +5,7 @@ use epiGuard\Presentation\Controller\DashboardController;
 use epiGuard\Presentation\Controller\InfractionController;
 use epiGuard\Presentation\Controller\ManagementController;
 use epiGuard\Presentation\Controller\OccurrenceController;
-
+use epiGuard\Presentation\Controller\SettingsController;
 
 return [
     '/login' => [AuthController::class, 'index'],
@@ -13,6 +13,7 @@ return [
     '/cadastro' => [AuthController::class, 'register'],
     '/recuperar-senha' => [AuthController::class, 'resetPassword'],
     '/dashboard' => [DashboardController::class, 'index'],
+    '/settings' => [SettingsController::class, 'index'],
     '/api/charts' => [\epiGuard\Presentation\Controller\Api\ChartApiController::class, 'index'],
     '/api/calendar' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'calendar'],
     '/api/modal_details' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'details'],
@@ -27,6 +28,9 @@ return [
     '/api/departments/update' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'update'],
     '/api/departments/delete' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'delete'],
     '/api/departments/employees' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'employees'],
+    '/api/marcar_lida' => [\epiGuard\Presentation\Controller\Api\NotificationApiController::class, 'markAsRead'],
     '/monitoring' => [\epiGuard\Presentation\Controller\MonitoringController::class, 'index'],
-    '/settings' => [\epiGuard\Presentation\Controller\SettingsController::class, 'index'],
+    '/api/occurrence/store' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'store'],
+    '/api/export-insights' => [\epiGuard\Presentation\Controller\Api\ExportApiController::class, 'insights'],
+    '/logout' => [AuthController::class, 'logout'],
 ];

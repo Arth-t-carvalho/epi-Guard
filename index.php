@@ -65,6 +65,8 @@ $path = explode('?', $path)[0];
 
 if ($path === '' || $path === '/') $path = '/login';
 
+define('CURRENT_ROUTE', $path);
+
 try {
     if (isset($routes[$path])) {
         [$controllerClass, $method] = $routes[$path];

@@ -112,8 +112,8 @@ ob_start();
                     <td>0</td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Ver perfil"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action" title="<?= __('Ver perfil') ?>"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -125,8 +125,8 @@ ob_start();
                     <td style="font-weight:700; color: var(--primary);">5</td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Ver perfil"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action" title="<?= __('Ver perfil') ?>"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -138,8 +138,8 @@ ob_start();
                     <td>0</td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Ver perfil"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action" title="<?= __('Ver perfil') ?>"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -151,8 +151,8 @@ ob_start();
                     <td>1</td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Ver perfil"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action" title="<?= __('Ver perfil') ?>"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </td>
                 </tr>

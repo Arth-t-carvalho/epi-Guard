@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
     "name": "epiguard/epiguard",
+=======
+    "name": "epi_guard/epi_guard",
+>>>>>>> 6798d2865b713e90fe6ea5781fad81be80cc6f5d
     "description": "EPI Management System",
     "type": "project",
     "license": "MIT",

@@ -14,6 +14,58 @@ $extraScripts = '<script src="' . BASE_PATH . '/assets/js/dashboard.js"></script
 ob_start();
 ?>
 
+<style>
+    .modal-search-wrapper {
+        padding: 0 4px 16px 4px;
+        border-bottom: 1px solid #f1f5f9;
+        margin-bottom: 16px;
+    }
+    .search-input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        width: 18px;
+        height: 18px;
+        color: #94a3b8;
+        pointer-events: none;
+    }
+    #sectorSearchInput {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        color: #1e293b;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+    }
+    #sectorSearchInput:focus {
+        outline: none;
+        border-color: #E30613;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(227, 6, 19, 0.05);
+    }
+    
+    /* Dark Mode Overrides */
+    html.dark-theme #sectorSearchInput {
+        background: var(--bg-card);
+        border-color: var(--border);
+        color: var(--text-main);
+    }
+    
+    html.dark-theme #sectorSearchInput:focus {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--primary);
+    }
+
+    .selection-row.hidden {
+        display: none;
+    }
+</style>
 
 <!-- Global Variables for JS -->
 <script>
@@ -183,21 +235,6 @@ ob_start();
     </div>
 </div>
 
-<!-- Detail Modal -->
-<div id="detailModal" class="modal">
-    <div class="modal-content large">
-        <div class="modal-header">
-            <h2 id="modalMonthTitle"><?= __('Detalhes') ?></h2>
-            <button class="close-btn" onclick="closeModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <table class="custom-table">
-                <thead><tr></tr></thead>
-                <tbody id="modalTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
 
 <!-- MODAL DE SELEÇÃO MINIMALISTA -->
 <div id="courseModal" class="modal-premium">

@@ -44,8 +44,8 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                     </div>
                     <div class="setting-action">
                         <select class="settings-select" id="languageSelect" onchange="changeLanguage(this.value)">
-                            <option value="pt-br" <?= ($_COOKIE['epiguard-lang'] ?? 'pt-br') === 'pt-br' ? 'selected' : '' ?>>Português (Brasil)</option>
-                            <option value="en" <?= ($_COOKIE['epiguard-lang'] ?? '') === 'en' ? 'selected' : '' ?>>English (US)</option>
+                            <option value="pt-br" <?= ($_COOKIE['epiguard-lang'] ?? 'pt-br') === 'pt-br' ? 'selected' : '' ?>><?= __('Português (Brasil)') ?></option>
+                            <option value="en" <?= ($_COOKIE['epiguard-lang'] ?? '') === 'en' ? 'selected' : '' ?>><?= __('English (US)') ?></option>
                         </select>
                     </div>
                 </div>

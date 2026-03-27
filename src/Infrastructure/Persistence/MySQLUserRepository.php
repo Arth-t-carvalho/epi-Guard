@@ -21,7 +21,13 @@ class MySQLUserRepository implements UserRepositoryInterface
 
     public function findById(int $id): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE id = ?");
+        $stmt = $this->db->prepare("
+            SELECT u.id, u.nome, u.usuario, u.senha, u.cargo, u.criado_em, u.atualizado_em,
+                   s.nome AS setor_nome
+            FROM usuarios u
+            LEFT JOIN setores s ON s.id = u.setor_id
+            WHERE u.id = ?
+        ");
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -35,7 +41,13 @@ class MySQLUserRepository implements UserRepositoryInterface
 
     public function findByEmail(Email $email): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO'");
+        $stmt = $this->db->prepare("
+            SELECT u.id, u.nome, u.usuario, u.senha, u.cargo, u.criado_em, u.atualizado_em,
+                   s.nome AS setor_nome
+            FROM usuarios u
+            LEFT JOIN setores s ON s.id = u.setor_id
+            WHERE u.usuario = ? AND u.status = 'ATIVO'
+        ");
         $emailStr = $email->getValue();
         $stmt->bind_param('s', $emailStr);
         $stmt->execute();
@@ -50,7 +62,13 @@ class MySQLUserRepository implements UserRepositoryInterface
 
     public function findByUsername(string $username): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO'");
+        $stmt = $this->db->prepare("
+            SELECT u.id, u.nome, u.usuario, u.senha, u.cargo, u.criado_em, u.atualizado_em,
+                   s.nome AS setor_nome
+            FROM usuarios u
+            LEFT JOIN setores s ON s.id = u.setor_id
+            WHERE u.usuario = ? AND u.status = 'ATIVO'
+        ");
         $stmt->bind_param('s', $username);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -156,7 +174,7 @@ class MySQLUserRepository implements UserRepositoryInterface
             $role = new UserRole(UserRole::VIEWER);
         }
 
-        return new User(
+        $user = new User(
             name: $row['nome'],
             email: new Email($row['usuario']),
             passwordHash: $row['senha'],
@@ -165,5 +183,12 @@ class MySQLUserRepository implements UserRepositoryInterface
             createdAt: new DateTimeImmutable($row['criado_em']),
             updatedAt: $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null
         );
+
+        // Armazena o nome do setor no objeto para uso posterior
+        if (!empty($row['setor_nome'])) {
+            $user->setSetorNome($row['setor_nome']);
+        }
+
+        return $user;
     }
 }

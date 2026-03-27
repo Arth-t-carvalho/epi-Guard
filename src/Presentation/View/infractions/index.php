@@ -1,9 +1,6 @@
 <?php
 $pageTitle = 'epiGuard - Infrações';
-$extraHead = '
-    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/infractions.css">
-    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/reports.css">
-';
+$extraHead = '';
 ob_start();
 ?>
 
@@ -20,7 +17,8 @@ ob_start();
         'Selecione pelo menos um funcionário para exportar.': '<?= __('Selecione pelo menos um funcionário para exportar.') ?>',
         'Gerando %s...': '<?= __('Gerando %s...') ?>',
         'Concluído!': '<?= __('Concluído!') ?>',
-        'Relatório %s gerado com sucesso para %d funcionário(s).': '<?= __('Relatório %s gerado com sucesso para %d funcionário(s).') ?>'
+        'Relatório %s gerado com sucesso para %d funcionário(s).': '<?= __('Relatório %s gerado com sucesso para %d funcionário(s).') ?>',
+        'Deseja realmente excluir este registro de infração?': '<?= __('Deseja realmente excluir este registro de infração?') ?>'
     };
 </script>
 
@@ -38,52 +36,92 @@ ob_start();
 </header>
 
 <div class="page-content">
-
+    <!-- Summary Cards -->
+    <div class="summary-row">
+        <div class="summary-card">
+            <div class="summary-icon red">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="summary-info">
+                <span class="summary-label">Total Infrações</span>
+                <span class="summary-value" id="totalInfracoes"><?= count($infractions) ?></span>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon amber">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="summary-info">
+                <span class="summary-label">Pendentes</span>
+                <span class="summary-value" id="totalPendentes"><?= count(array_filter($infractions, fn($i) => ($i['status'] ?? '') === 'pendente')) ?: 0 ?></span>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon green">
+                <i class="fa-solid fa-check-circle"></i>
+            </div>
+            <div class="summary-info">
+                <span class="summary-label">Resolvidas</span>
+                <span class="summary-value" id="totalResolvidas"><?= count(array_filter($infractions, fn($i) => ($i['status'] ?? '') === 'resolvido')) ?: 0 ?></span>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon blue">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="summary-info">
+                <span class="summary-label">Funcionários Afetados</span>
+                <span class="summary-value" id="totalAlunos"><?= count(array_unique(array_column($infractions, 'funcionario_nome'))) ?></span>
+            </div>
+        </div>
+    </div>
 
     <!-- Filters -->
     <form action="<?= BASE_PATH ?>/infractions" method="GET" class="filter-bar">
-        <div class="filter-group select-search">
-            <input type="text" name="search" id="searchInput" placeholder="<?= __('🔍 Buscar funcionário ou setor...') ?>" value="<?= htmlspecialchars($filters['search']) ?>">
-        </div>
-        <div class="filter-group">
-            <select name="periodo" id="filterPeriodo">
-                <option value="todos" <?= $filters['periodo'] === 'todos' ? 'selected' : '' ?>><?= __('Todos os períodos') ?></option>
-                <option value="hoje" <?= $filters['periodo'] === 'hoje' ? 'selected' : '' ?>><?= __('Hoje') ?></option>
-                <option value="semana" <?= $filters['periodo'] === 'semana' ? 'selected' : '' ?>><?= __('Esta Semana') ?></option>
-                <option value="mes" <?= $filters['periodo'] === 'mes' ? 'selected' : '' ?>><?= __('Este Mês') ?></option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <select name="status" id="filterStatus">
-                <option value="todos" <?= $filters['status'] === 'todos' ? 'selected' : '' ?>><?= __('Todos os Status') ?></option>
-                <option value="pendente" <?= $filters['status'] === 'pendente' ? 'selected' : '' ?>><?= __('Pendente') ?></option>
-                <option value="resolvido" <?= $filters['status'] === 'resolvido' ? 'selected' : '' ?>><?= __('Resolvido') ?></option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <select name="epi" id="filterEpi">
-                <option value="todos" <?= $filters['epi'] === 'todos' ? 'selected' : '' ?>><?= __('Todos os EPIs') ?></option>
-                <?php foreach ($episList as $epiItem): ?>
-                    <option value="<?= htmlspecialchars($epiItem->getName()) ?>" <?= $filters['epi'] === $epiItem->getName() ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($epiItem->getName()) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="filter-group">
-            <select name="visualizacao" id="filterVisualizacao">
-                <option value="nome" <?= $filters['visualizacao'] === 'nome' ? 'selected' : '' ?>><?= __('Exibir Nome') ?></option>
-                <option value="cards" <?= $filters['visualizacao'] === 'cards' ? 'selected' : '' ?>><?= __('Exibir Cards') ?></option>
-            </select>
-        </div>
-        <button type="submit" style="display: none;"></button> <!-- Hidden submit for Enter key -->
+        <input type="text" name="search" id="searchInput" placeholder="<?= __('🔍 Buscar funcionário ou setor...') ?>" value="<?= htmlspecialchars($filters['search']) ?>">
+        <select name="periodo" id="filterPeriodo">
+            <option value="todos" <?= $filters['periodo'] === 'todos' ? 'selected' : '' ?>><?= __('Todos os períodos') ?></option>
+            <option value="hoje" <?= $filters['periodo'] === 'hoje' ? 'selected' : '' ?>><?= __('Hoje') ?></option>
+            <option value="semana" <?= $filters['periodo'] === 'semana' ? 'selected' : '' ?>><?= __('Esta Semana') ?></option>
+            <option value="mes" <?= $filters['periodo'] === 'mes' ? 'selected' : '' ?>><?= __('Este Mês') ?></option>
+        </select>
+        <select name="status" id="filterStatus">
+            <option value="todos" <?= $filters['status'] === 'todos' ? 'selected' : '' ?>><?= __('Todos os Status') ?></option>
+            <option value="pendente" <?= $filters['status'] === 'pendente' ? 'selected' : '' ?>><?= __('Pendente') ?></option>
+            <option value="resolvido" <?= $filters['status'] === 'resolvido' ? 'selected' : '' ?>><?= __('Resolvido') ?></option>
+        </select>
+        <select name="epi" id="filterEpi">
+            <option value="todos" <?= $filters['epi'] === 'todos' ? 'selected' : '' ?>><?= __('Todos os EPIs') ?></option>
+            <?php foreach ($episList as $epiItem): ?>
+                <option value="<?= htmlspecialchars($epiItem->getName()) ?>" <?= $filters['epi'] === $epiItem->getName() ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($epiItem->getName()) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <select name="visualizacao" id="filterVisualizacao">
+            <option value="nome" <?= $filters['visualizacao'] === 'nome' ? 'selected' : '' ?>><?= __('Exibir Nome') ?></option>
+            <option value="cards" <?= $filters['visualizacao'] === 'cards' ? 'selected' : '' ?>><?= __('Exibir Cards') ?></option>
+        </select>
+        <button type="submit" class="btn-filter">
+            <i class="fa-solid fa-filter"></i> <?= __('Filtrar') ?>
+        </button>
     </form>
+
+    <?php if (!empty($filters['id'])): ?>
+        <div class="active-filter-alert" style="background: #fdf2f2; border: 1px solid #fee2e2; padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-circle-info" style="color: #ef4444;"></i>
+                <span style="color: #991b1b; font-weight: 500;">Exibindo apenas uma infracao especifica vinda de notificacao.</span>
+            </div>
+            <a href="<?= BASE_PATH ?>/infractions" style="background: white; border: 1px solid #ef4444; color: #ef4444; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#ef4444'">Limpar Filtro</a>
+        </div>
+    <?php endif; ?>
 
     <!-- Table -->
     <div class="table-card">
         <div class="card-header">
-            <h3><?= __('Registro de Infrações') ?></h3>
-            <span style="font-size: 12px; color: var(--text-muted);" id="tableCount"><?= sprintf(__('Mostrando %d registros'), count($infractions)) ?></span>
+            <h3>Registro de Infrações</h3>
+            <span style="font-size: 12px; color: var(--text-muted);" id="tableCount">Mostrando <?= count($infractions) ?> registros</span>
         </div>
 
         <?php if ($filters['visualizacao'] === 'cards'): ?>
@@ -260,6 +298,19 @@ ob_start();
 </div>
 
 <script src="<?= BASE_PATH ?>/assets/js/infractions.js"></script>
+<script>
+    function deleteInfraction(id, btn) {
+        if (confirm(window.I18N['Deseja realmente excluir este registro de infração?'])) {
+            const row = btn.closest('tr');
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+                row.remove();
+            }, 300);
+        }
+    }
+</script>
 
 <?php
 $content = ob_get_clean();

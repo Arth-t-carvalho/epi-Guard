@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<?php require_once __DIR__ . '/../../../../src/Application/helpers.php'; ?>
+<html lang="<?= ($_COOKIE['epiguard-lang'] ?? 'pt-br') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>epiGuard - Cadastro Facchini</title>
+    <title><?= __('epiGuard - Cadastro Facchini') ?></title>
     <script>
         if (sessionStorage.getItem('auth-transition') === 'true') {
             document.documentElement.classList.add('entering-transition');
@@ -21,7 +22,7 @@
     <div id="splash-screen" class="splash-screen hidden">
         <div class="splash-content">
             <h1 class="facchini-logo">FACCHINI</h1>
-            <p class="splash-subtitle">AUTENTICAR SISTEMA</p>
+            <p class="splash-subtitle"><?= __('AUTENTICAR SISTEMA') ?></p>
             <div class="loading-container">
                 <div id="progress-bar" class="progress-bar"></div>
             </div>
@@ -34,7 +35,7 @@
                 <div class="sidebar-content">
                     <div class="brand-group">
                         <h1 class="facchini-title">FACCHINI</h1>
-                        <p class="facchini-subtitle">DIVISÃO DE SEGURANÇA</p>
+                        <p class="facchini-subtitle"><?= __('DIVISÃO DE SEGURANÇA') ?></p>
                     </div>
 
                     <div class="carousel-section">
@@ -66,8 +67,8 @@
                     </div>
 
                     <div class="quote-section">
-                        <p class="main-quote">O nosso maior patrimônio são as <strong>pessoas.</strong></p>
-                        <p class="sub-quote">Com prevenção, o futuro avança, pois a Segurança é o melhor implemento da nossa vida.</p>
+                        <p class="main-quote"><?= __('O nosso maior patrimônio são as <strong>pessoas.</strong>') ?></p>
+                        <p class="sub-quote"><?= __('Com prevenção, o futuro avança, pois a Segurança é o melhor implemento da nossa vida.') ?></p>
                     </div>
                 </div>
             </div>
@@ -75,8 +76,8 @@
             <div class="login-form-area">
                 <div class="form-container">
                     <header class="form-header">
-                        <h2>Criar Conta</h2>
-                        <p>Preencha os dados abaixo para solicitar acesso à plataforma EPI GUARD.</p>
+                        <h2><?= __('Criar Conta') ?></h2>
+                        <p><?= __('Preencha os dados abaixo para solicitar acesso à plataforma EPI GUARD.') ?></p>
                     </header>
 
                     <?php if (isset($_SESSION['error'])): ?>
@@ -88,37 +89,37 @@
 
                     <form id="register-form" method="POST" action="<?= BASE_PATH ?>/register">
                         <div class="input-group">
-                            <label for="name">NOME COMPLETO</label>
+                            <label for="name"><?= __('NOME COMPLETO') ?></label>
                             <div class="input-wrapper">
                                 <i class="fa-regular fa-user input-icon"></i>
-                                <input type="text" id="name" name="nome" placeholder="Seu nome completo" required>
+                                <input type="text" id="name" name="nome" placeholder="<?= __('Seu nome completo') ?>" required>
                             </div>
                         </div>
 
                         <div class="input-group">
-                            <label for="username">E-MAIL OU CPF</label>
+                            <label for="username"><?= __('E-MAIL OU CPF') ?></label>
                             <div class="input-wrapper">
                                 <i class="fa-regular fa-envelope input-icon"></i>
-                                <input type="text" id="username" name="usuario" placeholder="exemplo@facchini.com.br" required>
+                                <input type="text" id="username" name="usuario" placeholder="<?= __('exemplo@facchini.com.br') ?>" required>
                             </div>
                         </div>
 
                         <div class="input-group">
-                            <label for="cargo">CARGO</label>
+                            <label for="cargo"><?= __('CARGO') ?></label>
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-briefcase input-icon"></i>
                                 <select name="cargo" id="cargo" required>
-                                    <option value="GERENTE_SEGURANCA">Gerente de Segurança</option>
-                                    <option value="SUPERVISOR">Supervisor</option>
-                                    <option value="SUPER_ADMIN">Super Admin</option>
-                                    <option value="OPERATOR" selected>Operador</option>
+                                    <option value="GERENTE_SEGURANCA"><?= __('Gerente de Segurança') ?></option>
+                                    <option value="SUPERVISOR"><?= __('Supervisor') ?></option>
+                                    <option value="SUPER_ADMIN"><?= __('Super Admin') ?></option>
+                                    <option value="OPERATOR" selected><?= __('Operador') ?></option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="input-group">
                             <div class="label-row">
-                                <label for="password">SENHA</label>
+                                <label for="password"><?= __('SENHA') ?></label>
                             </div>
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-lock input-icon"></i>
@@ -130,11 +131,11 @@
                         </div>
 
                         <button type="submit" class="btn-login">
-                            SOLICITAR ACESSO <i class="fa-solid fa-chevron-right"></i>
+                            <?= __('SOLICITAR ACESSO') ?> <i class="fa-solid fa-chevron-right"></i>
                         </button>
 
                         <div class="form-footer">
-                            <p>Já possui acesso? <a href="<?= BASE_PATH ?>/login" class="link-login">Fazer Login</a></p>
+                            <p><?= __('Já possui acesso?') ?> <a href="<?= BASE_PATH ?>/login" class="link-login"><?= __('Fazer Login') ?></a></p>
                         </div>
                     </form>
                 </div>

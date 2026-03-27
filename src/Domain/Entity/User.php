@@ -17,6 +17,7 @@ class User
     private UserRole $role;
     private DateTimeImmutable $createdAt;
     private ?DateTimeImmutable $updatedAt;
+    private ?string $setorNome = null;
 
     public function __construct(
         string $name,
@@ -87,5 +88,15 @@ class User
     {
         $this->role = $newRole;
         $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function getSetorNome(): ?string
+    {
+        return $this->setorNome;
+    }
+
+    public function setSetorNome(string $setorNome): void
+    {
+        $this->setorNome = $setorNome;
     }
 }

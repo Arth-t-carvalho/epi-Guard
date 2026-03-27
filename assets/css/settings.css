@@ -176,7 +176,7 @@ html.dark-theme .setting-item {
 }
 
 .settings-select {
-    padding: 8px 12px;
+    padding: 8px 40px 8px 12px;
     border-radius: 8px;
     border: 1px solid var(--border);
     background: var(--bg-card);

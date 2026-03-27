@@ -29,13 +29,13 @@ ob_start();
                     <div class="camera-tag">FEED-01</div>
                     <div class="live-indicator">
                         <div class="live-dot"></div>
-                        LIVE
+                        <?= __('LIVE') ?>
                     </div>
                 </div>
                 <div class="camera-bottom">
                     <div class="camera-info">
                         <h3><?= __('Setor de Soldagem') ?></h3>
-                        <p>Planta A - Pavimento 01</p>
+                        <p><?= __('Planta A - Pavimento 01') ?></p>
                     </div>
                     <div class="timestamp" id="time1">--:--:--</div>
                 </div>
@@ -51,13 +51,13 @@ ob_start();
                     <div class="camera-tag">FEED-02</div>
                     <div class="live-indicator">
                         <div class="live-dot"></div>
-                        LIVE
+                        <?= __('LIVE') ?>
                     </div>
                 </div>
                 <div class="camera-bottom">
                     <div class="camera-info">
                         <h3><?= __('Setor de Montagem') ?></h3>
-                        <p>Planta A - Pavimento 01</p>
+                        <p><?= __('Planta A - Pavimento 01') ?></p>
                     </div>
                     <div class="timestamp" id="time2">--:--:--</div>
                 </div>
@@ -76,7 +76,7 @@ ob_start();
                 <div class="camera-bottom">
                     <div class="camera-info">
                         <h3><?= __('Almoxarifado') ?></h3>
-                        <p>Planta B - Pavimento 02</p>
+                        <p><?= __('Planta B - Pavimento 02') ?></p>
                     </div>
                 </div>
             </div>

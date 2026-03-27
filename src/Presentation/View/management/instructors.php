@@ -105,7 +105,7 @@ ob_start();
                     <td><span class="status-dot resolved"></span> <?= __('Ativo') ?></td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -119,7 +119,7 @@ ob_start();
                     <td>
                         <div class="table-actions">
                             <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-action danger" title="Inativar"><i class="fa-solid fa-ban"></i></button>
+                            <button class="btn-action danger" title="<?= __('Inativar') ?>"><i class="fa-solid fa-ban"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -132,8 +132,8 @@ ob_start();
                     <td><span class="status-dot resolved"></span> <?= __('Ativo') ?></td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-action danger" title="Inativar"><i class="fa-solid fa-ban"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action danger" title="<?= __('Inativar') ?>"><i class="fa-solid fa-ban"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -146,7 +146,7 @@ ob_start();
                     <td><span class="status-dot resolved"></span> <?= __('Ativo') ?></td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
                             <button class="btn-action danger" title="<?= __('Inativar') ?>"><i class="fa-solid fa-ban"></i></button>
                         </div>
                     </td>
@@ -160,7 +160,7 @@ ob_start();
                     <td><span class="status-dot pending"></span> <?= __('Inativo') ?></td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
                             <button class="btn-action" title="<?= __('Reativar') ?>" style="color: #16a34a;"><i class="fa-solid fa-rotate-left"></i></button>
                         </div>
                     </td>

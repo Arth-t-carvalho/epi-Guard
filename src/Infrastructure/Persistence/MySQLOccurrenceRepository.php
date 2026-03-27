@@ -436,6 +436,12 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
             }
         }
 
+        if (!empty($filters['id'])) {
+            $sql .= " AND o.id = ?";
+            $params[] = (int) $filters['id'];
+            $types .= "i";
+        }
+
         $sql .= " ORDER BY o.data_hora DESC";
 
         $stmt = $this->db->prepare($sql);

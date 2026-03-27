@@ -50,7 +50,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Modal Detalhes (Gráfico)
         const detModal = document.getElementById('detailModal');
-        if (detModal && e.target === detModal) detModal.classList.remove('open');
+        if (detModal && e.target === detModal) {
+            detModal.classList.remove('open');
+            document.body.classList.remove('modal-open');
+        }
 
         // Card Instrutor
         const card = document.getElementById('instructorCard');
@@ -123,11 +126,11 @@ function renderInterface() {
 
                 // Em modo Empresarial, a ação padrão é abrir o detalhamento do curso/setor
                 list.innerHTML += `
-                    <div class="occurrence-item" onclick="applyCourseFilterByName('${name.replace(/'/g, "\\'")}')" style="cursor:pointer;" title="${window.I18N['Clique para detalhes deste setor']}">
+                    <div class="occurrence-item" onclick="applyCourseFilterByName('${name.replace(/'/g, "\\'")}')" style="cursor:pointer;" title="Clique para detalhes deste setor">
                         <div class="occ-avatar">${initials}</div>
                         <div class="occ-info">
                             <span class="occ-name" style="font-weight:700;">${name}</span>
-                            <span class="occ-desc" style="color:var(--primary); font-weight:600;">${data.count} ${data.count > 1 ? window.I18N['ocorrências'] : window.I18N['ocorrência']} ${data.count > 1 ? window.I18N['encontradas'] : window.I18N['encontrada']}</span>
+                            <span class="occ-desc" style="color:var(--primary); font-weight:600;">${data.count} ocorrência${data.count > 1 ? 's' : ''} encontrada${data.count > 1 ? 's' : ''}</span>
                         </div>
                         <div class="occ-time">❯</div>
                     </div>`;
@@ -150,6 +153,8 @@ let selectedSectorIds = []; // Novo: Array de setores selecionados
 function openCourseModal() {
     const modal = document.getElementById('courseModal');
     if (modal) {
+        document.body.appendChild(modal); // Move para o root
+        document.body.classList.add('modal-open');
         modal.classList.add('active');
         if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
         updateSelectionUI(); // Sincroniza checks com o estado
@@ -158,7 +163,10 @@ function openCourseModal() {
 
 function closeCourseModal() {
     const modal = document.getElementById('courseModal');
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.classList.remove('modal-open');
+    }
 }
 
 function toggleAllSectors(checked) {
@@ -269,13 +277,13 @@ function applyCourseFilterByName(name) {
 function filterSectors(query) {
     const filter = query.toLowerCase();
     const rows = document.querySelectorAll('.selection-row');
-    
+
     rows.forEach(row => {
         if (row.classList.contains('global-row')) return;
-        
+
         const span = row.querySelector('.sector-cell span');
         const text = span ? span.innerText.toLowerCase() : '';
-        
+
         if (text.includes(filter)) {
             row.style.display = '';
         } else {
@@ -373,16 +381,16 @@ function updateConformityStatus(valor) {
 
     if (valor < 70) {
         badge.className = 'status-badge status-critico';
-        badge.innerText = window.I18N['🚨 CRÍTICO'];
+        badge.innerText = '🚨 CRÍTICO';
     } else if (valor < 85) {
         badge.className = 'status-badge status-alto';
-        badge.innerText = window.I18N['🟠 ALTO RISCO'];
+        badge.innerText = '🟠 ALTO RISCO';
     } else if (valor < 95) {
         badge.className = 'status-badge status-moderado';
-        badge.innerText = window.I18N['🟡 MODERADO'];
+        badge.innerText = '🟡 MODERADO';
     } else {
         badge.className = 'status-badge status-baixo';
-        badge.innerText = window.I18N['🟢 CONTROLADO'];
+        badge.innerText = '🟢 CONTROLADO';
     }
 }
 
@@ -395,6 +403,8 @@ function toggleCalendar() {
     if (!modal) return;
 
     if (!modal.classList.contains('active')) {
+        document.body.appendChild(modal); // Move para o root
+        document.body.classList.add('modal-open');
         currCalYear = selectedDate.getFullYear();
         currCalMonth = selectedDate.getMonth();
         renderCalendarGrid();
@@ -402,6 +412,7 @@ function toggleCalendar() {
         if (typeof lucide !== 'undefined') lucide.createIcons();
     } else {
         modal.classList.remove('active');
+        document.body.classList.remove('modal-open');
     }
 }
 
@@ -500,50 +511,323 @@ function toggleInstructorCard() {
 }
 
 function exportData() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    // Robust detection of jsPDF
+    const jsPDFLib = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+    
+    if (!jsPDFLib) {
+        console.error('jsPDF not found. Libraries:', window.jspdf, window.jsPDF);
+        alert('Erro: Biblioteca de exportação (jsPDF) não carregada. Verifique sua conexão ou tente recarregar a página.');
+        return;
+    }
+
+    const doc = new jsPDFLib('p', 'mm', 'a4');
     const btn = document.querySelector('.btn-export');
     if (!btn) return;
+
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = window.I18N['Gerando PDF...'];
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando PDF...';
     btn.style.color = '#E30613';
+    btn.disabled = true;
 
-    doc.setFontSize(18);
-    doc.text(window.I18N['Relatório de Ocorrências - EPI Guard'], 14, 20);
-    doc.setFontSize(11);
-    doc.setTextColor(100);
-    doc.text(`${window.I18N['Data de Geração:']} ${new Date().toLocaleDateString()}`, 14, 30);
+    function resetBtn() {
+        btn.innerHTML = originalHTML;
+        btn.style.color = '';
+        btn.disabled = false;
+    }
 
-    const currentMonth = selectedDate.getMonth() + 1;
-    const currentYear = selectedDate.getFullYear();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 14;
+    const contentWidth = pageWidth - margin * 2;
+    const primaryColor = [227, 6, 19]; // #E30613
+    const darkColor = [31, 41, 55]; // #1F2937
 
-    fetch(`${window.BASE_PATH}/api/modal_details?month=${currentMonth}&year=${currentYear}`)
+    // Capture chart images BEFORE fetching data
+    let mainChartImg = null;
+    let doughnutChartImg = null;
+
+    try {
+        if (typeof mainChartInstance !== 'undefined' && mainChartInstance) {
+            mainChartImg = mainChartInstance.toBase64Image('image/png', 1);
+        }
+        if (typeof doughnutChartInstance !== 'undefined' && doughnutChartInstance) {
+            doughnutChartImg = doughnutChartInstance.toBase64Image('image/png', 1);
+        }
+    } catch (e) {
+        console.warn('Nao foi possivel capturar graficos:', e);
+    }
+
+    fetch(`${window.BASE_PATH}/api/export-insights`)
         .then(res => res.json())
         .then(data => {
-            if (!data || data.length === 0) {
-                alert(window.I18N['Nenhuma ocorrência encontrada para exportar neste mês.']);
-                btn.innerHTML = originalHTML;
-                btn.style.color = '';
-                return;
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'API error');
             }
-            const head = [[window.I18N['Data'], window.I18N['Aluno'], window.I18N['EPI'], window.I18N['Hora'], window.I18N['Status']]];
-            const body = data.map(row => [row.data, row.aluno, row.epis, row.hora, row.status_formatado]);
-            doc.autoTable({
-                startY: 35,
-                head: head,
-                body: body,
-                theme: 'striped',
-                headStyles: { fillColor: [227, 6, 19] }
+
+            // ============================================================
+            // PAGINA 1 - CAPA E RESUMO EXECUTIVO
+            // ============================================================
+            let y = 20;
+
+            // Header bar
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Relatorio de Seguranca EPI', margin, 18);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`EPI Guard - Gerado em ${data.generated_at}`, margin, 28);
+            doc.text(`Ano de Referencia: ${data.year}`, margin, 35);
+
+            y = 52;
+
+            // Subtitle
+            doc.setTextColor(...darkColor);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Resumo Executivo', margin, y);
+            y += 3;
+            doc.setDrawColor(...primaryColor);
+            doc.setLineWidth(0.8);
+            doc.line(margin, y, margin + 50, y);
+            y += 12;
+
+            // Insight cards
+            const insights = [
+                {
+                    icon: '',
+                    title: 'Setor com Mais Infracoes',
+                    value: data.worst_sector.nome,
+                    detail: `${data.worst_sector.total} infracao(oes) registrada(s) no ano`,
+                    desc: 'Este setor apresenta o maior numero de ocorrencias de nao conformidade com EPIs.'
+                },
+                {
+                    icon: '',
+                    title: 'EPIs Menos Utilizados',
+                    value: data.worst_epis.length > 0 ? data.worst_epis.map(e => e.nome).join(', ') : 'Nenhum dado',
+                    detail: data.worst_epis.length > 0 ? `${data.worst_epis[0].nome}: ${data.worst_epis[0].total} infracao(oes)` : '',
+                    desc: 'Equipamentos de protecao com maior indice de nao utilizacao pelos colaboradores.'
+                },
+                {
+                    icon: '',
+                    title: 'Mes Critico',
+                    value: data.worst_month.nome,
+                    detail: `${data.worst_month.total} infracao(oes) registrada(s)`,
+                    desc: 'Mes do ano com maior concentracao de infracoes relacionadas a EPIs.'
+                },
+                {
+                    icon: '',
+                    title: 'Dia da Semana Critico',
+                    value: data.worst_day_of_week.nome,
+                    detail: `${data.worst_day_of_week.total} infracao(oes) registrada(s)`,
+                    desc: 'Dia da semana em que ocorre o maior numero de infracoes.'
+                }
+            ];
+
+            insights.forEach((insight) => {
+                if (y > pageHeight - 50) { doc.addPage(); y = 20; }
+
+                // Card background
+                doc.setFillColor(248, 250, 252);
+                doc.roundedRect(margin, y, contentWidth, 32, 3, 3, 'F');
+                doc.setDrawColor(226, 232, 240);
+                doc.roundedRect(margin, y, contentWidth, 32, 3, 3, 'S');
+
+                // Red accent left bar
+                doc.setFillColor(...primaryColor);
+                doc.rect(margin, y, 3, 32, 'F');
+
+                // Title
+                doc.setTextColor(...darkColor);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text(insight.title, margin + 8, y + 8);
+
+                // Value
+                doc.setFontSize(13);
+                doc.setTextColor(...primaryColor);
+                doc.text(insight.value, margin + 8, y + 17);
+
+                // Detail
+                doc.setFontSize(8);
+                doc.setTextColor(100, 116, 139);
+                doc.setFont('helvetica', 'normal');
+                doc.text(insight.detail, margin + 8, y + 23);
+
+                // Description
+                doc.text(insight.desc, margin + 8, y + 28);
+
+                y += 38;
             });
-            doc.save(`relatorio_epi_${currentMonth}_${currentYear}.pdf`);
-            btn.innerHTML = originalHTML;
-            btn.style.color = '';
+
+            // ============================================================
+            // PAGINA 2 - GRAFICOS
+            // ============================================================
+            doc.addPage();
+            y = 20;
+
+            // Header
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 25, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Analise Grafica', margin, 16);
+
+            y = 35;
+
+            // Main Chart
+            if (mainChartImg) {
+                doc.setTextColor(...darkColor);
+                doc.setFontSize(13);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Visao Geral Mensal - Infracoes por EPI', margin, y);
+                y += 3;
+                doc.setDrawColor(...primaryColor);
+                doc.line(margin, y, margin + 70, y);
+                y += 5;
+
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(100, 116, 139);
+                doc.text('Este grafico de barras mostra a quantidade de infracoes por mes, separadas por tipo de EPI.', margin, y);
+                y += 3;
+                doc.text('Cada cor representa um tipo de EPI diferente, permitindo identificar quais equipamentos sao mais negligenciados.', margin, y);
+                y += 8;
+
+                const chartHeight = 75;
+                doc.addImage(mainChartImg, 'PNG', margin, y, contentWidth, chartHeight);
+                y += chartHeight + 10;
+            }
+
+            // Doughnut Chart
+            if (doughnutChartImg) {
+                if (y > pageHeight - 120) { doc.addPage(); y = 20; }
+
+                doc.setTextColor(...darkColor);
+                doc.setFontSize(13);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Distribuicao de Infracoes por EPI', margin, y);
+                y += 3;
+                doc.setDrawColor(...primaryColor);
+                doc.line(margin, y, margin + 60, y);
+                y += 5;
+
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(100, 116, 139);
+                doc.text('O grafico de rosca apresenta a proporcao de cada tipo de EPI no total de infracoes registradas.', margin, y);
+                y += 3;
+                doc.text('Quanto maior a fatia, mais frequente e a ausencia daquele equipamento de protecao.', margin, y);
+                y += 8;
+
+                const doughnutSize = 70;
+                const doughnutX = (pageWidth - doughnutSize) / 2;
+                doc.addImage(doughnutChartImg, 'PNG', doughnutX, y, doughnutSize, doughnutSize);
+                y += doughnutSize + 10;
+            }
+
+            // ============================================================
+            // PAGINA 3 - RANKINGS DETALHADOS
+            // ============================================================
+            doc.addPage();
+            y = 20;
+
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 25, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Rankings Detalhados', margin, 16);
+
+            y = 35;
+
+            // Sectors Ranking Table
+            if (typeof doc.autoTable !== 'function') {
+                console.error('jsPDF-AutoTable plugin not found');
+            } else if (data.sectors_ranking && data.sectors_ranking.length > 0) {
+                doc.setTextColor(...darkColor);
+                doc.setFontSize(13);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Ranking de Setores', margin, y);
+                y += 3;
+                doc.setDrawColor(...primaryColor);
+                doc.line(margin, y, margin + 40, y);
+                y += 3;
+
+                doc.autoTable({
+                    startY: y,
+                    head: [['#', 'Setor', 'Infracoes', 'Nivel de Risco']],
+                    body: data.sectors_ranking.map((s, i) => {
+                        let risk = 'Baixo';
+                        if (s.total > 20) risk = 'Critico';
+                        else if (s.total > 10) risk = 'Alto';
+                        else if (s.total > 5) risk = 'Moderado';
+                        return [i + 1, s.nome, s.total, risk];
+                    }),
+                    theme: 'striped',
+                    headStyles: { fillColor: primaryColor, fontSize: 10 },
+                    bodyStyles: { fontSize: 9 },
+                    margin: { left: margin, right: margin },
+                    columnStyles: {
+                        0: { cellWidth: 12 },
+                        3: { cellWidth: 35 }
+                    }
+                });
+
+                y = doc.lastAutoTable.finalY + 15;
+            }
+
+            // EPI Ranking Table
+            if (typeof doc.autoTable === 'function' && data.epis_ranking && data.epis_ranking.length > 0) {
+                if (y > pageHeight - 50) { doc.addPage(); y = 20; }
+
+                doc.setTextColor(...darkColor);
+                doc.setFontSize(13);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Ranking de EPIs Menos Utilizados', margin, y);
+                y += 3;
+                doc.setDrawColor(...primaryColor);
+                doc.line(margin, y, margin + 55, y);
+                y += 3;
+
+                doc.autoTable({
+                    startY: y,
+                    head: [['#', 'Equipamento (EPI)', 'Total de Infracoes']],
+                    body: data.epis_ranking.map((e, i) => [i + 1, e.nome, e.total]),
+                    theme: 'striped',
+                    headStyles: { fillColor: primaryColor, fontSize: 10 },
+                    bodyStyles: { fontSize: 9 },
+                    margin: { left: margin, right: margin },
+                    columnStyles: { 0: { cellWidth: 12 } }
+                });
+
+                y = doc.lastAutoTable.finalY + 15;
+            }
+
+            // ============================================================
+            // FOOTER em todas as paginas
+            // ============================================================
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(148, 163, 184);
+                doc.text(`EPI Guard - Relatorio de Seguranca ${data.year}`, margin, pageHeight - 8);
+                doc.text(`Pagina ${i} de ${totalPages}`, pageWidth - margin - 25, pageHeight - 8);
+            }
+
+            // Download
+            const currentMonth = selectedDate.getMonth() + 1;
+            doc.save(`relatorio_epi_guard_${data.year}_${String(currentMonth).padStart(2, '0')}.pdf`);
+            resetBtn();
         })
         .catch(err => {
-            console.error(err);
-            alert(window.I18N['Erro ao gerar PDF.']);
-            btn.innerHTML = originalHTML;
-            btn.style.color = '';
+            console.error('Erro ao gerar relatorio:', err);
+            alert('Erro ao gerar o relatorio PDF: ' + err.message);
+            if (typeof resetBtn === 'function') resetBtn();
         });
 }
 
@@ -554,6 +838,10 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
     const thead = document.querySelector('.custom-table thead tr');
 
     if (!modal) return;
+    
+    document.body.appendChild(modal); // Move para o root
+    document.body.classList.add('modal-open');
+    
     const realMonth = monthIndex + 1;
     const currentYear = new Date().getFullYear();
     const isGlobal = (selectedSectorId === 'all');
@@ -927,3 +1215,11 @@ const config = { childList: true, characterData: true, subtree: true };
 if (document.getElementById('kpiDia')) observer.observe(document.getElementById('kpiDia'), config);
 if (document.getElementById('kpiSemana')) observer.observe(document.getElementById('kpiSemana'), config);
 if (document.getElementById('kpiMes')) observer.observe(document.getElementById('kpiMes'), config);
+
+function closeModal() {
+    const modal = document.getElementById('detailModal');
+    if (modal) {
+        modal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+    }
+}

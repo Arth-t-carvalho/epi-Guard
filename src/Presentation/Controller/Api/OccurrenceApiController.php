@@ -138,4 +138,82 @@ class OccurrenceApiController
 
         echo json_encode($data);
     }
+
+    public function store()
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
+            return;
+        }
+
+        $db = Connection::getInstance();
+        $db->begin_transaction();
+
+        try {
+            $funcionarioId = (int) ($_POST['funcionario_id'] ?? 0);
+            $epiId = (int) ($_POST['epi_id'] ?? 0);
+            $dataHora = $_POST['data_hora'] ?? date('Y-m-d H:i:s');
+            $tipoAcao = $_POST['tipo_acao'] ?? 'OBSERVACAO';
+            $observacao = $_POST['observacao'] ?? '';
+            $tipoOcorrencia = ($epiId > 0 && $epiId !== 'none') ? 'INFRACAO' : 'CONFORMIDADE';
+
+            if ($funcionarioId <= 0) {
+                throw new \Exception("ID do funcionário é obrigatório.");
+            }
+
+            // 1. Inserir Ocorrência
+            $stmt = $db->prepare("INSERT INTO ocorrencias (funcionario_id, tipo, data_hora) VALUES (?, ?, ?)");
+            $stmt->bind_param('iss', $funcionarioId, $tipoOcorrencia, $dataHora);
+            $stmt->execute();
+            $ocorrenciaId = $db->insert_id;
+
+            // 2. Inserir EPI (se houver)
+            if ($epiId > 0) {
+                $stmtEpi = $db->prepare("INSERT INTO ocorrencia_epis (ocorrencia_id, epi_id) VALUES (?, ?)");
+                $stmtEpi->bind_param('ii', $ocorrenciaId, $epiId);
+                $stmtEpi->execute();
+            }
+
+            // 3. Inserir Ação Disciplinar
+            $enumTipoAcao = 'OBSERVACAO';
+            if (str_contains($tipoAcao, 'Verbal')) $enumTipoAcao = 'ADVERTENCIA_VERBAL';
+            elseif (str_contains($tipoAcao, 'Escrita')) $enumTipoAcao = 'ADVERTENCIA_ESCRITA';
+            elseif (str_contains($tipoAcao, 'Suspensão')) $enumTipoAcao = 'SUSPENSAO';
+
+            $usuarioId = $_SESSION['user_id'] ?? 1;
+            $stmtAcao = $db->prepare("INSERT INTO acoes_ocorrencia (ocorrencia_id, usuario_id, tipo, observacao, data_hora) VALUES (?, ?, ?, ?, ?)");
+            $stmtAcao->bind_param('iisss', $ocorrenciaId, $usuarioId, $enumTipoAcao, $observacao, $dataHora);
+            $stmtAcao->execute();
+
+            // 4. Salvar Evidências
+            if (!empty($_FILES['evidencias']['name'][0])) {
+                $uploadDir = __DIR__ . '/../../../../public/uploads/evidences/';
+                foreach ($_FILES['evidencias']['tmp_name'] as $key => $tmpName) {
+                    if ($_FILES['evidencias']['error'][$key] === UPLOAD_ERR_OK) {
+                        $extension = pathinfo($_FILES['evidencias']['name'][$key], PATHINFO_EXTENSION);
+                        $fileName = $ocorrenciaId . '_' . $key . '_' . time() . '.' . $extension;
+                        $destination = $uploadDir . $fileName;
+
+                        if (move_uploaded_file($tmpName, $destination)) {
+                            $dbPath = 'public/uploads/evidences/' . $fileName;
+                            $stmtImg = $db->prepare("INSERT INTO evidencias (ocorrencia_id, caminho_imagem) VALUES (?, ?)");
+                            $stmtImg->bind_param('is', $ocorrenciaId, $dbPath);
+                            $stmtImg->execute();
+                        }
+                    }
+                }
+            }
+
+            $db->commit();
+            echo json_encode(['success' => true, 'message' => 'Ocorrência registrada com sucesso.', 'id' => $ocorrenciaId]);
+
+        } catch (\Exception $e) {
+            $db->rollback();
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao salvar: ' . $e->getMessage()]);
+        }
+    }
 }
