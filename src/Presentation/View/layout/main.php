@@ -12,7 +12,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/sidebar.css">
-    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/dashboard.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/common.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/management.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <?= $extraHead ?? '' ?>
@@ -35,7 +35,6 @@
             lucide.createIcons();
         }
     </script>
-    <script src="<?= BASE_PATH ?>/assets/js/notifications.js"></script>
     <?= $extraScripts ?? '' ?>
 </body>
 

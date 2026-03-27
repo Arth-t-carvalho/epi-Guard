@@ -2,6 +2,9 @@
 $pageTitle = 'epiGuard - Painel Geral';
 $extraHead = '
     <!-- Dependencies -->
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/dashboard-main.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/calendar.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/reports.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -11,45 +14,6 @@ $extraScripts = '<script src="' . BASE_PATH . '/assets/js/dashboard.js"></script
 ob_start();
 ?>
 
-<style>
-    .modal-search-wrapper {
-        padding: 0 4px 16px 4px;
-        border-bottom: 1px solid #f1f5f9;
-        margin-bottom: 16px;
-    }
-    .search-input-group {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-    .search-icon {
-        position: absolute;
-        left: 12px;
-        width: 18px;
-        height: 18px;
-        color: #94a3b8;
-        pointer-events: none;
-    }
-    #sectorSearchInput {
-        width: 100%;
-        padding: 12px 12px 12px 40px;
-        border: 1.5px solid #e2e8f0;
-        border-radius: 12px;
-        font-size: 14px;
-        color: #1e293b;
-        background: #f8fafc;
-        transition: all 0.2s ease;
-    }
-    #sectorSearchInput:focus {
-        outline: none;
-        border-color: #E30613;
-        background: #fff;
-        box-shadow: 0 0 0 4px rgba(227, 6, 19, 0.05);
-    }
-    .selection-row.hidden {
-        display: none;
-    }
-</style>
 
 <!-- Global Variables for JS -->
 <script>
