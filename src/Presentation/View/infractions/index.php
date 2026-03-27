@@ -2,6 +2,7 @@
 $pageTitle = 'epiGuard - Infrações';
 $extraHead = '
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/infractions.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/picker.css">
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/modal/modalInfractions.css">
 ';
@@ -30,43 +31,78 @@ ob_start();
 
 
     <!-- Filters -->
-    <form action="<?= BASE_PATH ?>/infractions" method="GET" class="filter-bar">
+    <form action="<?= BASE_PATH ?>/infractions" method="GET" class="filter-bar" id="filterForm">
         <div class="filter-group select-search">
             <input type="text" name="search" id="searchInput" placeholder="🔍 Buscar funcionário ou setor..."
                 value="<?= htmlspecialchars($filters['search']) ?>">
         </div>
+
+        <!-- Hidden Fields for Filters -->
+        <input type="hidden" name="periodo" id="hiddenPeriodo" value="<?= htmlspecialchars($filters['periodo']) ?>">
+        <input type="hidden" name="status" id="hiddenStatus" value="<?= htmlspecialchars($filters['status']) ?>">
+        <input type="hidden" name="epi" id="hiddenEpi" value="<?= htmlspecialchars($filters['epi']) ?>">
+        <input type="hidden" name="visualizacao" id="hiddenVisualizacao" value="<?= htmlspecialchars($filters['visualizacao']) ?>">
+
+        <!-- Modern Triggers -->
         <div class="filter-group">
-            <select name="periodo" id="filterPeriodo" onchange="this.form.submit()">
-                <option value="todos" <?= $filters['periodo'] === 'todos' ? 'selected' : '' ?>>Todos os períodos</option>
-                <option value="hoje" <?= $filters['periodo'] === 'hoje' ? 'selected' : '' ?>>Hoje</option>
-                <option value="semana" <?= $filters['periodo'] === 'semana' ? 'selected' : '' ?>>Esta Semana</option>
-                <option value="mes" <?= $filters['periodo'] === 'mes' ? 'selected' : '' ?>>Este Mês</option>
-            </select>
+            <div class="modern-picker-trigger" onclick="openModernPicker('periodo')">
+                <i class="fa-solid fa-calendar-days"></i>
+                <div class="trigger-info">
+                    <span class="trigger-label">Período</span>
+                    <span class="trigger-value" id="label-periodo">
+                        <?php 
+                        $periodLabels = ['todos' => 'Todos os períodos', 'hoje' => 'Hoje', 'semana' => 'Esta Semana', 'mes' => 'Este Mês'];
+                        echo $periodLabels[$filters['periodo']] ?? 'Todos';
+                        ?>
+                    </span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
         </div>
+
         <div class="filter-group">
-            <select name="status" id="filterStatus" onchange="this.form.submit()">
-                <option value="todos" <?= $filters['status'] === 'todos' ? 'selected' : '' ?>>Todos os Status</option>
-                <option value="pendente" <?= $filters['status'] === 'pendente' ? 'selected' : '' ?>>Pendente</option>
-                <option value="resolvido" <?= $filters['status'] === 'resolvido' ? 'selected' : '' ?>>Resolvido</option>
-            </select>
+            <div class="modern-picker-trigger" onclick="openModernPicker('status')">
+                <i class="fa-solid fa-list-check"></i>
+                <div class="trigger-info">
+                    <span class="trigger-label">Status</span>
+                    <span class="trigger-value" id="label-status">
+                        <?php 
+                        $statusLabels = ['todos' => 'Todos os Status', 'pendente' => 'Pendente', 'resolvido' => 'Resolvido'];
+                        echo $statusLabels[$filters['status']] ?? 'Todos';
+                        ?>
+                    </span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
         </div>
+
         <div class="filter-group">
-            <select name="epi" id="filterEpi" onchange="this.form.submit()">
-                <option value="todos" <?= $filters['epi'] === 'todos' ? 'selected' : '' ?>>Todos os EPIs</option>
-                <?php foreach ($episList as $epiItem): ?>
-                    <option value="<?= htmlspecialchars($epiItem->getName()) ?>" <?= $filters['epi'] === $epiItem->getName() ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($epiItem->getName()) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+            <div class="modern-picker-trigger" onclick="openModernPicker('epi')">
+                <i class="fa-solid fa-mask-face"></i>
+                <div class="trigger-info">
+                    <span class="trigger-label">EPI</span>
+                    <span class="trigger-value" id="label-epi">
+                        <?= $filters['epi'] === 'todos' ? 'Todos os EPIs' : htmlspecialchars($filters['epi']) ?>
+                    </span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
         </div>
+
         <div class="filter-group">
-            <select name="visualizacao" id="filterVisualizacao" onchange="this.form.submit()">
-                <option value="nome" <?= $filters['visualizacao'] === 'nome' ? 'selected' : '' ?>>Exibir Nome</option>
-                <option value="cards" <?= $filters['visualizacao'] === 'cards' ? 'selected' : '' ?>>Exibir Cards</option>
-            </select>
+            <div class="modern-picker-trigger" onclick="openModernPicker('visualizacao')">
+                <i class="fa-solid fa-table-columns"></i>
+                <div class="trigger-info">
+                    <span class="trigger-label">Visualização</span>
+                    <span class="trigger-value" id="label-visualizacao">
+                        <?= $filters['visualizacao'] === 'nome' ? 'Exibir Nome' : 'Exibir Cards' ?>
+                    </span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
         </div>
-        <button type="submit" style="display: none;"></button> <!-- Hidden submit for Enter key -->
+
+        <button type="submit" style="display: none;"></button>
     </form>
 
     <!-- Table -->
@@ -565,6 +601,49 @@ ob_start();
     });
 </script>
 
+<!-- Modern Picker Modal (Apple Style) -->
+<div class="modern-picker-modal" id="modernPicker">
+    <div class="modern-picker-backdrop" onclick="closeModernPicker()"></div>
+    <div class="modern-picker-container">
+        <div class="modern-picker-header">
+            <h3 id="pickerTitle">Selecionar</h3>
+            <p id="pickerSubtitle">Escolha uma opção abaixo</p>
+        </div>
+        <div class="modern-picker-options" id="pickerOptionsContainer">
+            <!-- Opções injetadas via JS -->
+        </div>
+        <button class="modern-picker-close" onclick="closeModernPicker()">Cancelar</button>
+    </div>
+</div>
+
+<script>
+    // Opções para o Picker Moderno
+    window.PICKER_OPTIONS = {
+        periodo: [
+            { value: 'todos', label: 'Todos os períodos' },
+            { value: 'hoje', label: 'Hoje' },
+            { value: 'semana', label: 'Esta Semana' },
+            { value: 'mes', label: 'Este Mês' }
+        ],
+        status: [
+            { value: 'todos', label: 'Todos os Status' },
+            { value: 'pendente', label: 'Pendente' },
+            { value: 'resolvido', label: 'Resolvido' }
+        ],
+        epi: [
+            { value: 'todos', label: 'Todos os EPIs' },
+            <?php foreach ($episList as $epiItem): ?>
+            { value: '<?= htmlspecialchars($epiItem->getName()) ?>', label: '<?= htmlspecialchars($epiItem->getName()) ?>' },
+            <?php endforeach; ?>
+        ],
+        visualizacao: [
+            { value: 'nome', label: 'Exibir Nome' },
+            { value: 'cards', label: 'Exibir Cards' }
+        ]
+    };
+</script>
+
+<script src="<?= BASE_PATH ?>/assets/js/picker.js"></script>
 <script src="<?= BASE_PATH ?>/assets/js/infractions.js"></script>
 
 <?php

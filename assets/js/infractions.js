@@ -345,3 +345,4 @@ async function doHideInfraction(id) {
     }
 }
 
+// As funções do Modern Picker (Apple Style) foram movidas para assets/js/picker.js

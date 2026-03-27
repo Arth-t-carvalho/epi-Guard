@@ -1,6 +1,9 @@
 <?php
 $pageTitle = 'epiGuard - Instrutores';
-$extraHead = '<link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">';
+$extraHead = '
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/picker.css">
+';
 ob_start();
 ?>
 
@@ -58,23 +61,44 @@ ob_start();
     </div>
 
     <!-- Filters -->
-    <div class="filter-bar">
-        <input type="text" placeholder="🔍 Buscar instrutor...">
-        <select>
-            <option value="">Todos os Cargos</option>
-            <option value="SUPER_ADMIN">Super Admin</option>
-            <option value="SUPERVISOR">Supervisor</option>
-            <option value="PROFESSOR">Professor</option>
-        </select>
-        <select>
-            <option value="">Todos os Setores</option>
-            <option value="TDS">TDS</option>
-            <option value="ELE">ELE</option>
-            <option value="MEC">MEC</option>
-            <option value="AUT">AUT</option>
-        </select>
-        <button class="btn-filter"><i class="fa-solid fa-filter"></i> Filtrar</button>
-    </div>
+    <form action="<?= BASE_PATH ?>/management/instructors" method="GET" class="filter-bar" id="filterForm">
+        <input type="text" name="search" placeholder="🔍 Buscar instrutor..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+        
+        <!-- Hidden Fields for Filters -->
+        <input type="hidden" name="cargo" id="hiddenCargo" value="<?= htmlspecialchars($_GET['cargo'] ?? 'todos') ?>">
+        <input type="hidden" name="setor" id="hiddenSetor" value="<?= htmlspecialchars($_GET['setor'] ?? 'todos') ?>">
+
+        <!-- Modern Triggers -->
+        <div class="modern-picker-trigger" onclick="openModernPicker('cargo')">
+            <i class="fa-solid fa-user-tie"></i>
+            <div class="trigger-info">
+                <span class="trigger-label">Cargo</span>
+                <span class="trigger-value" id="label-cargo">
+                    <?php 
+                    $cargoLabels = ['todos' => 'Todos os Cargos', 'SUPER_ADMIN' => 'Super Admin', 'SUPERVISOR' => 'Supervisor', 'PROFESSOR' => 'Professor'];
+                    echo $cargoLabels[$_GET['cargo'] ?? 'todos'] ?? 'Todos';
+                    ?>
+                </span>
+            </div>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+
+        <div class="modern-picker-trigger" onclick="openModernPicker('setor')">
+            <i class="fa-solid fa-building"></i>
+            <div class="trigger-info">
+                <span class="trigger-label">Setor</span>
+                <span class="trigger-value" id="label-setor">
+                    <?php 
+                    $setorLabels = ['todos' => 'Todos os Setores', 'TDS' => 'TDS', 'ELE' => 'ELE', 'MEC' => 'MEC', 'AUT' => 'AUT'];
+                    echo $setorLabels[$_GET['setor'] ?? 'todos'] ?? 'Todos';
+                    ?>
+                </span>
+            </div>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        
+        <button type="submit" style="display: none;"></button>
+    </form>
 
     <!-- Table -->
     <div class="table-card">
@@ -169,6 +193,40 @@ ob_start();
         </table>
     </div>
 </div>
+
+<!-- Modern Picker Modal (Apple Style) -->
+<div class="modern-picker-modal" id="modernPicker">
+    <div class="modern-picker-backdrop"></div>
+    <div class="modern-picker-container">
+        <div class="modern-picker-header">
+            <h3 id="pickerTitle">Selecionar</h3>
+            <p id="pickerSubtitle">Escolha uma opção abaixo</p>
+        </div>
+        <div class="modern-picker-options" id="pickerOptionsContainer"></div>
+        <button class="modern-picker-close" onclick="closeModernPicker()">Cancelar</button>
+    </div>
+</div>
+
+<script src="<?= BASE_PATH ?>/assets/js/picker.js"></script>
+
+<script>
+    // Opções para o Picker Moderno (Instrutores)
+    window.PICKER_OPTIONS = {
+        cargo: [
+            { value: 'todos', label: 'Todos os Cargos' },
+            { value: 'SUPER_ADMIN', label: 'Super Admin' },
+            { value: 'SUPERVISOR', label: 'Supervisor' },
+            { value: 'PROFESSOR', label: 'Professor' }
+        ],
+        setor: [
+            { value: 'todos', label: 'Todos os Setores' },
+            { value: 'TDS', label: 'TDS' },
+            { value: 'ELE', label: 'ELE' },
+            { value: 'MEC', label: 'MEC' },
+            { value: 'AUT', label: 'AUT' }
+        ]
+    };
+</script>
 
 <?php
 $content = ob_get_clean();

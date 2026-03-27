@@ -564,50 +564,203 @@ function toggleInstructorCard() {
 }
 
 function exportData() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    // 1. Instanciar o jsPDF de forma segura
+    const jsPDFLib = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+    if (!jsPDFLib) return alert('Biblioteca jsPDF não carregada adequadamente.');
+    const doc = new jsPDFLib('p', 'mm', 'a4');
     const btn = document.querySelector('.btn-export');
-    if (!btn) return;
+    
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = 'Gerando PDF...';
-    btn.style.color = '#E30613';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando PDF...';
+    btn.disabled = true;
 
-    doc.setFontSize(18);
-    doc.text("Relatório de Ocorrências - EPI Guard", 14, 20);
-    doc.setFontSize(11);
-    doc.setTextColor(100);
-    doc.text(`Data de Geração: ${new Date().toLocaleDateString()}`, 14, 30);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    const contentWidth = pageWidth - margin * 2;
+    const primaryColor = [227, 6, 19];
+    const darkColor = [31, 41, 55];
+    const grayBorder = [226, 232, 240];
+    const grayText = [100, 116, 139];
 
-    const currentMonth = selectedDate.getMonth() + 1;
-    const currentYear = selectedDate.getFullYear();
+    // Helper: Draw Premium Card
+    const drawCard = (x, y, title, mainText, subText) => {
+        const h = 26;
+        // Fundo com borda
+        doc.setDrawColor(...grayBorder);
+        doc.setFillColor(250, 250, 252);
+        doc.roundedRect(x, y, contentWidth, h, 2, 2, 'FD');
+        // Faixa vermelha lateral
+        doc.setFillColor(...primaryColor);
+        doc.rect(x, y, 3, h, 'F');
+        // Textos
+        doc.setFontSize(10);
+        doc.setTextColor(...darkColor);
+        doc.setFont(undefined, 'bold');
+        doc.text(title, x + 8, y + 7);
+        doc.setFontSize(14);
+        doc.setTextColor(...primaryColor);
+        doc.text(mainText, x + 8, y + 15);
+        doc.setFontSize(8);
+        doc.setTextColor(...grayText);
+        doc.setFont(undefined, 'normal');
+        doc.text(subText, x + 8, y + 21);
+    };
 
-    fetch(`${window.BASE_PATH}/api/modal_details?month=${currentMonth}&year=${currentYear}`)
+    let mainChartImg = null;
+    let doughnutChartImg = null;
+    try {
+        if (typeof mainChartInstance !== 'undefined' && mainChartInstance) {
+            mainChartImg = mainChartInstance.toBase64Image('image/png', 1);
+        }
+        if (typeof doughnutChartInstance !== 'undefined' && doughnutChartInstance) {
+            doughnutChartImg = doughnutChartInstance.toBase64Image('image/png', 1);
+        }
+    } catch (e) { console.warn('Falha captura graficos', e); }
+
+    fetch(`${window.BASE_PATH}/api/export-insights`)
         .then(res => res.json())
         .then(data => {
-            if (!data || data.length === 0) {
-                alert("Nenhuma ocorrência encontrada para exportar neste mês.");
-                btn.innerHTML = originalHTML;
-                btn.style.color = '';
-                return;
+            // ================= PÁGINA 1: CAPA =================
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 45, 'F'); 
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont(undefined, 'bold');
+            doc.text('Relatorio de Seguranca EPI', margin, 20);
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(`EPI Guard - Gerado em ${data.generated_at}`, margin, 32);
+            doc.text(`Ano de Referencia: ${data.year}`, margin, 38);
+            
+            let yCursor = 60;
+            
+            // Subtítulo
+            doc.setTextColor(...darkColor);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Resumo Executivo', margin, yCursor);
+            
+            // Underline Red
+            doc.setDrawColor(...primaryColor);
+            doc.setLineWidth(0.8);
+            doc.line(margin, yCursor + 2, margin + 45, yCursor + 2);
+            
+            yCursor += 12;
+
+            // Cards
+            const worstSectorNome = data.worst_sector ? data.worst_sector.nome : 'Nenhum';
+            const worstSectorTotal = data.worst_sector ? data.worst_sector.total : 0;
+            drawCard(margin, yCursor, 'Setor com Mais Infracoes', worstSectorNome, `${worstSectorTotal} infracao(oes) registrada(s) no ano\nEste setor apresenta o maior numero de ocorrencias de nao conformidade com EPIs.`);
+            
+            yCursor += 32;
+            const worstEpisStr = (data.worst_epis && data.worst_epis.length > 0) ? data.worst_epis.map(e => e.nome).join(', ') : 'Nenhum';
+            const firstEpiTotal = (data.worst_epis && data.worst_epis.length > 0) ? data.worst_epis[0].total : 0;
+            drawCard(margin, yCursor, 'EPIs Menos Utilizados', worstEpisStr, `${data.worst_epis[0] ? data.worst_epis[0].nome : 'EPI'}: ${firstEpiTotal} infracao(oes)\nEquipamentos de protecao com maior indice de nao utilizacao pelos colaboradores.`);
+
+            yCursor += 32;
+            const worstMonthNome = data.worst_month ? data.worst_month.nome : 'Nenhum';
+            const worstMonthTotal = data.worst_month ? data.worst_month.total : 0;
+            drawCard(margin, yCursor, 'Mes Critico', worstMonthNome, `${worstMonthTotal} infracao(oes) registrada(s)\nMes do ano com maior concentracao de infracoes relacionadas a EPIs.`);
+
+            yCursor += 32;
+            const worstDayNome = data.worst_day_of_week ? data.worst_day_of_week.nome : 'Nenhum';
+            const worstDayTotal = data.worst_day_of_week ? data.worst_day_of_week.total : 0;
+            drawCard(margin, yCursor, 'Dia da Semana Critico', worstDayNome, `${worstDayTotal} infracao(oes) registrada(s)\nDia da semana em que ocorre o maior numero de infracoes.`);
+
+
+            // ================= PÁGINA 2: RANKINGS =================
+            doc.addPage();
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 30, 'F'); 
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('Rankings Detalhados', margin, 20);
+
+            yCursor = 45;
+            doc.setTextColor(...darkColor);
+            doc.setFontSize(14);
+            doc.text('Ranking de Setores', margin, yCursor);
+            doc.setDrawColor(...primaryColor);
+            doc.setLineWidth(0.8);
+            doc.line(margin, yCursor + 2, margin + 40, yCursor + 2);
+            
+            if (data.sectors_ranking && data.sectors_ranking.length > 0) {
+                doc.autoTable({
+                    startY: yCursor + 6,
+                    head: [['#', 'Setor', 'Infracoes', 'Nivel de Risco']],
+                    body: data.sectors_ranking.map((s, i) => {
+                        let risk = 'Baixo';
+                        if(s.total > 20) risk = 'Critico';
+                        else if(s.total > 10) risk = 'Medio';
+                        return [i + 1, s.nome, s.total, risk];
+                    }),
+                    theme: 'striped',
+                    headStyles: { fillColor: primaryColor }
+                });
             }
-            const head = [['Data', 'Aluno', 'EPI', 'Hora', 'Status']];
-            const body = data.map(row => [row.data, row.aluno, row.epis, row.hora, row.status_formatado]);
-            doc.autoTable({
-                startY: 35,
-                head: head,
-                body: body,
-                theme: 'striped',
-                headStyles: { fillColor: [227, 6, 19] }
-            });
-            doc.save(`relatorio_epi_${currentMonth}_${currentYear}.pdf`);
+
+            yCursor = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : yCursor + 30;
+
+            doc.setTextColor(...darkColor);
+            doc.setFontSize(14);
+            doc.text('Ranking de EPIs Menos Utilizados', margin, yCursor);
+            doc.setDrawColor(...primaryColor);
+            doc.line(margin, yCursor + 2, margin + 55, yCursor + 2);
+
+            if (data.epis_ranking && data.epis_ranking.length > 0) {
+                doc.autoTable({
+                    startY: yCursor + 6,
+                    head: [['#', 'Equipamento (EPI)', 'Total de Infracoes']],
+                    body: data.epis_ranking.map((e, i) => [i + 1, e.nome, e.total]),
+                    theme: 'striped',
+                    headStyles: { fillColor: primaryColor }
+                });
+            }
+
+            // ================= PÁGINA 3: GRÁFICOS =================
+            if (mainChartImg || doughnutChartImg) {
+                doc.addPage();
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, pageWidth, 30, 'F'); 
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(18);
+                doc.setFont(undefined, 'bold');
+                doc.text('Analise Grafica', margin, 20);
+
+                let gCursor = 45;
+
+                if (mainChartImg) {
+                    doc.setTextColor(...darkColor);
+                    doc.setFontSize(12);
+                    doc.text('Infracoes por Mes (Geral vs EPIs)', margin, gCursor);
+                    const chartHeight = 75;
+                    doc.addImage(mainChartImg, 'PNG', margin, gCursor + 5, contentWidth, chartHeight);
+                    gCursor += chartHeight + 20;
+                }
+
+                if (doughnutChartImg && gCursor < 250) {
+                    doc.setTextColor(...darkColor);
+                    doc.setFontSize(12);
+                    doc.text('Distribuicao Total de EPIs Ausentes', margin, gCursor);
+                    const dogHeight = 70;
+                    // Doughnut usually proportional
+                    doc.addImage(doughnutChartImg, 'PNG', margin + (contentWidth/2) - 35, gCursor + 5, 70, dogHeight);
+                }
+            }
+
+            // 4. Concluir e Baixar o Arquivo
+            doc.save(`relatorio_${data.year}.pdf`);
+            
             btn.innerHTML = originalHTML;
-            btn.style.color = '';
+            btn.disabled = false;
         })
         .catch(err => {
-            console.error(err);
-            alert("Erro ao gerar PDF.");
+            alert('Erro ao exportar PDF: ' + err.message);
             btn.innerHTML = originalHTML;
-            btn.style.color = '';
+            btn.disabled = false;
         });
 }
 
@@ -690,6 +843,14 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
             console.error(err);
             tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center">Erro na conexão.</td></tr>`;
         });
+}
+
+function closeModal() {
+    const modal = document.getElementById('detailModal');
+    if (modal) {
+        modal.classList.remove('open');
+        document.querySelector('.main-content').style.overflow = '';
+    }
 }
 
 function loadCharts() {

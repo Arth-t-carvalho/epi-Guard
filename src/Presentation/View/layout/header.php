@@ -16,22 +16,31 @@
 
     <div class="header-actions">
 
-        <!-- Notificações -->
-        <button class="header-icon-btn notification-btn" id="notificationBellBtn" onclick="toggleNotificationPanel()">
-            <i class="fa-solid fa-bell"></i>
-            <span class="notification-badge hidden" id="bell-badge">0</span>
+        <!-- Botão de Simulação Real -->
+        <button class="header-icon-btn" onclick="testNotification()" style="color: #3b82f6;" title="Simular Detecção Real (Banco de Dados)">
+            <i class="fa-solid fa-vial"></i>
         </button>
 
-        <!-- Painel de Notificações -->
-        <div class="notification-panel" id="notificationPanel">
-            <div class="notification-panel-header">
-                <h3><i class="fa-solid fa-bell"></i> Notificações</h3>
-                <button class="notification-panel-close" onclick="toggleNotificationPanel()">&times;</button>
-            </div>
-            <div class="notification-panel-body" id="notificationPanelBody">
-                <div class="notification-empty">
-                    <i class="fa-solid fa-check-circle"></i>
-                    <p>Nenhuma notificação pendente</p>
+        <!-- Notificações Dropdown -->
+        <div style="position: relative; display: flex;">
+            <!-- Botão principal do sino com o contador -->
+            <button class="header-icon-btn notification-btn" id="notifBtn">
+                <i data-lucide="bell"></i>
+                <span class="notification-badge visible" id="notifBadge" style="display:none;">0</span>
+            </button>
+            
+            <!-- Modal (Dropdown) -->
+            <div class="notification-dropdown" id="notifDropdown">
+                <div class="notif-dropdown-header">
+                    <span>Notificações</span>
+                    <button class="notif-clear-btn" id="notifClearBtn" style="display:none;">Lidas</button>
+                </div>
+                
+                <div class="notif-list" id="notifList">
+                    <div class="notif-empty" id="notifEmpty">
+                        <i data-lucide="bell-off"></i>
+                        <span>Nenhuma infração nova</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -41,7 +50,7 @@
             <i data-lucide="settings"></i>
         </button>
 
-        <button class="btn-export">
+        <button class="btn-export" onclick="exportData()">
             <i class="fa-solid fa-download"></i> Exportar
         </button>
         

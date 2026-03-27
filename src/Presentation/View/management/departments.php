@@ -3,6 +3,7 @@ $pageTitle = 'epiGuard - Gestão de Setor';
 $extraHead = '
     <!-- Page CSS -->
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/picker.css">
     <!-- Bibliotecas de Processamento de Arquivos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
@@ -587,22 +588,44 @@ ob_start();
 </div>
 
 <!-- Filtros -->
-<form action="<?= BASE_PATH ?>/management/departments" method="GET" class="setor-filters">
+<form action="<?= BASE_PATH ?>/management/departments" method="GET" class="setor-filters" id="filterForm">
     <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
         <input type="text" id="searchInputSettings" name="search" placeholder="Pesquisar setores..." oninput="filterSetores()" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
     </div>
-    <select name="status" onchange="this.form.submit()">
-        <option value="todos" <?= ($filters['status'] ?? 'todos') === 'todos' ? 'selected' : '' ?>>Filtrar Status (Todos)</option>
-        <option value="ativo" <?= ($filters['status'] ?? 'todos') === 'ativo' ? 'selected' : '' ?>>Ativos</option>
-        <option value="inativo" <?= ($filters['status'] ?? 'todos') === 'inativo' ? 'selected' : '' ?>>Inativos</option>
-    </select>
-    <select name="risk" onchange="this.form.submit()">
-        <option value="todos" <?= ($filters['risk'] ?? 'todos') === 'todos' ? 'selected' : '' ?>>Filtrar Risco (Todos)</option>
-        <option value="baixo" <?= ($filters['risk'] ?? 'todos') === 'baixo' ? 'selected' : '' ?>>Baixo (< 5%)</option>
-        <option value="medio" <?= ($filters['risk'] ?? 'todos') === 'medio' ? 'selected' : '' ?>>Médio (5% - 10%)</option>
-        <option value="alto" <?= ($filters['risk'] ?? 'todos') === 'alto' ? 'selected' : '' ?>>Alto (>= 10%)</option>
-    </select>
+
+    <!-- Hidden Fields for Filters -->
+    <input type="hidden" name="status" id="hiddenStatus" value="<?= htmlspecialchars($filters['status'] ?? 'todos') ?>">
+    <input type="hidden" name="risk" id="hiddenRisk" value="<?= htmlspecialchars($filters['risk'] ?? 'todos') ?>">
+
+    <!-- Modern Triggers -->
+    <div class="modern-picker-trigger" onclick="openModernPicker('status')">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="trigger-info">
+            <span class="trigger-label">Status</span>
+            <span class="trigger-value" id="label-status">
+                <?php 
+                $statusLabels = ['todos' => 'Todos os Status', 'ativo' => 'Ativos', 'inativo' => 'Inativos'];
+                echo $statusLabels[$filters['status'] ?? 'todos'] ?? 'Todos';
+                ?>
+            </span>
+        </div>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+
+    <div class="modern-picker-trigger" onclick="openModernPicker('risk')">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div class="trigger-info">
+            <span class="trigger-label">Risco</span>
+            <span class="trigger-value" id="label-risk">
+                <?php 
+                $riskLabels = ['todos' => 'Todos os Riscos', 'baixo' => 'Baixo (< 5%)', 'medio' => 'Médio (5% - 10%)', 'alto' => 'Alto (>= 10%)'];
+                echo $riskLabels[$filters['risk'] ?? 'todos'] ?? 'Todos';
+                ?>
+            </span>
+        </div>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
     
     <!-- Botão Adicionar Ajustado para a mesma linha -->
     <button type="button" class="btn-add-setor" onclick="openModal()">
@@ -1043,6 +1066,38 @@ ob_start();
         const row = btn.closest('tr');
         openModal(true, row);
     }
+</script>
+
+<!-- Modern Picker Modal (Apple Style) -->
+<div class="modern-picker-modal" id="modernPicker">
+    <div class="modern-picker-backdrop"></div>
+    <div class="modern-picker-container">
+        <div class="modern-picker-header">
+            <h3 id="pickerTitle">Selecionar</h3>
+            <p id="pickerSubtitle">Escolha uma opção abaixo</p>
+        </div>
+        <div class="modern-picker-options" id="pickerOptionsContainer"></div>
+        <button class="modern-picker-close" onclick="closeModernPicker()">Cancelar</button>
+    </div>
+</div>
+
+<script src="<?= BASE_PATH ?>/assets/js/picker.js"></script>
+
+<script>
+    // Opções para o Picker Moderno (Setores)
+    window.PICKER_OPTIONS = {
+        status: [
+            { value: 'todos', label: 'Todos os Status' },
+            { value: 'ativo', label: 'Ativos' },
+            { value: 'inativo', label: 'Inativos' }
+        ],
+        risk: [
+            { value: 'todos', label: 'Todos os Riscos' },
+            { value: 'baixo', label: 'Baixo (< 5%)' },
+            { value: 'medio', label: 'Médio (5% - 10%)' },
+            { value: 'alto', label: 'Alto (>= 10%)' }
+        ]
+    };
 </script>
 
 <?php
