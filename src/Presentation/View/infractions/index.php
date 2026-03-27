@@ -1,5 +1,10 @@
 <?php
 $pageTitle = 'epiGuard - Infrações';
+$extraHead = '
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/infractions.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/modal/modalInfractions.css">
+';
 ob_start();
 ?>
 
@@ -27,7 +32,8 @@ ob_start();
     <!-- Filters -->
     <form action="<?= BASE_PATH ?>/infractions" method="GET" class="filter-bar">
         <div class="filter-group select-search">
-            <input type="text" name="search" id="searchInput" placeholder="🔍 Buscar funcionário ou setor..." value="<?= htmlspecialchars($filters['search']) ?>">
+            <input type="text" name="search" id="searchInput" placeholder="🔍 Buscar funcionário ou setor..."
+                value="<?= htmlspecialchars($filters['search']) ?>">
         </div>
         <div class="filter-group">
             <select name="periodo" id="filterPeriodo" onchange="this.form.submit()">
@@ -67,7 +73,8 @@ ob_start();
     <div class="table-card">
         <div class="card-header">
             <h3>Registro de Infrações</h3>
-            <span style="font-size: 12px; color: var(--text-muted);" id="tableCount">Mostrando <?= count($infractions) ?> registros</span>
+            <span style="font-size: 12px; color: var(--text-muted);" id="tableCount">Mostrando
+                <?= count($infractions) ?> registros</span>
         </div>
 
         <?php if ($filters['visualizacao'] === 'cards'): ?>
@@ -75,11 +82,13 @@ ob_start();
                 <?php foreach ($infractions as $infraction): ?>
                     <div class="infraction-card">
                         <div class="card-image-box">
-                            <?php 
-                                $photoPath = !empty($infraction['funcionario_foto']) ? BASE_PATH . '/' . $infraction['funcionario_foto'] : BASE_PATH . '/assets/img/default-avatar.png';
+                            <?php
+                            $photoPath = !empty($infraction['funcionario_foto']) ? BASE_PATH . '/' . $infraction['funcionario_foto'] : BASE_PATH . '/assets/img/default-avatar.png';
                             ?>
-                            <img src="<?= $photoPath ?>" alt="<?= htmlspecialchars($infraction['funcionario_nome']) ?>" class="card-employee-photo" onerror="this.src='<?= BASE_PATH ?>/assets/img/default-avatar.png'">
-                            <span class="status-badge-premium <?= ($infraction['status'] ?? 'pendente') === 'resolvido' ? 'resolved' : 'pending' ?>">
+                            <img src="<?= $photoPath ?>" alt="<?= htmlspecialchars($infraction['funcionario_nome']) ?>"
+                                class="card-employee-photo" onerror="this.src='<?= BASE_PATH ?>/assets/img/default-avatar.png'">
+                            <span
+                                class="status-badge-premium <?= ($infraction['status'] ?? 'pendente') === 'resolvido' ? 'resolved' : 'pending' ?>">
                                 <?= ucfirst($infraction['status'] ?? 'Pendente') ?>
                             </span>
                         </div>
@@ -99,10 +108,13 @@ ob_start();
                             </div>
                             <div class="card-footer-premium">
                                 <button class="btn-card-action" title="Ver detalhes"><i class="fa-solid fa-eye"></i></button>
-                                <button class="btn-card-action secondary" title="Salvar para revisão"><i class="fa-solid fa-bookmark"></i></button>
-                                <button class="btn-card-action info" title="Assinar Ocorrência"><i class="fa-solid fa-signature"></i></button>
+                                <button class="btn-card-action secondary" title="Salvar para revisão"><i
+                                        class="fa-solid fa-bookmark"></i></button>
+                                <button class="btn-card-action info" title="Assinar Ocorrência"><i
+                                        class="fa-solid fa-signature"></i></button>
                                 <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                    <button class="btn-card-action success" title="Resolver"><i class="fa-solid fa-check"></i></button>
+                                    <button class="btn-card-action success" title="Resolver"><i
+                                            class="fa-solid fa-check"></i></button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -136,31 +148,40 @@ ob_start();
                                 <td class="employee-cell">
                                     <?php if ($filters['visualizacao'] === 'foto'): ?>
                                         <div class="employee-avatar-wrapper">
-                                            <?php 
-                                                $photoPath = !empty($infraction['funcionario_foto']) ? BASE_PATH . '/' . $infraction['funcionario_foto'] : BASE_PATH . '/assets/img/default-avatar.png';
+                                            <?php
+                                            $photoPath = !empty($infraction['funcionario_foto']) ? BASE_PATH . '/' . $infraction['funcionario_foto'] : BASE_PATH . '/assets/img/default-avatar.png';
                                             ?>
-                                            <img src="<?= $photoPath ?>" alt="<?= htmlspecialchars($infraction['funcionario_nome']) ?>" class="employee-avatar" onerror="this.src='<?= BASE_PATH ?>/assets/img/default-avatar.png'">
+                                            <img src="<?= $photoPath ?>" alt="<?= htmlspecialchars($infraction['funcionario_nome']) ?>"
+                                                class="employee-avatar"
+                                                onerror="this.src='<?= BASE_PATH ?>/assets/img/default-avatar.png'">
                                         </div>
                                     <?php else: ?>
                                         <span style="font-weight: 600;"><?= htmlspecialchars($infraction['funcionario_nome']) ?></span>
                                     <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?></td>
-                                <td data-epi="<?= strtolower($infraction['epi_nome'] ?? '') ?>"><?= htmlspecialchars($infraction['epi_nome'] ?? 'N/A') ?></td>
+                                <td data-epi="<?= strtolower($infraction['epi_nome'] ?? '') ?>">
+                                    <?= htmlspecialchars($infraction['epi_nome'] ?? 'N/A') ?></td>
                                 <td><?= date('H:i', strtotime($infraction['data_hora'])) ?></td>
                                 <td data-status="<?= htmlspecialchars($infraction['status'] ?? 'pendente') ?>">
-                                    <span class="status-dot <?= ($infraction['status'] ?? 'pendente') === 'resolvido' ? 'resolved' : 'pending' ?>"></span> 
+                                    <span
+                                        class="status-dot <?= ($infraction['status'] ?? 'pendente') === 'resolvido' ? 'resolved' : 'pending' ?>"></span>
                                     <?= ucfirst($infraction['status'] ?? 'Pendente') ?>
                                 </td>
                                 <td>
                                     <div class="table-actions">
                                         <button class="btn-action" title="Ver detalhes"><i class="fa-solid fa-eye"></i></button>
-                                        <button class="btn-action secondary" title="Salvar para revisão"><i class="fa-solid fa-bookmark"></i></button>
-                                        <button class="btn-action info" title="Assinar Ocorrência"><i class="fa-solid fa-signature"></i></button>
+                                        <button class="btn-action secondary" title="Salvar para revisão"><i
+                                                class="fa-solid fa-bookmark"></i></button>
+                                        <button class="btn-action info" title="Assinar Ocorrência"><i
+                                                class="fa-solid fa-signature"></i></button>
                                         <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                            <button class="btn-action success" title="Resolver"><i class="fa-solid fa-check"></i></button>
+                                            <button class="btn-action success" title="Resolver"><i
+                                                    class="fa-solid fa-check"></i></button>
                                         <?php endif; ?>
-                                        <button class="btn-action danger" title="Excluir" onclick="deleteInfraction(<?= $infraction['id'] ?>, this)"><i class="fa-solid fa-trash"></i></button>
+                                        <button class="btn-action danger" title="Excluir"
+                                            onclick="deleteInfraction(<?= $infraction['id'] ?>, this)"><i
+                                                class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -182,7 +203,7 @@ ob_start();
             </div>
             <button class="close-premium" onclick="closeExportModal()">&times;</button>
         </div>
-        
+
         <div class="modal-premium-body">
             <!-- Passo 1: Seleção de Setor via Select -->
             <div class="export-step">
@@ -190,11 +211,11 @@ ob_start();
                 <div class="export-select-wrapper">
                     <select id="exportSectorSelect" onchange="onSectorSelectChange(this)">
                         <option value="" disabled selected>Escolha um setor...</option>
-                        <?php 
-                            $deptRepo = new \epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository();
-                            $sectors = $deptRepo->findAll();
-                            foreach ($sectors as $sector): 
-                        ?>
+                        <?php
+                        $deptRepo = new \epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository();
+                        $sectors = $deptRepo->findAll();
+                        foreach ($sectors as $sector):
+                            ?>
                             <option value="<?= $sector->getId() ?>"><?= htmlspecialchars($sector->getName()) ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -208,12 +229,14 @@ ob_start();
                     <!-- Barra de Pesquisa -->
                     <div class="employee-search-bar">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="employeeSearchInput" placeholder="Pesquisar funcionário..." oninput="filterExportEmployees(this.value)">
+                        <input type="text" id="employeeSearchInput" placeholder="Pesquisar funcionário..."
+                            oninput="filterExportEmployees(this.value)">
                     </div>
                     <!-- Selecionar Todos -->
                     <div class="selection-controls">
                         <label class="custom-checkbox">
-                            <input type="checkbox" id="selectAllEmployees" onchange="toggleAllExportEmployees(this.checked)">
+                            <input type="checkbox" id="selectAllEmployees"
+                                onchange="toggleAllExportEmployees(this.checked)">
                             <span class="checkmark"></span>
                             <span class="label-text">Selecionar Todos</span>
                         </label>
@@ -223,7 +246,8 @@ ob_start();
                     <div class="employee-check-list" id="exportEmployeeList">
                         <div class="employee-empty info">
                             <i class="fa-solid fa-circle-info"></i>
-                            <span>Nenhum setor selecionado. Por favor, escolha um setor acima para carregar a lista.</span>
+                            <span>Nenhum setor selecionado. Por favor, escolha um setor acima para carregar a
+                                lista.</span>
                         </div>
                     </div>
                 </div>

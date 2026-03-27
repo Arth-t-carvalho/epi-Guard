@@ -1,5 +1,6 @@
 <?php
 $pageTitle = 'epiGuard - Alunos';
+$extraHead = '<link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">';
 ob_start();
 ?>
 

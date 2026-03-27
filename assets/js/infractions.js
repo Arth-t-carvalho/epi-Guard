@@ -23,6 +23,7 @@ function openExportModal() {
     if (!modal) return;
 
     modal.classList.add('active');
+    document.querySelector('.main-content').classList.add('no-main-scroll');
 
     // Reset completo ao abrir
     const select = document.getElementById('exportSectorSelect');
@@ -38,14 +39,14 @@ function openExportModal() {
     `;
 
     document.getElementById('formatStep').style.display = 'none';
-    
+
     // Desativar controles de busca e seleção
     const searchInput = document.getElementById('employeeSearchInput');
     if (searchInput) {
         searchInput.value = '';
         searchInput.disabled = true;
     }
-    
+
     const selectAllCheck = document.getElementById('selectAllEmployees');
     if (selectAllCheck) {
         selectAllCheck.checked = false;
@@ -58,7 +59,10 @@ function openExportModal() {
 
 function closeExportModal() {
     const modal = document.getElementById('exportModal');
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+        document.querySelector('.main-content').classList.remove('no-main-scroll');
+    }
 }
 
 /* ==============================
@@ -211,7 +215,7 @@ function processExport(format) {
     const selectedEmployees = Array.from(
         document.querySelectorAll('.export-employee-check:checked')
     ).map(c => c.value);
-    
+
     if (selectedEmployees.length === 0) {
         alert('Selecione pelo menos um funcionário para exportar.');
         return;
@@ -219,7 +223,7 @@ function processExport(format) {
 
     const btn = event.currentTarget;
     const originalText = btn.querySelector('.btn-text').innerHTML;
-    
+
     btn.querySelector('.btn-text').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Gerando ${format.toUpperCase()}...`;
     btn.disabled = true;
     btn.style.opacity = '0.7';
@@ -228,7 +232,7 @@ function processExport(format) {
     setTimeout(() => {
         btn.querySelector('.btn-text').innerHTML = '<i class="fa-solid fa-check"></i> Concluído!';
         btn.style.opacity = '1';
-        
+
         setTimeout(() => {
             btn.querySelector('.btn-text').innerHTML = originalText;
             btn.disabled = false;

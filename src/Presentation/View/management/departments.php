@@ -1,6 +1,8 @@
 <?php
 $pageTitle = 'epiGuard - Gestão de Setor';
 $extraHead = '
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">
     <!-- Bibliotecas de Processamento de Arquivos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>

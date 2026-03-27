@@ -11,9 +11,9 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/global.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/sidebar.css">
-    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/dashboard.css">
-    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/management.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/modal/modalBase.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <?= $extraHead ?? '' ?>
 </head>

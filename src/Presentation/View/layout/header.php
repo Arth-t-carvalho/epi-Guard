@@ -1,6 +1,17 @@
 <header class="header">
+    <div id="epi-parade" class="epi-parade">
+        <i class="fa-solid fa-helmet-safety"></i>
+        <i class="fa-solid fa-glasses"></i>
+        <i class="fa-solid fa-vest"></i>
+        <i class="fa-solid fa-helmet-safety"></i>
+        <i class="fa-solid fa-glasses"></i>
+        <i class="fa-solid fa-vest"></i>
+    </div>
     <div class="page-title">
-        <p>Olá Arthur, bem-vindo de volta!</p>
+        <div id="welcome-truck-container" class="welcome-container">
+            <span class="truck-icon"><i class="fa-solid fa-truck-moving"></i></span>
+            <p class="welcome-text">Olá Arthur, bem-vindo de volta!</p>
+        </div>
     </div>
 
     <div class="header-actions">

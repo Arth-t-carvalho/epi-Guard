@@ -1,12 +1,17 @@
 <?php
 $pageTitle = 'epiGuard - Painel Geral';
 $extraHead = '
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/dashboard.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/modal/modalDashboard.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/modal/modalGestaoSetor.css">
     <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 ';
 $extraScripts = '<script src="' . BASE_PATH . '/assets/js/dashboard.js"></script>';
+$extraHead .= '<style>.main-content { overflow-y: hidden !important; }</style>';
 
 ob_start();
 ?>
@@ -17,11 +22,13 @@ ob_start();
         border-bottom: 1px solid #f1f5f9;
         margin-bottom: 16px;
     }
+
     .search-input-group {
         position: relative;
         display: flex;
         align-items: center;
     }
+
     .search-icon {
         position: absolute;
         left: 12px;
@@ -30,6 +37,7 @@ ob_start();
         color: #94a3b8;
         pointer-events: none;
     }
+
     #sectorSearchInput {
         width: 100%;
         padding: 12px 12px 12px 40px;
@@ -40,12 +48,14 @@ ob_start();
         background: #f8fafc;
         transition: all 0.2s ease;
     }
+
     #sectorSearchInput:focus {
         outline: none;
         border-color: #E30613;
         background: #fff;
         box-shadow: 0 0 0 4px rgba(227, 6, 19, 0.05);
     }
+
     .selection-row.hidden {
         display: none;
     }
@@ -60,7 +70,7 @@ ob_start();
 
 <!-- KPI CARDS -->
 <div class="kpi-grid">
-    <div class="kpi-card card">
+    <div class="kpi-card card" onclick="confirmRedirect('hoje')" style="cursor: pointer;">
         <span class="kpi-header">INFRAÇÕES HOJE</span>
         <div class="kpi-value">
             <span id="kpiDia">0</span>
@@ -68,7 +78,7 @@ ob_start();
         </div>
     </div>
 
-    <div class="kpi-card card">
+    <div class="kpi-card card" onclick="confirmRedirect('semana')" style="cursor: pointer;">
         <span class="kpi-header">INFRAÇÕES SEMANA</span>
         <div class="kpi-value">
             <span id="kpiSemana">0</span>
@@ -76,7 +86,7 @@ ob_start();
         </div>
     </div>
 
-    <div class="kpi-card card">
+    <div class="kpi-card card" onclick="confirmRedirect('mes')" style="cursor: pointer;">
         <span class="kpi-header">INFRAÇÕES MÊS</span>
         <div class="kpi-value">
             <span id="kpiMes">0</span>
@@ -95,7 +105,7 @@ ob_start();
 <div class="chart-card card">
     <div class="chart-header-actions">
         <h3 class="chart-title">Visão Geral Mensal</h3>
-        
+
         <div class="header-controls">
             <div class="active-filters-info" id="activeFiltersContainer" style="display: none;">
                 <span class="active-count" id="selectedSectorsCount">0</span> setores selecionados
@@ -106,7 +116,7 @@ ob_start();
             </button>
         </div>
     </div>
-    <div class="chart-container" style="height: 300px;">
+    <div class="chart-container" style="height: 240px;">
         <canvas id="mainChart"></canvas>
     </div>
 </div>
@@ -121,15 +131,14 @@ ob_start();
                 <i data-lucide="calendar"></i>
             </button>
         </div>
-        <div class="calendar-nav" onclick="toggleCalendar()"
-            onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+        <div class="calendar-nav" onclick="toggleCalendar()" onmouseover="this.style.transform='scale(1.01)'"
+            onmouseout="this.style.transform='scale(1)'">
 
             <button class="nav-btn" onclick="event.stopPropagation(); changeDay(-1)">❮</button>
 
             <div class="date-display"
                 style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-                <div id="displayDayNum"
-                    style="color: #E30613; font-size: 28px; font-weight: 800; line-height: 1;">
+                <div id="displayDayNum" style="color: #E30613; font-size: 28px; font-weight: 800; line-height: 1;">
                     --
                 </div>
                 <div id="displayMonthStr" style="color: #64748B; font-size: 13px; font-weight: 600;">
@@ -154,7 +163,7 @@ ob_start();
         <div class="section-header">
             <h3 class="section-title">Distribuição de EPIs</h3>
         </div>
-        <div class="chart-container" style="height: 250px;">
+        <div class="chart-container" style="height: 200px;">
             <canvas id="doughnutChart"></canvas>
         </div>
     </div>
@@ -190,7 +199,13 @@ ob_start();
             <button id="nextMonth"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
         <ul class="weeks">
-            <li>Dom</li><li>Seg</li><li>Ter</li><li>Qua</li><li>Qui</li><li>Sex</li><li>Sáb</li>
+            <li>Dom</li>
+            <li>Seg</li>
+            <li>Ter</li>
+            <li>Qua</li>
+            <li>Qui</li>
+            <li>Sex</li>
+            <li>Sáb</li>
         </ul>
         <ul class="days" id="calendarDays"></ul>
         <div class="manual-input">
@@ -211,7 +226,9 @@ ob_start();
         </div>
         <div class="modal-body">
             <table class="custom-table">
-                <thead><tr></tr></thead>
+                <thead>
+                    <tr></tr>
+                </thead>
                 <tbody id="modalTableBody"></tbody>
             </table>
         </div>
@@ -233,7 +250,8 @@ ob_start();
             <div class="modal-search-wrapper">
                 <div class="search-input-group">
                     <i data-lucide="search" class="search-icon"></i>
-                    <input type="text" id="sectorSearchInput" placeholder="Pesquisar setor..." onkeyup="filterSectors(this.value)">
+                    <input type="text" id="sectorSearchInput" placeholder="Pesquisar setor..."
+                        onkeyup="filterSectors(this.value)">
                 </div>
             </div>
 
@@ -241,7 +259,8 @@ ob_start();
                 <div class="selection-row global-row" onclick="toggleSectorSelect('all')">
                     <div class="selection-main">
                         <label class="custom-checkbox">
-                            <input type="checkbox" id="check-all" checked onchange="toggleAllSectors(this.checked); event.stopPropagation();">
+                            <input type="checkbox" id="check-all" checked
+                                onchange="toggleAllSectors(this.checked); event.stopPropagation();">
                             <span class="checkmark"></span>
                         </label>
                         <div class="sector-cell">
@@ -251,16 +270,18 @@ ob_start();
                     </div>
                     <span class="status-tag">Visão Global</span>
                 </div>
-                
-                <?php 
-                    $deptRepo = new \epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository();
-                    $sectors = $deptRepo->findAll();
-                    foreach ($sectors as $sector): 
-                ?>
+
+                <?php
+                $deptRepo = new \epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository();
+                $sectors = $deptRepo->findAll();
+                foreach ($sectors as $sector):
+                    ?>
                     <div class="selection-row" onclick="toggleSectorSelect('<?= $sector->getId() ?>')">
                         <div class="selection-main">
                             <label class="custom-checkbox">
-                                <input type="checkbox" class="sector-check" value="<?= $sector->getId() ?>" data-name="<?= htmlspecialchars($sector->getName()) ?>" onchange="updateSelectionState(); event.stopPropagation();">
+                                <input type="checkbox" class="sector-check" value="<?= $sector->getId() ?>"
+                                    data-name="<?= htmlspecialchars($sector->getName()) ?>"
+                                    onchange="updateSelectionState(); event.stopPropagation();">
                                 <span class="checkmark"></span>
                             </label>
                             <div class="sector-cell">
@@ -277,6 +298,28 @@ ob_start();
             <button class="btn-apply-filter" onclick="applySectorsFilter()">
                 <span>Aplicar Filtros</span>
                 <i data-lucide="check"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE CONFIRMAÇÃO DE REDIRECIONAMENTO -->
+<div id="confirmInfractionsModal" class="modal-premium">
+    <div class="modal-confirmation-content">
+        <i data-lucide="help-circle" class="main-icon"></i>
+        <h2>Deseja ir para Infrações?</h2>
+        <p>Você será redirecionado para a página de detalhes com o filtro de período selecionado.</p>
+
+        <div class="confirmation-actions">
+            <button class="btn-liquid" onclick="goToInfractions()">
+                <span class="btn-text">
+                    <i data-lucide="check-circle"></i>
+                    Confirmar
+                </span>
+                <div class="liquid"></div>
+            </button>
+            <button class="btn-light-shadow" onclick="closeConfirmModal()">
+                Cancelar
             </button>
         </div>
     </div>

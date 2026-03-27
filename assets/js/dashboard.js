@@ -11,6 +11,7 @@ let mainChartInstance = null;
 let doughnutChartInstance = null;
 let selectedCourseId = 'all'; // Legado, mantido para compatibilidade de funções
 let selectedSectorId = 'all'; // Novo: Filtro de setor para visão empresarial
+let pendingRedirectPeriod = 'todos'; // Armazena o período para o modal de confirmação
 
 // Cores para os gráficos
 const colorHelmet = '#1F2937';
@@ -46,7 +47,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Modal Detalhes (Gráfico)
         const detModal = document.getElementById('detailModal');
-        if (detModal && e.target === detModal) detModal.classList.remove('open');
+        if (detModal && e.target === detModal) {
+            detModal.classList.remove('open');
+            document.querySelector('.main-content').style.overflow = '';
+        }
 
         // Card Instrutor
         const card = document.getElementById('instructorCard');
@@ -59,6 +63,30 @@ document.addEventListener("DOMContentLoaded", function () {
     // Re-render markers if lucide is available
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+    }
+
+    // --- Welcome Galactic Portal Animation ---
+    const welcomeContainer = document.getElementById('welcome-truck-container');
+    const blackDoor = document.getElementById('black-door');
+    const epiParade = document.getElementById('epi-parade');
+
+    if (welcomeContainer && !sessionStorage.getItem('welcomeAnimated')) {
+        const welcomeText = welcomeContainer.querySelector('.welcome-text');
+        
+        welcomeContainer.classList.add('animating');
+        if (epiParade) epiParade.classList.add('active');
+        
+        // At 55% of 4.5s (2.47s), the text reaches its final position
+        setTimeout(() => {
+            if (welcomeText) welcomeText.classList.add('delivered');
+        }, 2470);
+
+        // Cleanup after animation ends (4.5s + small buffer)
+        setTimeout(() => {
+            welcomeContainer.classList.remove('animating');
+            if (epiParade) epiParade.classList.remove('active');
+            sessionStorage.setItem('welcomeAnimated', 'true');
+        }, 5500);
     }
 });
 
@@ -147,6 +175,7 @@ function openCourseModal() {
     const modal = document.getElementById('courseModal');
     if (modal) {
         modal.classList.add('active');
+        document.querySelector('.main-content').style.overflow = 'hidden';
         if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
         updateSelectionUI(); // Sincroniza checks com o estado
     }
@@ -154,7 +183,10 @@ function openCourseModal() {
 
 function closeCourseModal() {
     const modal = document.getElementById('courseModal');
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+        document.querySelector('.main-content').style.overflow = '';
+    }
 }
 
 function toggleAllSectors(checked) {
@@ -286,6 +318,35 @@ function irParaInfracoes(nome) {
     window.location.href = url;
 }
 
+// --- LÓGICA DE CONFIRMAÇÃO DE REDIRECIONAMENTO ---
+function confirmRedirect(period) {
+    pendingRedirectPeriod = period;
+    const modal = document.getElementById('confirmInfractionsModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.querySelector('.main-content').style.overflow = 'hidden';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
+    }
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirmInfractionsModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.querySelector('.main-content').style.overflow = '';
+    }
+}
+
+function goToInfractions() {
+    const periodMap = {
+        'hoje': 'hoje',
+        'semana': 'semana',
+        'mes': 'mes'
+    };
+    const period = periodMap[pendingRedirectPeriod] || 'todos';
+    window.location.href = `${window.BASE_PATH}/infractions?periodo=${period}`;
+}
+
 function changeDay(delta) {
     const oldMonth = selectedDate.getMonth();
     selectedDate.setDate(selectedDate.getDate() + delta);
@@ -395,9 +456,11 @@ function toggleCalendar() {
         currCalMonth = selectedDate.getMonth();
         renderCalendarGrid();
         modal.classList.add('active');
+        document.querySelector('.main-content').style.overflow = 'hidden';
         if (typeof lucide !== 'undefined') lucide.createIcons();
     } else {
         modal.classList.remove('active');
+        document.querySelector('.main-content').style.overflow = '';
     }
 }
 
@@ -559,6 +622,7 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
     title.innerText = displayTitle;
     modal.style.display = '';
     modal.classList.add('open');
+    document.querySelector('.main-content').style.overflow = 'hidden';
 
     if (isGlobal) {
         thead.innerHTML = `<th>Rank</th><th>Curso</th><th>Infrações</th><th>Conformidade</th><th>Risco</th>`;
@@ -771,7 +835,6 @@ function loadCharts() {
                     }
                 }
             });
-
             // Atualiza TOP OCORRÊNCIAS baseado no Doughnut Chart
             const topList = document.getElementById('topInfractions');
             if (topList) {
@@ -796,11 +859,18 @@ function loadCharts() {
                     });
                 }
             }
-
         })
         .catch(err => {
             console.error('Erro gráficos:', err);
         });
+}
+
+function closeModal() {
+    const detailModal = document.getElementById('detailModal');
+    if (detailModal) {
+        detailModal.classList.remove('open');
+    }
+    document.querySelector('.main-content').style.overflow = '';
 }
 
 function selectMonth(index) {
