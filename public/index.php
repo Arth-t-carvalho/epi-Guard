@@ -4,6 +4,9 @@ session_start();
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Global helpers (e.g., i18n translation)
+require_once __DIR__ . '/../src/Application/helpers.php';
+
 // Carregar configurações
 $config = require_once __DIR__ . '/../config/app.php';
 

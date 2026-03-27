@@ -76,10 +76,10 @@ class MySQLEpiRepository implements EpiRepositoryInterface
     private function hydrate(array $row): EpiItem
     {
         return new EpiItem(
-            $row['nome'],
-            true, // Padrão
-            $row['descricao'],
-            (int) $row['id']
+            name: $row['nome'],
+            isRequired: true, // Padrão
+            description: $row['descricao'],
+            id: (int) $row['id']
         );
     }
 }

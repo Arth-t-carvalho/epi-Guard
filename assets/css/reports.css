@@ -1,0 +1,306 @@
+/* =========================================
+   REPORT MODALS & TABLES
+   ========================================= */
+.modal-overlay,
+.modal-ranking-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.open,
+.modal-ranking-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-container,
+.modal-ranking-square {
+    background: white;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    padding: 25px;
+    transform: translateY(-50px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #e2e8f0;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 15px;
+}
+
+/* DATA TABLE */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 15px;
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.data-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.data-table tr:hover {
+    background: #f8fafc;
+}
+
+/* STATUS DOTS */
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-dot.pending {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.status-dot.resolved {
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+/* RANKING TABLE */
+.ranking-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.ranking-row td {
+    padding: 12px 15px;
+    font-size: 14px;
+    background: #ffffff;
+}
+
+/* STATUS BADGES */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-critico {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.status-alto {
+    background-color: #ffedd5;
+    color: #ea580c;
+    border: 1px solid #fed7aa;
+}
+
+.status-moderado {
+    background-color: #fef9c3;
+    color: #a16207;
+    border: 1px solid #fef08a;
+}
+
+.status-baixo {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* TABLE CARD ENHANCEMENT */
+.table-card {
+    background: white;
+    border-radius: 28px !important;
+    padding: 35px;
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f1f5f9;
+}
+
+/* =========================================
+   MODAL DE RELATÓRIOS (Detalhado)
+   ========================================= */
+.modal-overlay,
+.modal-ranking-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.open,
+.modal-ranking-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-container,
+.modal-ranking-square {
+    background: white;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    padding: 25px;
+    transform: translateY(-50px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-overlay.open .modal-container,
+.modal-ranking-overlay.open .modal-ranking-square {
+    transform: translateY(0) scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 15px;
+}
+
+.modal-title h2 {
+    font-size: 1.25rem;
+    color: #1F2937;
+    margin: 0;
+}
+
+.modal-title span {
+    color: #E30613;
+    font-weight: 700;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    color: #64748B;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-close-modal:hover {
+    color: #E30613;
+}
+
+/* TABELA DENTRO DO MODAL */
+.table-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.custom-table th {
+    text-align: left;
+    padding: 12px;
+    background-color: #F8FAFC;
+    color: #64748B;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.custom-table td {
+    padding: 12px;
+    border-bottom: 1px solid #F1F5F9;
+    color: #334155;
+}
+
+.custom-table tr {
+    transition: all 0.2s ease;
+}
+
+.custom-table tr:hover {
+    background-color: rgba(227, 6, 19, 0.04);
+    box-shadow: inset 4px 0 0 var(--primary);
+}
+
+[data-theme="dark"] .custom-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-pendente {
+    background: #FEF2F2;
+    color: #DC2626;
+}
+
+.status-resolvido {
+    background: #F0FDF4;
+    color: #16A34A;
+}
+
+.btn-modal-action {
+    padding: 8px 16px;
+    background: #1F2937;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-modal-action:hover {
+    background: #E30613;
+}
+

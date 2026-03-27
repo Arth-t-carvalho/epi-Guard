@@ -157,13 +157,13 @@ class MySQLUserRepository implements UserRepositoryInterface
         }
 
         return new User(
-            $row['nome'],
-            new Email($row['usuario']),
-            $row['senha'],
-            $role,
-            (int) $row['id'],
-            new DateTimeImmutable($row['criado_em']),
-            $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null
+            name: $row['nome'],
+            email: new Email($row['usuario']),
+            passwordHash: $row['senha'],
+            role: $role,
+            id: (int) $row['id'],
+            createdAt: new DateTimeImmutable($row['criado_em']),
+            updatedAt: $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null
         );
     }
 }

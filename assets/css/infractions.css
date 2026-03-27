@@ -1,0 +1,170 @@
+/* =========================================
+   CARDS GRID VIEW (INFRACTIONS)
+   ========================================= */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 20px;
+}
+
+.infraction-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.infraction-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-light);
+}
+
+.card-image-box {
+    position: relative;
+    height: 180px;
+    background: #f1f5f9;
+}
+
+.card-employee-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.status-badge-premium {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge-premium.pending {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+}
+
+.status-badge-premium.resolved {
+    background: #f0fdf4;
+    color: #22c55e;
+    border: 1px solid #dcfce7;
+}
+
+.card-content-premium {
+    padding: 20px;
+}
+
+.infraction-card h4.employee-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--secondary);
+    margin-bottom: 12px;
+}
+
+/* =========================================
+   PREMIUM EXPORT MODAL (GLASSMORPHISM)
+   ========================================= */
+.modal-premium {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-premium.active {
+    display: flex;
+    opacity: 1;
+}
+
+.export-modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    width: 90%;
+    max-width: 680px;
+    max-height: 90vh;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    transform: scale(0.9) translateY(40px);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* EMPLOYEE SELECTION */
+.employee-selection-wrapper {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.employee-check-list {
+    max-height: 240px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.employee-check-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.employee-check-item:hover {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* LIQUID BUTTONS */
+.btn-liquid {
+    position: relative;
+    width: 100%;
+    padding: 20px 35px;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    overflow: hidden;
+    color: #fff;
+    font-weight: 800;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.btn-liquid.pdf {
+    background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%);
+}
+
+.btn-liquid.excel {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}

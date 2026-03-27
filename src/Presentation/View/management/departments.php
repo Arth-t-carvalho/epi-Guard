@@ -5,590 +5,7 @@ $extraHead = '
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";</script>
-    <style>
-        /* === PAGE STYLES === */
-        .setor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 28px;
-        }
-
-        .setor-header .page-title h1 {
-            font-size: 22px;
-            font-weight: 800;
-            color: #1F2937;
-        }
-
-        .setor-header .page-title p {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-
-        .btn-add-setor {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 22px;
-            background: #E30613;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: "Inter", sans-serif;
-            transition: 0.2s;
-            box-shadow: 0 4px 14px rgba(227, 6, 19, 0.25);
-        }
-
-        .btn-add-setor:hover {
-            background: #c40510;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(227, 6, 19, 0.35);
-        }
-
-        /* Filtros */
-        .setor-filters {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .search-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 10px 16px;
-            min-width: 280px;
-            transition: 0.2s;
-        }
-
-        .search-box:focus-within {
-            border-color: #E30613;
-            box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
-        }
-
-        .search-box i {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        .search-box input {
-            border: none;
-            outline: none;
-            font-size: 13px;
-            font-family: "Inter", sans-serif;
-            color: #1F2937;
-            width: 100%;
-            background: transparent;
-        }
-
-        .search-box input::placeholder {
-            color: #94a3b8;
-        }
-
-        .setor-filters select {
-            padding: 10px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 13px;
-            font-family: "Inter", sans-serif;
-            color: #1F2937;
-            background: #fff;
-            cursor: pointer;
-            outline: none;
-            transition: 0.2s;
-        }
-
-        .setor-filters select:focus {
-            border-color: #E30613;
-            box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
-        }
-
-        /* Tabela */
-        .setor-table-wrapper {
-            background: #fff;
-            border-radius: 16px;
-            border: 1px solid #f0f0f5;
-            overflow: hidden;
-        }
-
-        .setor-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .setor-table thead th {
-            text-align: left;
-            padding: 16px 24px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #94a3b8;
-            border-bottom: 1px solid #f0f0f5;
-        }
-
-        .setor-table tbody tr {
-            transition: background 0.15s;
-        }
-
-        .setor-table tbody tr:hover {
-            background: #fafbfc;
-        }
-
-        .setor-table tbody td {
-            padding: 18px 24px;
-            border-bottom: 1px solid #f5f5f8;
-            vertical-align: middle;
-        }
-
-        .setor-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .setor-nome {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1F2937;
-        }
-
-        .setor-desc {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
-
-        .setor-count {
-            font-size: 15px;
-            font-weight: 700;
-            color: #1F2937;
-        }
-
-        .epi-icons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .epi-icon-badge {
-            width: 30px;
-            height: 30px;
-            border-radius: 8px;
-            background: #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            color: #475569;
-            transition: 0.2s;
-        }
-
-        .epi-icon-badge:hover {
-            background: rgba(227, 6, 19, 0.08);
-            color: #E30613;
-        }
-
-        .setor-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #10b981;
-            border: 2px solid #d1fae5;
-        }
-
-        .btn-edit {
-            width: 30px;
-            height: 30px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #94a3b8;
-            font-size: 12px;
-            transition: 0.2s;
-        }
-
-        .btn-edit:hover {
-            border-color: #E30613;
-            color: #E30613;
-            background: rgba(227, 6, 19, 0.04);
-        }
-
-        .btn-delete {
-            width: 30px;
-            height: 30px;
-            border-radius: 8px;
-            border: 1px solid #fee2e2;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #ef4444;
-            font-size: 12px;
-            transition: 0.2s;
-        }
-
-        .btn-delete:hover {
-            border-color: #ef4444;
-            background: #fef2f2;
-        }
-
-        /* Risk Badges */
-        .risk-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .risk-badge.baixo {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .risk-badge.medio {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .risk-badge.alto {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        /* ============ MODAL ============ */
-        .modal-setor-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .modal-setor-overlay.active {
-            display: flex;
-        }
-
-        .modal-setor {
-            background: #fff;
-            border-radius: 18px;
-            padding: 32px;
-            width: 520px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
-            animation: dropIn 0.3s ease;
-        }
-
-        @keyframes dropIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px) scale(0.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .modal-setor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-        }
-
-        .modal-setor-header h2 {
-            font-size: 18px;
-            font-weight: 800;
-            color: #1F2937;
-        }
-
-        .modal-close-btn {
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: #94a3b8;
-            cursor: pointer;
-            transition: 0.2s;
-            padding: 4px;
-        }
-
-        .modal-close-btn:hover {
-            color: #E30613;
-        }
-
-        /* Form fields */
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 700;
-            color: #1F2937;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: "Inter", sans-serif;
-            color: #1F2937;
-            outline: none;
-            transition: 0.2s;
-            background: #fff;
-        }
-
-        .form-input::placeholder {
-            color: #94a3b8;
-        }
-
-        .form-input:focus {
-            border-color: #E30613;
-            box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
-        }
-
-        /* Upload area */
-        .upload-area {
-            border: 2px dashed #e5e7eb;
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .upload-area:hover {
-            border-color: #E30613;
-            color: #E30613;
-            background: rgba(227, 6, 19, 0.02);
-        }
-
-        .upload-area i {
-            font-size: 16px;
-        }
-
-        /* EPIs grid */
-        .epi-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .epi-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            background: #fff;
-        }
-
-        .epi-card:hover {
-            border-color: #E30613;
-            background: rgba(227, 6, 19, 0.02);
-        }
-
-        .epi-card.selected {
-            border-color: #E30613;
-            background: rgba(227, 6, 19, 0.06);
-        }
-
-        .epi-card-icon {
-            width: 36px;
-            height: 36px;
-            background: #f1f5f9;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            color: #475569;
-        }
-
-        .epi-card.selected .epi-card-icon {
-            background: rgba(227, 6, 19, 0.1);
-            color: #E30613;
-        }
-
-        .epi-card-info .epi-card-name {
-            font-size: 13px;
-            font-weight: 700;
-            color: #1F2937;
-        }
-
-        .epi-card-info .epi-card-brands {
-            font-size: 11px;
-            color: #94a3b8;
-        }
-
-        /* Footer */
-        .modal-setor-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 28px;
-            padding-top: 20px;
-            border-top: 1px solid #f0f0f5;
-        }
-
-        .btn-cancel {
-            background: none;
-            border: none;
-            color: #64748b;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 10px 20px;
-            transition: 0.2s;
-            font-family: "Inter", sans-serif;
-        }
-
-        .btn-cancel:hover {
-            color: #1F2937;
-        }
-
-        .btn-create {
-            padding: 10px 24px;
-            background: #E30613;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: "Inter", sans-serif;
-            transition: 0.2s;
-        }
-
-        .btn-create:hover {
-            background: #c40510;
-        }
-
-        .btn-create:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        /* Employee list in modal */
-        .employees-list-container {
-            margin-top: 15px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .employee-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 16px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 13px;
-            color: #475569;
-        }
-
-        .employee-item:last-child {
-            border-bottom: none;
-        }
-
-        .employee-item i {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        .btn-remove-employee {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            padding: 4px;
-            transition: 0.2s;
-            display: none; /* Only show for newly imported */
-        }
-
-        .btn-remove-employee:hover {
-            color: #ef4444;
-        }
-
-        /* ==================== DARK THEME FIXES ==================== */
-        html.dark-theme .setor-header .page-title h1 { color: var(--secondary); }
-        html.dark-theme .setor-header .page-title p { color: var(--text-muted); }
-        html.dark-theme .search-box { background: var(--bg-card); border-color: var(--border); }
-        html.dark-theme .search-box input { color: var(--text-main); }
-        html.dark-theme .setor-filters select { background: var(--bg-card); color: var(--text-main); border-color: var(--border); }
-        html.dark-theme .setor-table-wrapper { background: var(--bg-card); border-color: var(--border); }
-        html.dark-theme .setor-table thead th { border-bottom-color: var(--border); color: var(--text-muted); background: var(--bg-body); }
-        html.dark-theme .setor-table tbody td { border-bottom-color: var(--border); color: var(--text-main); }
-        html.dark-theme .setor-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
-        html.dark-theme .setor-nome { color: var(--text-main); }
-        html.dark-theme .setor-desc { color: var(--text-muted); }
-        html.dark-theme .setor-count { color: var(--secondary); }
-        html.dark-theme .epi-icon-badge { background: var(--bg-body); color: var(--text-muted); }
-        html.dark-theme .btn-edit { background: var(--bg-body); border-color: var(--border); }
-        html.dark-theme .btn-delete { background: var(--bg-body); border-color: rgba(239, 68, 68, 0.4); }
-        
-        /* Modal Fixes */
-        html.dark-theme .modal-setor { background: var(--bg-card); }
-        html.dark-theme .modal-setor-header h2 { color: var(--secondary); }
-        html.dark-theme .form-label { color: var(--text-main); }
-        html.dark-theme .form-input { background: var(--bg-body); color: var(--text-main); border-color: var(--border); }
-        html.dark-theme .upload-area { border-color: var(--border); color: var(--text-muted); }
-        html.dark-theme .epi-card { background: var(--bg-body); border-color: var(--border); }
-        html.dark-theme .epi-card-info .epi-card-name { color: var(--text-main); }
-        html.dark-theme .epi-card-info .epi-card-brands { color: var(--text-muted); }
-        html.dark-theme .epi-card-icon { background: var(--bg-card); color: var(--text-muted); }
-        html.dark-theme .employees-list-container { background: var(--bg-body); border-color: var(--border); }
-        html.dark-theme .employee-item { border-bottom-color: var(--border); color: var(--text-main); }
-        html.dark-theme .btn-cancel { color: var(--text-muted); }
-        html.dark-theme .btn-cancel:hover { color: var(--text-main); }
-        html.dark-theme td[colspan="5"] { color: var(--text-muted) !important; }
-    </style>
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/departments.css">
 ';
 
 ob_start();
@@ -597,11 +14,11 @@ ob_start();
 <!-- Header -->
 <div class="setor-header">
     <div class="page-title">
-        <h1>Gestão de Setor</h1>
-        <p>Gerencie as áreas e os respectivos EPIs obrigatórios</p>
+        <h1><?= __('Gestão de Setor') ?></h1>
+        <p><?= __('Gerencie as áreas e os respectivos EPIs obrigatórios') ?></p>
     </div>
     <button class="btn-add-setor" onclick="openModal()">
-        <i class="fa-solid fa-plus"></i> Adicionar Setor
+        <i class="fa-solid fa-plus"></i> <?= __('Adicionar Setor') ?>
     </button>
 </div>
 
@@ -609,18 +26,18 @@ ob_start();
 <form action="<?= BASE_PATH ?>/management/departments" method="GET" class="setor-filters">
     <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="searchInputSettings" name="search" placeholder="Pesquisar setores..." oninput="filterSetores()" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+        <input type="text" id="searchInputSettings" name="search" placeholder="<?= __('Pesquisar setores...') ?>" oninput="filterSetores()" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
     </div>
     <select name="status" onchange="this.form.submit()" class="status-filter">
-        <option value="todos" <?= ($filters['status'] ?? 'todos') === 'todos' ? 'selected' : '' ?>>Filtrar Status (Todos)</option>
-        <option value="ativo" <?= ($filters['status'] ?? 'todos') === 'ativo' ? 'selected' : '' ?>>Ativos</option>
-        <option value="inativo" <?= ($filters['status'] ?? 'todos') === 'inativo' ? 'selected' : '' ?>>Inativos</option>
+        <option value="todos" <?= ($filters['status'] ?? 'todos') === 'todos' ? 'selected' : '' ?>><?= __('Filtrar Status (Todos)') ?></option>
+        <option value="ativo" <?= ($filters['status'] ?? 'todos') === 'ativo' ? 'selected' : '' ?>><?= __('Ativos') ?></option>
+        <option value="inativo" <?= ($filters['status'] ?? 'todos') === 'inativo' ? 'selected' : '' ?>><?= __('Inativos') ?></option>
     </select>
     <select name="risk" onchange="this.form.submit()" class="risk-filter">
-        <option value="todos" <?= ($filters['risk'] ?? 'todos') === 'todos' ? 'selected' : '' ?>>Filtrar Risco (Todos)</option>
-        <option value="baixo" <?= ($filters['risk'] ?? 'todos') === 'baixo' ? 'selected' : '' ?>>Baixo (< 5%)</option>
-        <option value="medio" <?= ($filters['risk'] ?? 'todos') === 'medio' ? 'selected' : '' ?>>Médio (5% - 10%)</option>
-        <option value="alto" <?= ($filters['risk'] ?? 'todos') === 'alto' ? 'selected' : '' ?>>Alto (>= 10%)</option>
+        <option value="todos" <?= ($filters['risk'] ?? 'todos') === 'todos' ? 'selected' : '' ?>><?= __('Filtrar Risco (Todos)') ?></option>
+        <option value="baixo" <?= ($filters['risk'] ?? 'todos') === 'baixo' ? 'selected' : '' ?>><?= __('Baixo') ?> (< 5%)</option>
+        <option value="medio" <?= ($filters['risk'] ?? 'todos') === 'medio' ? 'selected' : '' ?>><?= __('Médio') ?> (5% - 10%)</option>
+        <option value="alto" <?= ($filters['risk'] ?? 'todos') === 'alto' ? 'selected' : '' ?>><?= __('Alto') ?> (>= 10%)</option>
     </select>
     <button type="submit" style="display: none;"></button>
 </form>
@@ -630,11 +47,11 @@ ob_start();
     <table class="setor-table">
         <thead>
             <tr>
-                <th>Nome do Setor</th>
-                <th>Funcionários Ativos</th>
-                <th>EPIs Obrigatórios</th>
-                <th>Risco</th>
-                <th style="text-align: right;">Ações</th>
+                <th><?= __('Nome do Setor') ?></th>
+                <th><?= __('Funcionários Ativos') ?></th>
+                <th><?= __('EPIs Obrigatórios') ?></th>
+                <th><?= __('Risco') ?></th>
+                <th style="text-align: right;"><?= __('Ações') ?></th>
             </tr>
         </thead>
         <tbody id="setoresTableBody">
@@ -642,15 +59,15 @@ ob_start();
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
                         <i class="fa-solid fa-folder-open" style="font-size: 24px; display: block; margin-bottom: 10px; opacity: 0.5;"></i>
-                        Nenhum setor encontrado no banco de dados.
+                        <?= __('Nenhum setor encontrado no banco de dados.') ?>
                     </td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($setores as $setor): ?>
                     <tr>
                         <td>
-                            <div class="setor-nome"><?= htmlspecialchars($setor['nome']) ?></div>
-                            <div class="setor-desc"><?= htmlspecialchars($setor['sigla'] ?: 'Sem sigla') ?></div>
+                            <div class="setor-nome"><?= __(htmlspecialchars($setor['nome'])) ?></div>
+                            <div class="setor-desc"><?= __($setor['sigla'] ?: 'Sem sigla') ?></div>
                         </td>
                         <td><span class="setor-count"><?= $setor['total_funcionarios'] ?></span></td>
                         <td>
@@ -672,11 +89,11 @@ ob_start();
                                 }
 
                                 if (empty($episSetor)): ?>
-                                    <span class="epi-icon-badge" title="Nenhum EPI" style="opacity: 0.3;"><i class="fa-solid fa-shield-slash"></i></span>
+                                    <span class="epi-icon-badge" title="<?= __('Nenhum EPI') ?>" style="opacity: 0.3;"><i class="fa-solid fa-shield-slash"></i></span>
                                 <?php else:
                                     foreach ($episSetor as $epiSlug): 
                                         $iconClass = $epiIconsMap[$epiSlug] ?? 'fa-shield';
-                                        $label = ucfirst(str_replace('_', ' ', $epiSlug));
+                                        $label = __(ucwords(str_replace('_', ' ', $epiSlug)));
                                 ?>
                                         <span class="epi-icon-badge" title="<?= $label ?>" data-epi="<?= $epiSlug ?>"><i class="fa-solid <?= $iconClass ?>"></i></span>
                                 <?php 
@@ -689,25 +106,25 @@ ob_start();
                             <?php 
                             $risk = $setor['risk_p'] ?? 0;
                             $riskClass = 'baixo';
-                            $riskLabel = 'Baixo';
+                            $riskLabel = __('Baixo');
                             
                             if ($risk >= 10) {
                                 $riskClass = 'alto';
-                                $riskLabel = 'Alto';
+                                $riskLabel = __('Alto');
                             } elseif ($risk >= 5) {
                                 $riskClass = 'medio';
-                                $riskLabel = 'Médio';
+                                $riskLabel = __('Médio');
                             }
                             ?>
-                            <span class="risk-badge <?= $riskClass ?>" title="<?= number_format((float)$risk, 1) ?>% de funcionários com infrações">
+                            <span class="risk-badge <?= $riskClass ?>" title="<?= sprintf(__('%s%% de funcionários com infrações'), number_format((float)$risk, 1)) ?>">
                                 <?= $riskLabel ?> (<?= number_format((float)$risk, 1) ?>%)
                             </span>
                         </td>
                         <td>
                             <div class="setor-actions">
-                                <span class="status-indicator" title="<?= $setor['status'] === 'ATIVO' ? 'Ativo' : 'Inativo' ?>" style="background: <?= $setor['status'] === 'ATIVO' ? '#10b981' : '#ef4444' ?>;"></span>
-                                <button class="btn-edit" title="Editar" onclick="editSetor(this)" data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-pen"></i></button>
-                                <button class="btn-delete" title="Excluir" onclick="deleteSetor(this)" data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-trash"></i></button>
+                                <span class="status-indicator" title="<?= $setor['status'] === 'ATIVO' ? __('Ativo') : __('Inativo') ?>" style="background: <?= $setor['status'] === 'ATIVO' ? '#10b981' : '#ef4444' ?>;"></span>
+                                <button class="btn-edit" title="<?= __('Editar') ?>" onclick="editSetor(this)" data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn-delete" title="<?= __('Excluir') ?>" onclick="deleteSetor(this)" data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -721,26 +138,26 @@ ob_start();
 <div class="modal-setor-overlay" id="modalSetor">
     <div class="modal-setor">
         <div class="modal-setor-header">
-            <h2>Adicionar Setor</h2>
+            <h2><?= __('Adicionar Setor') ?></h2>
             <button class="modal-close-btn" onclick="closeModal()">&times;</button>
         </div>
 
         <!-- Nome do Setor -->
         <div class="form-group">
-            <label class="form-label">Nome do Setor</label>
-            <input class="form-input" type="text" id="inputNomeSetor" placeholder="Ex: Soldagem TIG">
+            <label class="form-label"><?= __('Nome do Setor') ?></label>
+            <input class="form-input" type="text" id="inputNomeSetor" placeholder="<?= __('Ex: Soldagem TIG') ?>">
         </div>
 
         <!-- Funcionários -->
         <div class="form-group">
-            <label class="form-label">Funcionários</label>
+            <label class="form-label"><?= __('Funcionários') ?></label>
             <div class="upload-area" onclick="document.getElementById('fileUpload').click()">
                 <i class="fa-solid fa-file-arrow-up"></i>
-                Adicionar funcionários via Excel / PDF
+                <?= __('Adicionar funcionários via Excel / PDF') ?>
             </div>
             <input type="file" id="fileUpload" accept=".xlsx,.xls,.pdf,.csv" style="display: none;">
             <div id="uploadFeedback" style="margin-top: 8px; font-size: 13px; color: #10b981; display: none;">
-                <i class="fa-solid fa-check-circle"></i> <span id="uploadCount">0</span> funcionários detectados.
+                <i class="fa-solid fa-check-circle"></i> <span id="uploadCount">0</span> <?= __('funcionários detectados.') ?>
             </div>
             
             <!-- Lista de Funcionários -->
@@ -751,40 +168,40 @@ ob_start();
 
         <!-- EPIs Obrigatórios -->
         <div class="form-group">
-            <label class="form-label">EPIs Obrigatórios (Marcas Permitidas)</label>
+            <label class="form-label"><?= __('EPIs Obrigatórios (Marcas Permitidas)') ?></label>
             <div class="epi-grid" id="epiGrid">
                 <div class="epi-card" onclick="toggleEpi(this)" data-epi="capacete">
                     <div class="epi-card-icon"><i class="fa-solid fa-hard-hat"></i></div>
                     <div class="epi-card-info">
-                        <div class="epi-card-name">Capacete de Proteção</div>
+                        <div class="epi-card-name"><?= __('Capacete de Proteção') ?></div>
                         <div class="epi-card-brands">3M, MSA</div>
                     </div>
                 </div>
                 <div class="epi-card" onclick="toggleEpi(this)" data-epi="avental">
                     <div class="epi-card-icon"><i class="fa-solid fa-shirt"></i></div>
                     <div class="epi-card-info">
-                        <div class="epi-card-name">Avental</div>
+                        <div class="epi-card-name"><?= __('Avental') ?></div>
                         <div class="epi-card-brands">Vivel, PVC</div>
                     </div>
                 </div>
                 <div class="epi-card" onclick="toggleEpi(this)" data-epi="jaqueta">
                     <div class="epi-card-icon"><i class="fa-solid fa-vest-patches"></i></div>
                     <div class="epi-card-info">
-                        <div class="epi-card-name">Jaqueta</div>
-                        <div class="epi-card-brands">Térmica, Impermeável</div>
+                        <div class="epi-card-name"><?= __('Jaqueta') ?></div>
+                        <div class="epi-card-brands"><?= __('Térmica, Impermeável') ?></div>
                     </div>
                 </div>
                 <div class="epi-card" onclick="toggleEpi(this)" data-epi="oculos">
                     <div class="epi-card-icon"><i class="fa-solid fa-glasses"></i></div>
                     <div class="epi-card-info">
-                        <div class="epi-card-name">Óculos de Proteção</div>
+                        <div class="epi-card-name"><?= __('Óculos de Proteção') ?></div>
                         <div class="epi-card-brands">3M, Danny</div>
                     </div>
                 </div>
                 <div class="epi-card" onclick="toggleEpi(this)" data-epi="luvas">
                     <div class="epi-card-icon"><i class="fa-solid fa-mitten"></i></div>
                     <div class="epi-card-info">
-                        <div class="epi-card-name">Luvas de Raspa</div>
+                        <div class="epi-card-name"><?= __('Luvas de Raspa') ?></div>
                         <div class="epi-card-brands">Marluvas, Volk</div>
                     </div>
                 </div>
@@ -793,14 +210,27 @@ ob_start();
 
         <!-- Footer -->
         <div class="modal-setor-footer">
-            <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-            <button class="btn-create" id="btnCriarSetor" onclick="criarSetor()">Criar Setor</button>
+            <button class="btn-cancel" onclick="closeModal()"><?= __('Cancelar') ?></button>
+            <button class="btn-create" id="btnCriarSetor" onclick="criarSetor()"><?= __('Criar Setor') ?></button>
         </div>
     </div>
 </div>
 
 <script>
     const BASE_PATH_LOCAL = '<?= BASE_PATH ?>';
+    window.I18N = {
+        'Nenhum funcionário encontrado no arquivo. Verifique a estrutura.': '<?= __('Nenhum funcionário encontrado no arquivo. Verifique a estrutura.') ?>',
+        'Erro ao processar arquivo: ': '<?= __('Erro ao processar arquivo: ') ?>',
+        'Editar Setor': '<?= __('Editar Setor') ?>',
+        'Salvar Alterações': '<?= __('Salvar Alterações') ?>',
+        'Adicionar Setor': '<?= __('Adicionar Setor') ?>',
+        'Criar Setor': '<?= __('Criar Setor') ?>',
+        'Por favor, informe o nome do setor.': '<?= __('Por favor, informe o nome do setor.') ?>',
+        'Setor atualizado!': '<?= __('Setor atualizado!') ?>',
+        'Setor criado com sucesso!': '<?= __('Setor criado com sucesso!') ?>',
+        'Erro na comunicação com o servidor.': '<?= __('Erro na comunicação com o servidor.') ?>',
+        'Deseja desativar este setor?': '<?= __('Deseja desativar este setor?') ?>'
+    };
     let editingRow = null;
     let currentSectorId = null; // Armazena o ID do setor sendo editado
     let importedEmployees = []; // Armazena nomes extraídos do arquivo
@@ -826,12 +256,12 @@ ob_start();
                 countSpan.textContent = importedEmployees.length;
                 renderEmployeeList(true);
             } else {
-                alert('Nenhum funcionário encontrado no arquivo. Verifique a estrutura.');
+                alert(window.I18N['Nenhum funcionário encontrado no arquivo. Verifique a estrutura.']);
                 feedback.style.display = 'none';
             }
         } catch (err) {
             console.error(err);
-            alert('Erro ao processar arquivo: ' + err.message);
+            alert(window.I18N['Erro ao processar arquivo: '] + err.message);
         }
     });
 
@@ -933,8 +363,8 @@ ob_start();
         if (isEdit && row) {
             editingRow = row;
             currentSectorId = row.querySelector('.btn-edit').getAttribute('data-id');
-            title.textContent = 'Editar Setor';
-            btn.textContent = 'Salvar Alterações';
+            title.textContent = window.I18N['Editar Setor'];
+            btn.textContent = window.I18N['Salvar Alterações'];
 
             // Preencher campos
             const nomeContainer = row.querySelector('.setor-nome');
@@ -960,8 +390,8 @@ ob_start();
                 });
         } else {
             editingRow = null;
-            title.textContent = 'Adicionar Setor';
-            btn.textContent = 'Criar Setor';
+            title.textContent = window.I18N['Adicionar Setor'];
+            btn.textContent = window.I18N['Criar Setor'];
         }
     }
 
@@ -986,7 +416,7 @@ ob_start();
         const selectedEpis = Array.from(document.querySelectorAll('.epi-card.selected')).map(c => c.getAttribute('data-epi'));
 
         if (!nome) {
-            alert('Por favor, informe o nome do setor.');
+            alert(window.I18N['Por favor, informe o nome do setor.']);
             return;
         }
 
@@ -1008,14 +438,14 @@ ob_start();
 
             const result = await response.json();
             if (result.success) {
-                alert(currentSectorId ? 'Setor atualizado!' : 'Setor criado com sucesso!');
+                alert(currentSectorId ? window.I18N['Setor atualizado!'] : window.I18N['Setor criado com sucesso!']);
                 location.reload();
             } else {
                 alert('Erro: ' + result.message);
             }
         } catch (err) {
             console.error(err);
-            alert('Erro na comunicação com o servidor.');
+            alert(window.I18N['Erro na comunicação com o servidor.']);
         }
     }
 
@@ -1032,7 +462,7 @@ ob_start();
     }
 
     async function deleteSetor(btn) {
-        if (!confirm('Deseja desativar este setor?')) return;
+        if (!confirm(window.I18N['Deseja desativar este setor?'])) return;
         const id = btn.getAttribute('data-id');
         try {
             const response = await fetch(`${BASE_PATH_LOCAL}/api/departments/delete`, {

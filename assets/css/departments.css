@@ -1,0 +1,582 @@
+/* === PAGE STYLES === */
+        .setor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 28px;
+        }
+
+        .setor-header .page-title h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1F2937;
+        }
+
+        .setor-header .page-title p {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .btn-add-setor {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            background: #E30613;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: "Inter", sans-serif;
+            transition: 0.2s;
+            box-shadow: 0 4px 14px rgba(227, 6, 19, 0.25);
+        }
+
+        .btn-add-setor:hover {
+            background: #c40510;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(227, 6, 19, 0.35);
+        }
+
+        /* Filtros */
+        .setor-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 16px;
+            min-width: 280px;
+            transition: 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: #E30613;
+            box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
+        }
+
+        .search-box i {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            font-family: "Inter", sans-serif;
+            color: #1F2937;
+            width: 100%;
+            background: transparent;
+        }
+
+        .search-box input::placeholder {
+            color: #94a3b8;
+        }
+
+        .setor-filters select {
+            padding: 10px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: "Inter", sans-serif;
+            color: #1F2937;
+            background: #fff;
+            cursor: pointer;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .setor-filters select:focus {
+            border-color: #E30613;
+            box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
+        }
+
+        /* Tabela */
+        .setor-table-wrapper {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #f0f0f5;
+            overflow: hidden;
+        }
+
+        .setor-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .setor-table thead th {
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #94a3b8;
+            border-bottom: 1px solid #f0f0f5;
+        }
+
+        .setor-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .setor-table tbody tr:hover {
+            background: #fafbfc;
+        }
+
+        .setor-table tbody td {
+            padding: 18px 24px;
+            border-bottom: 1px solid #f5f5f8;
+            vertical-align: middle;
+        }
+
+        .setor-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .setor-nome {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .setor-desc {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .setor-count {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .epi-icons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .epi-icon-badge {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #475569;
+            transition: 0.2s;
+        }
+
+        .epi-icon-badge:hover {
+            background: rgba(227, 6, 19, 0.08);
+            color: #E30613;
+        }
+
+        .setor-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            border: 2px solid #d1fae5;
+        }
+
+        .btn-edit {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-edit:hover {
+            border-color: #E30613;
+            color: #E30613;
+            background: rgba(227, 6, 19, 0.04);
+        }
+
+        .btn-delete {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid #fee2e2;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #ef4444;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-delete:hover {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        /* Risk Badges */
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .risk-badge.baixo {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .risk-badge.medio {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .risk-badge.alto {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* ============ MODAL ============ */
+        .modal-setor-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-setor-overlay.active {
+            display: flex;
+        }
+
+        .modal-setor {
+            background: #fff;
+            border-radius: 18px;
+            padding: 32px;
+            width: 520px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            animation: dropIn 0.3s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-setor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .modal-setor-header h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1F2937;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 4px;
+        }
+
+        .modal-close-btn:hover {
+            color: #E30613;
+        }
+
+        /* Form fields */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: "Inter", sans-serif;
+            color: #1F2937;
+            outline: none;
+            transition: 0.2s;
+            background: #fff;
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-input:focus {
+            border-color: #E30613;
+            box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
+        }
+
+        /* Upload area */
+        .upload-area {
+            border: 2px dashed #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .upload-area:hover {
+            border-color: #E30613;
+            color: #E30613;
+            background: rgba(227, 6, 19, 0.02);
+        }
+
+        .upload-area i {
+            font-size: 16px;
+        }
+
+        /* EPIs grid */
+        .epi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .epi-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #fff;
+        }
+
+        .epi-card:hover {
+            border-color: #E30613;
+            background: rgba(227, 6, 19, 0.02);
+        }
+
+        .epi-card.selected {
+            border-color: #E30613;
+            background: rgba(227, 6, 19, 0.06);
+        }
+
+        .epi-card-icon {
+            width: 36px;
+            height: 36px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #475569;
+        }
+
+        .epi-card.selected .epi-card-icon {
+            background: rgba(227, 6, 19, 0.1);
+            color: #E30613;
+        }
+
+        .epi-card-info .epi-card-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .epi-card-info .epi-card-brands {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* Footer */
+        .modal-setor-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f5;
+        }
+
+        .btn-cancel {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 10px 20px;
+            transition: 0.2s;
+            font-family: "Inter", sans-serif;
+        }
+
+        .btn-cancel:hover {
+            color: #1F2937;
+        }
+
+        .btn-create {
+            padding: 10px 24px;
+            background: #E30613;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: "Inter", sans-serif;
+            transition: 0.2s;
+        }
+
+        .btn-create:hover {
+            background: #c40510;
+        }
+
+        .btn-create:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Employee list in modal */
+        .employees-list-container {
+            margin-top: 15px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .employee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .employee-item:last-child {
+            border-bottom: none;
+        }
+
+        .employee-item i {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .btn-remove-employee {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            transition: 0.2s;
+            display: none; /* Only show for newly imported */
+        }
+
+        .btn-remove-employee:hover {
+            color: #ef4444;
+        }
+
+        /* ==================== DARK THEME FIXES ==================== */
+        html.dark-theme .setor-header .page-title h1 { color: var(--secondary); }
+        html.dark-theme .setor-header .page-title p { color: var(--text-muted); }
+        html.dark-theme .search-box { background: var(--bg-card); border-color: var(--border); }
+        html.dark-theme .search-box input { color: var(--text-main); }
+        html.dark-theme .setor-filters select { background: var(--bg-card); color: var(--text-main); border-color: var(--border); }
+        html.dark-theme .setor-table-wrapper { background: var(--bg-card); border-color: var(--border); }
+        html.dark-theme .setor-table thead th { border-bottom-color: var(--border); color: var(--text-muted); background: var(--bg-body); }
+        html.dark-theme .setor-table tbody td { border-bottom-color: var(--border); color: var(--text-main); }
+        html.dark-theme .setor-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+        html.dark-theme .setor-nome { color: var(--text-main); }
+        html.dark-theme .setor-desc { color: var(--text-muted); }
+        html.dark-theme .setor-count { color: var(--secondary); }
+        html.dark-theme .epi-icon-badge { background: var(--bg-body); color: var(--text-muted); }
+        html.dark-theme .btn-edit { background: var(--bg-body); border-color: var(--border); }
+        html.dark-theme .btn-delete { background: var(--bg-body); border-color: rgba(239, 68, 68, 0.4); }
+        
+        /* Modal Fixes */
+        html.dark-theme .modal-setor { background: var(--bg-card); }
+        html.dark-theme .modal-setor-header h2 { color: var(--secondary); }
+        html.dark-theme .form-label { color: var(--text-main); }
+        html.dark-theme .form-input { background: var(--bg-body); color: var(--text-main); border-color: var(--border); }
+        html.dark-theme .upload-area { border-color: var(--border); color: var(--text-muted); }
+        html.dark-theme .epi-card { background: var(--bg-body); border-color: var(--border); }
+        html.dark-theme .epi-card-info .epi-card-name { color: var(--text-main); }
+        html.dark-theme .epi-card-info .epi-card-brands { color: var(--text-muted); }
+        html.dark-theme .epi-card-icon { background: var(--bg-card); color: var(--text-muted); }
+        html.dark-theme .employees-list-container { background: var(--bg-body); border-color: var(--border); }
+        html.dark-theme .employee-item { border-bottom-color: var(--border); color: var(--text-main); }
+        html.dark-theme .btn-cancel { color: var(--text-muted); }
+        html.dark-theme .btn-cancel:hover { color: var(--text-main); }
+        html.dark-theme td[colspan="5"] { color: var(--text-muted) !important; }

@@ -1,16 +1,17 @@
 <?php
 $pageTitle = 'epiGuard - Alunos';
+$extraHead = '<link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">';
 ob_start();
 ?>
 
 <header class="header">
     <div class="page-title">
-        <h1>Alunos</h1>
-        <p>Gerencie os alunos cadastrados na instituição</p>
+        <h1><?= __('Alunos') ?></h1>
+        <p><?= __('Gerencie os alunos cadastrados na instituição') ?></p>
     </div>
     <div class="header-actions">
         <button class="btn-primary" id="btnAddEmployee">
-            <i class="fa-solid fa-user-plus"></i> Novo Aluno
+            <i class="fa-solid fa-user-plus"></i> <?= __('Novo Aluno') ?>
         </button>
     </div>
 </header>
@@ -23,7 +24,7 @@ ob_start();
                 <i class="fa-solid fa-user-graduate"></i>
             </div>
             <div class="summary-info">
-                <span class="summary-label">Total de Alunos</span>
+                <span class="summary-label"><?= __('Total de Alunos') ?></span>
                 <span class="summary-value">165</span>
             </div>
         </div>
@@ -32,7 +33,7 @@ ob_start();
                 <i class="fa-solid fa-circle-check"></i>
             </div>
             <div class="summary-info">
-                <span class="summary-label">Conformes</span>
+                <span class="summary-label"><?= __('Conformes') ?></span>
                 <span class="summary-value">142</span>
             </div>
         </div>
@@ -41,7 +42,7 @@ ob_start();
                 <i class="fa-solid fa-circle-xmark"></i>
             </div>
             <div class="summary-info">
-                <span class="summary-label">Não Conformes</span>
+                <span class="summary-label"><?= __('Não Conformes') ?></span>
                 <span class="summary-value">23</span>
             </div>
         </div>
@@ -49,65 +50,65 @@ ob_start();
 
     <!-- Filters -->
     <div class="filter-bar">
-        <input type="text" placeholder="🔍 Buscar aluno por nome...">
+        <input type="text" placeholder="<?= __('🔍 Buscar aluno por nome...') ?>">
         <select>
-            <option value="">Todos os Cursos</option>
+            <option value=""><?= __('Todos os Cursos') ?></option>
             <option value="TDS">TDS</option>
             <option value="ELE">ELE</option>
             <option value="MEC">MEC</option>
             <option value="AUT">AUT</option>
         </select>
         <select>
-            <option value="">Todos os Turnos</option>
-            <option value="MANHA">Manhã</option>
-            <option value="TARDE">Tarde</option>
-            <option value="NOITE">Noite</option>
+            <option value=""><?= __('Todos os Turnos') ?></option>
+            <option value="MANHA"><?= __('Manhã') ?></option>
+            <option value="TARDE"><?= __('Tarde') ?></option>
+            <option value="NOITE"><?= __('Noite') ?></option>
         </select>
         <select>
-            <option value="">Todos os Status</option>
-            <option value="CONFORME">Conforme</option>
-            <option value="NAO_CONFORME">Não Conforme</option>
+            <option value=""><?= __('Todos os Status') ?></option>
+            <option value="CONFORME"><?= __('Conforme') ?></option>
+            <option value="NAO_CONFORME"><?= __('Não Conforme') ?></option>
         </select>
-        <button class="btn-filter"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <button class="btn-filter"><i class="fa-solid fa-filter"></i> <?= __('Filtrar') ?></button>
     </div>
 
     <!-- Table -->
     <div class="table-card">
         <div class="card-header">
-            <h3>Lista de Alunos</h3>
-            <span style="font-size: 12px; color: var(--text-muted);">5 registros</span>
+            <h3><?= __('Lista de Alunos') ?></h3>
+            <span style="font-size: 12px; color: var(--text-muted);"><?= __('5 registros') ?></span>
         </div>
 
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Nome</th>
-                    <th>Curso</th>
-                    <th>Turno</th>
-                    <th>Status EPI</th>
-                    <th>Infrações</th>
-                    <th>Ações</th>
+                    <th><?= __('Nome') ?></th>
+                    <th><?= __('Curso') ?></th>
+                    <th><?= __('Turno') ?></th>
+                    <th><?= __('Status EPI') ?></th>
+                    <th><?= __('Infrações') ?></th>
+                    <th><?= __('Ações') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td style="font-weight:600;">João Silva</td>
                     <td>TDS</td>
-                    <td>Manhã</td>
-                    <td><span class="status-dot pending"></span> Não Conforme</td>
+                    <td><?= __('Manhã') ?></td>
+                    <td><span class="status-dot pending"></span> <?= __('Não Conforme') ?></td>
                     <td style="font-weight:700; color: var(--primary);">3</td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn-action" title="Ver perfil"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-action" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action" title="<?= __('Ver perfil') ?>"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-action" title="<?= __('Editar') ?>"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </td>
                 </tr>
                 <tr>
                     <td style="font-weight:600;">Maria Souza</td>
                     <td>TDS</td>
-                    <td>Tarde</td>
-                    <td><span class="status-dot resolved"></span> Conforme</td>
+                    <td><?= __('Tarde') ?></td>
+                    <td><span class="status-dot resolved"></span> <?= __('Conforme') ?></td>
                     <td>0</td>
                     <td>
                         <div class="table-actions">
@@ -119,8 +120,8 @@ ob_start();
                 <tr>
                     <td style="font-weight:600;">Pedro Santos</td>
                     <td>ELE</td>
-                    <td>Manhã</td>
-                    <td><span class="status-dot pending"></span> Não Conforme</td>
+                    <td><?= __('Manhã') ?></td>
+                    <td><span class="status-dot pending"></span> <?= __('Não Conforme') ?></td>
                     <td style="font-weight:700; color: var(--primary);">5</td>
                     <td>
                         <div class="table-actions">
@@ -132,8 +133,8 @@ ob_start();
                 <tr>
                     <td style="font-weight:600;">Ana Oliveira</td>
                     <td>MEC</td>
-                    <td>Noite</td>
-                    <td><span class="status-dot resolved"></span> Conforme</td>
+                    <td><?= __('Noite') ?></td>
+                    <td><span class="status-dot resolved"></span> <?= __('Conforme') ?></td>
                     <td>0</td>
                     <td>
                         <div class="table-actions">
@@ -145,8 +146,8 @@ ob_start();
                 <tr>
                     <td style="font-weight:600;">Carlos Lima</td>
                     <td>AUT</td>
-                    <td>Manhã</td>
-                    <td><span class="status-dot resolved"></span> Conforme</td>
+                    <td><?= __('Manhã') ?></td>
+                    <td><span class="status-dot resolved"></span> <?= __('Conforme') ?></td>
                     <td>1</td>
                     <td>
                         <div class="table-actions">

@@ -116,14 +116,13 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
         }
         
         return new Employee(
-            $row['nome'],
-            new CPF('12345678909'),
-            (string) $row['id'],
-            $department,
-            null,
-            (int) $row['id'],
-            new DateTimeImmutable($row['criado_em']),
-            $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null
+            name: $row['nome'],
+            cpf: new CPF('12345678909'),
+            enrollmentNumber: (string) $row['id'],
+            department: $department,
+            id: (int) $row['id'],
+            createdAt: new DateTimeImmutable($row['criado_em']),
+            updatedAt: $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null
         );
     }
 }

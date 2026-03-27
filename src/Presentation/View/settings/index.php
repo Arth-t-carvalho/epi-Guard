@@ -8,8 +8,8 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
 <div class="settings-container fade-in">
     <div class="settings-header">
         <div>
-            <h1>Configurações do Sistema</h1>
-            <p>Gerencie suas preferências, aparência e alertas do EPI Guard.</p>
+            <h1><?= __('Configurações do Sistema') ?></h1>
+            <p><?= __('Gerencie suas preferências, aparência e alertas do EPI Guard.') ?></p>
         </div>
     </div>
 
@@ -21,32 +21,31 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                 <div class="icon-wrapper">
                     <i data-lucide="palette"></i>
                 </div>
-                <h2>Aparência</h2>
+                <h2><?= __('Aparência') ?></h2>
             </div>
             <div class="settings-card-body">
                 <div class="setting-item">
                     <div class="setting-info">
-                        <h3>Modo Escuro (Dark Mode)</h3>
-                        <p>Alterne entre cores claras e escuras para preservar a visão.</p>
+                        <h3><?= __('Modo Escuro (Dark Mode)') ?></h3>
+                        <p><?= __('Alterne entre cores claras e escuras para preservar a visão.') ?></p>
                     </div>
                     <div class="setting-action">
                         <button id="btnToggleTheme" class="btn-theme-toggle" onclick="toggleTheme()">
                             <i id="theme-icon-display" data-lucide="moon"></i>
-                            <span id="theme-text-display">Mudar Tema</span>
+                            <span id="theme-text-display"><?= __('Mudar Tema') ?></span>
                         </button>
                     </div>
                 </div>
                 
                 <div class="setting-item">
                     <div class="setting-info">
-                        <h3>Idioma do Sistema</h3>
-                        <p>Preferência regional para alertas e datas.</p>
+                        <h3><?= __('Idioma do Sistema') ?></h3>
+                        <p><?= __('Preferência regional para alertas e datas.') ?></p>
                     </div>
                     <div class="setting-action">
-                        <select class="settings-select">
-                            <option value="pt-br" selected>Português (Brasil)</option>
-                            <option value="en">English (US)</option>
-                            <option value="es">Español</option>
+                        <select class="settings-select" id="languageSelect" onchange="changeLanguage(this.value)">
+                            <option value="pt-br" <?= ($_COOKIE['epiguard-lang'] ?? 'pt-br') === 'pt-br' ? 'selected' : '' ?>>Português (Brasil)</option>
+                            <option value="en" <?= ($_COOKIE['epiguard-lang'] ?? '') === 'en' ? 'selected' : '' ?>>English (US)</option>
                         </select>
                     </div>
                 </div>
@@ -59,13 +58,13 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                 <div class="icon-wrapper alert-icon">
                     <i data-lucide="bell"></i>
                 </div>
-                <h2>Notificações</h2>
+                <h2><?= __('Notificações') ?></h2>
             </div>
             <div class="settings-card-body">
                 <div class="setting-item">
                     <div class="setting-info">
-                        <h3>Alertas de Infração por E-mail</h3>
-                        <p>Receba um e-mail imediato sempre que uma infração Grave for registrada.</p>
+                        <h3><?= __('Alertas de Infração por E-mail') ?></h3>
+                        <p><?= __('Receba um e-mail imediato sempre que uma infração Grave for registrada.') ?></p>
                     </div>
                     <div class="setting-action">
                         <label class="switch">
@@ -77,8 +76,8 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                 
                 <div class="setting-item">
                     <div class="setting-info">
-                        <h3>Resumo Semanal</h3>
-                        <p>Relatório de conformidade enviado toda sexta-feira.</p>
+                        <h3><?= __('Resumo Semanal') ?></h3>
+                        <p><?= __('Relatório de conformidade enviado toda sexta-feira.') ?></p>
                     </div>
                     <div class="setting-action">
                         <label class="switch">
@@ -96,7 +95,7 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                 <div class="icon-wrapper account-icon">
                     <i data-lucide="user"></i>
                 </div>
-                <h2>Sua Conta</h2>
+                <h2><?= __('Sua Conta') ?></h2>
             </div>
             <div class="settings-card-body">
                 <div class="profile-summary">
@@ -118,13 +117,13 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                 <div class="icon-wrapper shield-icon">
                     <i data-lucide="shield-check"></i>
                 </div>
-                <h2>Regras de Ocorrência</h2>
+                <h2><?= __('Regras de Ocorrência') ?></h2>
             </div>
             <div class="settings-card-body">
                 <div class="setting-item">
                     <div class="setting-info">
-                        <h3>Exigir Foto (Evidência)</h3>
-                        <p>Obriga o preenchimento de imagem fotográfica no registro de qualquer nova Infração.</p>
+                        <h3><?= __('Exigir Foto (Evidência)') ?></h3>
+                        <p><?= __('Obriga o preenchimento de imagem fotográfica no registro de qualquer nova Infração.') ?></p>
                     </div>
                     <div class="setting-action">
                         <label class="switch">
@@ -140,6 +139,15 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
 </div>
 
 <script>
+function changeLanguage(lang) {
+    // Set cookie so PHP can read it on next page load
+    document.cookie = "epiguard-lang=" + lang + ";path=/;max-age=31536000;SameSite=Lax";
+    // Also keep localStorage for backward compat
+    localStorage.setItem('epiguard-lang', lang);
+    // Reload page so PHP renders the new language
+    window.location.reload();
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     var isDark = document.documentElement.classList.contains('dark-theme');
     const themeIcon = document.getElementById("theme-icon-display");
@@ -148,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function() {
         themeIcon.setAttribute("data-lucide", isDark ? "sun" : "moon");
     }
     if (themeLabel) {
-        themeLabel.textContent = isDark ? "Tema Claro" : "Tema Escuro";
+        themeLabel.textContent = isDark ? "<?= __('Tema Claro') ?>" : "<?= __('Tema Escuro') ?>";
     }
     if (window.lucide) {
         lucide.createIcons();

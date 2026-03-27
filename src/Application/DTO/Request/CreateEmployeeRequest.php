@@ -1,9 +1,12 @@
 <?php
-declare(strict_types = 1)
-;
+declare(strict_types = 1);
 
 namespace epiGuard\Application\DTO\Request;
 
+/**
+ * Data Transfer Object para requisição de criação de novo funcionário.
+ * Transporta os dados brutos da apresentação para a camada de aplicação.
+ */
 class CreateEmployeeRequest
 {
     public string $name;

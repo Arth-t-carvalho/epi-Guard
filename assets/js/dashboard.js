@@ -18,7 +18,11 @@ const colorGlasses = '#9CA3AF';
 const colorAll = '#E30613';
 
 // Arrays auxiliares
-const monthsFull = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+const monthsFull = [
+    window.I18N['Janeiro'], window.I18N['Fevereiro'], window.I18N['Março'], window.I18N['Abril'],
+    window.I18N['Maio'], window.I18N['Junho'], window.I18N['Julho'], window.I18N['Agosto'],
+    window.I18N['Setembro'], window.I18N['Outubro'], window.I18N['Novembro'], window.I18N['Dezembro']
+];
 
 // --- INICIALIZAÇÃO ---
 document.addEventListener("DOMContentLoaded", function () {
@@ -119,11 +123,11 @@ function renderInterface() {
 
                 // Em modo Empresarial, a ação padrão é abrir o detalhamento do curso/setor
                 list.innerHTML += `
-                    <div class="occurrence-item" onclick="applyCourseFilterByName('${name.replace(/'/g, "\\'")}')" style="cursor:pointer;" title="Clique para detalhes deste setor">
+                    <div class="occurrence-item" onclick="applyCourseFilterByName('${name.replace(/'/g, "\\'")}')" style="cursor:pointer;" title="${window.I18N['Clique para detalhes deste setor']}">
                         <div class="occ-avatar">${initials}</div>
                         <div class="occ-info">
                             <span class="occ-name" style="font-weight:700;">${name}</span>
-                            <span class="occ-desc" style="color:var(--primary); font-weight:600;">${data.count} ocorrência${data.count > 1 ? 's' : ''} encontrada${data.count > 1 ? 's' : ''}</span>
+                            <span class="occ-desc" style="color:var(--primary); font-weight:600;">${data.count} ${data.count > 1 ? window.I18N['ocorrências'] : window.I18N['ocorrência']} ${data.count > 1 ? window.I18N['encontradas'] : window.I18N['encontrada']}</span>
                         </div>
                         <div class="occ-time">❯</div>
                     </div>`;
@@ -369,16 +373,16 @@ function updateConformityStatus(valor) {
 
     if (valor < 70) {
         badge.className = 'status-badge status-critico';
-        badge.innerText = '🚨 CRÍTICO';
+        badge.innerText = window.I18N['🚨 CRÍTICO'];
     } else if (valor < 85) {
         badge.className = 'status-badge status-alto';
-        badge.innerText = '🟠 ALTO RISCO';
+        badge.innerText = window.I18N['🟠 ALTO RISCO'];
     } else if (valor < 95) {
         badge.className = 'status-badge status-moderado';
-        badge.innerText = '🟡 MODERADO';
+        badge.innerText = window.I18N['🟡 MODERADO'];
     } else {
         badge.className = 'status-badge status-baixo';
-        badge.innerText = '🟢 CONTROLADO';
+        badge.innerText = window.I18N['🟢 CONTROLADO'];
     }
 }
 
@@ -501,14 +505,14 @@ function exportData() {
     const btn = document.querySelector('.btn-export');
     if (!btn) return;
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = 'Gerando PDF...';
+    btn.innerHTML = window.I18N['Gerando PDF...'];
     btn.style.color = '#E30613';
 
     doc.setFontSize(18);
-    doc.text("Relatório de Ocorrências - EPI Guard", 14, 20);
+    doc.text(window.I18N['Relatório de Ocorrências - EPI Guard'], 14, 20);
     doc.setFontSize(11);
     doc.setTextColor(100);
-    doc.text(`Data de Geração: ${new Date().toLocaleDateString()}`, 14, 30);
+    doc.text(`${window.I18N['Data de Geração:']} ${new Date().toLocaleDateString()}`, 14, 30);
 
     const currentMonth = selectedDate.getMonth() + 1;
     const currentYear = selectedDate.getFullYear();
@@ -517,12 +521,12 @@ function exportData() {
         .then(res => res.json())
         .then(data => {
             if (!data || data.length === 0) {
-                alert("Nenhuma ocorrência encontrada para exportar neste mês.");
+                alert(window.I18N['Nenhuma ocorrência encontrada para exportar neste mês.']);
                 btn.innerHTML = originalHTML;
                 btn.style.color = '';
                 return;
             }
-            const head = [['Data', 'Aluno', 'EPI', 'Hora', 'Status']];
+            const head = [[window.I18N['Data'], window.I18N['Aluno'], window.I18N['EPI'], window.I18N['Hora'], window.I18N['Status']]];
             const body = data.map(row => [row.data, row.aluno, row.epis, row.hora, row.status_formatado]);
             doc.autoTable({
                 startY: 35,
@@ -537,7 +541,7 @@ function exportData() {
         })
         .catch(err => {
             console.error(err);
-            alert("Erro ao gerar PDF.");
+            alert(window.I18N['Erro ao gerar PDF.']);
             btn.innerHTML = originalHTML;
             btn.style.color = '';
         });
@@ -554,16 +558,16 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
     const currentYear = new Date().getFullYear();
     const isGlobal = (selectedSectorId === 'all');
 
-    let displayTitle = `${monthName} de ${currentYear}`;
-    if (epiName) displayTitle += ` - Filtro: ${epiName}`;
+    let displayTitle = `${monthName} ${window.I18N['de']} ${currentYear}`;
+    if (epiName) displayTitle += ` - ${window.I18N['Filtro:']} ${epiName}`;
     title.innerText = displayTitle;
     modal.style.display = '';
     modal.classList.add('open');
 
     if (isGlobal) {
-        thead.innerHTML = `<th>Rank</th><th>Curso</th><th>Infrações</th><th>Conformidade</th><th>Risco</th>`;
+        thead.innerHTML = `<th>${window.I18N['Rank']}</th><th>${window.I18N['Curso']}</th><th>${window.I18N['Infrações']}</th><th>${window.I18N['Conformidade']}</th><th>${window.I18N['Risco']}</th>`;
     } else {
-        thead.innerHTML = `<th>Data</th><th>Aluno</th><th>Infração (EPI)</th><th>Horário</th><th>Status</th>`;
+        thead.innerHTML = `<th>${window.I18N['Data']}</th><th>${window.I18N['Aluno']}</th><th>${window.I18N['Infração (EPI)']}</th><th>${window.I18N['Horário']}</th><th>${window.I18N['Status']}</th>`;
     }
 
     let url = `${window.BASE_PATH}/api/modal_details?month=${realMonth}&year=${currentYear}&sector_id=${selectedSectorId}`;
@@ -574,7 +578,7 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
         .then(data => {
             tbody.innerHTML = '';
             if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">${window.I18N['Nenhum registro encontrado.']}</td></tr>`;
                 return;
             }
 
@@ -604,8 +608,8 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
                 });
             } else {
                 data.forEach(row => {
-                    const statusTexto = row.status_formatado || row.status;
-                    let classeStatus = statusTexto === 'Pendente' ? 'status-pendente' : 'status-resolvido';
+                    const statusTexto = window.I18N[row.status_formatado] || row.status_formatado || row.status;
+                    let classeStatus = (statusTexto === 'Pendente' || statusTexto === window.I18N['Pendente']) ? 'status-pendente' : 'status-resolvido';
                     tbody.innerHTML += `
                         <tr>
                             <td>${row.data}</td>
@@ -619,7 +623,7 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
         })
         .catch(err => {
             console.error(err);
-            tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center">Erro na conexão.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center">${window.I18N['Erro na conexão.']}</td></tr>`;
         });
 }
 
@@ -648,16 +652,16 @@ function loadCharts() {
             if (doughnutChartInstance) doughnutChartInstance.destroy();
 
             const epiColors = {
-                'capacete': { bg: '#1F2937', label: 'Capacete' },
-                'oculos': { bg: '#9CA3AF', label: 'Óculos' },
-                'óculos': { bg: '#9CA3AF', label: 'Óculos' },
-                'jaqueta': { bg: '#f59e0b', label: 'Jaqueta' },
-                'avental': { bg: '#3b82f6', label: 'Avental' },
-                'luvas': { bg: '#10b981', label: 'Luvas' },
-                'luva': { bg: '#10b981', label: 'Luvas' },
-                'mascara': { bg: '#6366f1', label: 'Máscara' },
-                'máscara': { bg: '#6366f1', label: 'Máscara' },
-                'protetor': { bg: '#ec4899', label: 'Protetor' }
+                'capacete': { bg: '#1F2937', label: window.I18N['Capacete'] },
+                'oculos': { bg: '#9CA3AF', label: window.I18N['Óculos'] },
+                'óculos': { bg: '#9CA3AF', label: window.I18N['Óculos'] },
+                'jaqueta': { bg: '#f59e0b', label: window.I18N['Jaqueta'] },
+                'avental': { bg: '#3b82f6', label: window.I18N['Avental'] },
+                'luvas': { bg: '#10b981', label: window.I18N['Luvas'] },
+                'luva': { bg: '#10b981', label: window.I18N['Luvas'] },
+                'mascara': { bg: '#6366f1', label: window.I18N['Máscara'] },
+                'máscara': { bg: '#6366f1', label: window.I18N['Máscara'] },
+                'protetor': { bg: '#ec4899', label: window.I18N['Protetor'] }
             };
 
             const datasets = [];
@@ -690,7 +694,7 @@ function loadCharts() {
 
             // Always add Total
             datasets.push({
-                label: 'Total',
+                label: window.I18N['Total'],
                 data: response.bar.total,
                 backgroundColor: '#E30613',
                 borderColor: '#E30613',
@@ -752,7 +756,7 @@ function loadCharts() {
             doughnutChartInstance = new Chart(ctxDoughnut, {
                 type: 'doughnut',
                 data: {
-                    labels: isDoughnutEmpty ? ['Sem Infrações'] : response.doughnut.labels,
+                    labels: isDoughnutEmpty ? [window.I18N['Sem Infrações']] : response.doughnut.labels,
                     datasets: [{
                         data: isDoughnutEmpty ? [1] : response.doughnut.data,
                         backgroundColor: doughnutBgColor,
@@ -870,7 +874,7 @@ function mostrarNotificacao(aluno, epi) {
     toast.innerHTML = `
         <div class="toast-icon"><i data-lucide="alert-triangle"></i></div>
         <div class="toast-content">
-            <div class="toast-title">Infração Detectada</div>
+            <div class="toast-title">${window.I18N['Infração Detectada'] || 'Infração Detectada'}</div>
             <div class="toast-message"><b>${aluno}</b> • Sem ${epi}</div>
             <span class="toast-time">${horario}</span>
         </div>

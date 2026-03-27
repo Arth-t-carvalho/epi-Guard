@@ -46,7 +46,7 @@ class DepartmentApiController
             // Validação
             if (empty($input['nome'])) {
                 http_response_code(422);
-                echo json_encode(['success' => false, 'error' => 'O nome do setor é obrigatório.']);
+                echo json_encode(['success' => false, 'error' => __('O nome do setor é obrigatório.')]);
                 return;
             }
 
@@ -59,14 +59,14 @@ class DepartmentApiController
             // Verificar duplicata por nome
             if ($repo->findByName($nome)) {
                 http_response_code(409);
-                echo json_encode(['success' => false, 'error' => 'Já existe um setor cadastrado com este nome.']);
+                echo json_encode(['success' => false, 'error' => __('Já existe um setor cadastrado com este nome.')]);
                 return;
             }
 
             // Verificar duplicata por sigla
             if (!empty($sigla) && $repo->findByCode($sigla)) {
                 http_response_code(409);
-                echo json_encode(['success' => false, 'error' => 'Já existe um setor com essa sigla.']);
+                echo json_encode(['success' => false, 'error' => __('Já existe um setor com essa sigla.')]);
                 return;
             }
 
@@ -120,7 +120,7 @@ class DepartmentApiController
 
             if (empty($input['id']) || empty($input['nome'])) {
                 http_response_code(422);
-                echo json_encode(['success' => false, 'error' => 'ID e nome são obrigatórios para atualizar.']);
+                echo json_encode(['success' => false, 'error' => __('ID e nome são obrigatórios para atualizar.')]);
                 return;
             }
 
@@ -134,7 +134,7 @@ class DepartmentApiController
 
             if (!$department) {
                 http_response_code(404);
-                echo json_encode(['success' => false, 'error' => 'Setor não encontrado.']);
+                echo json_encode(['success' => false, 'error' => __('Setor não encontrado.')]);
                 return;
             }
 
@@ -142,7 +142,7 @@ class DepartmentApiController
             $existing = $repo->findByName($nome);
             if ($existing && $existing->getId() !== $id) {
                 http_response_code(409);
-                echo json_encode(['success' => false, 'error' => 'Já existe outro setor cadastrado com este nome.']);
+                echo json_encode(['success' => false, 'error' => __('Já existe outro setor cadastrado com este nome.')]);
                 return;
             }
 
@@ -190,7 +190,7 @@ class DepartmentApiController
 
             if (empty($input['id'])) {
                 http_response_code(422);
-                echo json_encode(['success' => false, 'error' => 'ID do setor é obrigatório.']);
+                echo json_encode(['success' => false, 'error' => __('ID do setor é obrigatório.')]);
                 return;
             }
 
@@ -200,7 +200,7 @@ class DepartmentApiController
             $department = $repo->findById($id);
             if (!$department) {
                 http_response_code(404);
-                echo json_encode(['success' => false, 'error' => 'Setor não encontrado.']);
+                echo json_encode(['success' => false, 'error' => __('Setor não encontrado.')]);
                 return;
             }
 
@@ -223,7 +223,7 @@ class DepartmentApiController
         try {
             $id = (int)($_GET['id'] ?? 0);
             if ($id <= 0) {
-                echo json_encode(['success' => false, 'error' => 'ID inválido']);
+                echo json_encode(['success' => false, 'error' => __('ID inválido')]);
                 return;
             }
 

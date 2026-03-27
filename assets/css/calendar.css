@@ -1,0 +1,370 @@
+/* =========================================
+   CALENDAR MODAL (MODERN SELECTOR)
+   ========================================= */
+.modal-overlay-calendar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.modal-overlay-calendar.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.calendar-wrapper {
+    background: #fff;
+    width: 380px;
+    border-radius: 16px;
+    padding: 25px;
+    position: relative;
+    border: 1px solid #D1D5DB;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.15);
+}
+
+.cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-body .weeks,
+.calendar-body .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    list-style: none;
+    text-align: center;
+}
+
+.calendar-body .days li {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.days li.today {
+    color: #E30613;
+    font-weight: bold;
+    background: #FEF2F2;
+}
+
+.days li.active {
+    background: #E30613;
+    color: #fff;
+    font-weight: bold;
+}
+
+.input-area {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #E5E7EB;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.input-wrapper input {
+    border: none;
+    background: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+}
+
+/* =========================================
+   COMPONENTES INTERNOS (Calendário, Listas)
+   ========================================= */
+.nav-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
+}
+
+.date-display {
+    text-align: center;
+}
+
+.date-day {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.date-month {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.occurrences-list {
+    height: 180px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.occurrence-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.occ-avatar {
+    width: 32px;
+    height: 32px;
+    background: #e2e8f0;
+    color: var(--secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.occ-info {
+    flex: 1;
+}
+
+.occ-name {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--secondary);
+}
+
+.occ-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.occ-time {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    background: #fef2f2;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #fecaca;
+}
+
+/* LISTA DE ALUNOS (Progress Bar) */
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.list-item:last-child {
+    border-bottom: none;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    width: 80px;
+    margin-left: auto;
+    margin-right: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background: #E30613;
+}
+
+
+/* =========================================
+   CALENDAR MODAL (Seletor de Data)
+   Escondido por padrão, aparece com .active
+   ========================================= */
+.modal-calendar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-calendar.active {
+    display: flex;
+}
+
+.modal-calendar .modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 340px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: dropIn 0.3s ease;
+}
+
+.modal-calendar .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.modal-calendar .calendar-header button {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    color: var(--secondary);
+    transition: 0.2s;
+}
+
+.modal-calendar .calendar-header button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.modal-calendar .month-selector {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--secondary);
+    display: flex;
+    gap: 6px;
+}
+
+.modal-calendar .weeks {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.modal-calendar .days {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    gap: 4px;
+}
+
+.modal-calendar .days li {
+    padding: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.modal-calendar .days li:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.modal-calendar .days li.inactive {
+    color: #cbd5e1;
+    cursor: default;
+}
+
+.modal-calendar .days li.inactive:hover {
+    background: transparent;
+    color: #cbd5e1;
+}
+
+.modal-calendar .days li.today {
+    background: #f1f5f9;
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+.modal-calendar .days li.active {
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+}
+
+.modal-calendar .manual-input {
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.modal-calendar .input-wrapper {
+    display: flex;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+.modal-calendar .input-wrapper.error-shake {
+    animation: shake-red 0.4s ease;
+}
+
+.modal-calendar .input-wrapper input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.modal-calendar .input-wrapper input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.modal-calendar .input-wrapper button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.modal-calendar .input-wrapper button:hover {
+    background: var(--primary-dark);
+}
+

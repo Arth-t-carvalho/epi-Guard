@@ -159,12 +159,12 @@ class MySQLDepartmentRepository implements DepartmentRepositoryInterface
         }
 
         return new Department(
-            $row['nome'],
-            $row['sigla'],
-            $episList,
-            (int)$row['id'],
-            new \DateTimeImmutable($row['criado_em']),
-            $row['atualizado_em'] ? new \DateTimeImmutable($row['atualizado_em']) : null
+            name: $row['nome'],
+            code: $row['sigla'],
+            epis: $episList,
+            id: (int)$row['id'],
+            createdAt: new \DateTimeImmutable($row['criado_em']),
+            updatedAt: $row['atualizado_em'] ? new \DateTimeImmutable($row['atualizado_em']) : null
         );
     }
 }

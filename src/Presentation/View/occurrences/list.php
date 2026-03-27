@@ -6,19 +6,19 @@ ob_start();
 <div class="dashboard-container">
     <div class="page-header">
         <div>
-            <h1 class="page-title">Ocorrências</h1>
-            <p class="page-subtitle">Listagem completa de ocorrências registradas no sistema.</p>
+            <h1 class="page-title"><?= __('Ocorrências') ?></h1>
+            <p class="page-subtitle"><?= __('Listagem completa de ocorrências registradas no sistema.') ?></p>
         </div>
         <div class="header-actions">
             <button class="btn btn-primary">
                 <i data-lucide="plus-circle"></i>
-                Nova Ocorrência
+                <?= __('Nova Ocorrência') ?>
             </button>
         </div>
     </div>
 
     <div class="content-card">
-        <p>Conteúdo das ocorrências em desenvolvimento...</p>
+        <p><?= __('Conteúdo das ocorrências em desenvolvimento...') ?></p>
     </div>
 </div>
 

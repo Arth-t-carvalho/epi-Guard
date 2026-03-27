@@ -31,6 +31,9 @@ if (file_exists(__DIR__ . '/config/.env')) {
     }
 }
 
+// Carregar helpers globais (i18n, etc.)
+require_once __DIR__ . '/src/Application/helpers.php';
+
 // Carregar configurações
 $config = require_once __DIR__ . '/config/app.php';
 

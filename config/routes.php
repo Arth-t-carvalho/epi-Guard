@@ -6,6 +6,7 @@ use epiGuard\Presentation\Controller\InfractionController;
 use epiGuard\Presentation\Controller\ManagementController;
 use epiGuard\Presentation\Controller\OccurrenceController;
 
+
 return [
     '/login' => [AuthController::class, 'index'],
     '/register' => [AuthController::class, 'register'],

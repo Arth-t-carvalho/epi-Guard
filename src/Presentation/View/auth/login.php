@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<?php require_once __DIR__ . '/../../../../src/Application/helpers.php'; ?>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -75,8 +76,8 @@
             <div class="login-form-area">
                 <div class="form-container">
                     <header class="form-header">
-                        <h2>Bem-vindo</h2>
-                        <p>Acesse a sua conta EPI GUARD introduzindo as suas credenciais abaixo.</p>
+                        <h2><?= __('Bem-vindo') ?></h2>
+                        <p><?= __('Acesse a sua conta EPI GUARD introduzindo as suas credenciais abaixo.') ?></p>
                     </header>
 
                     <?php if (isset($_SESSION['error'])): ?>
@@ -95,7 +96,7 @@
 
                     <form id="login-form" method="POST" action="<?= BASE_PATH ?>/login">
                         <div class="input-group">
-                            <label for="username">E-MAIL OU CPF</label>
+                            <label for="username"><?= __('E-MAIL OU CPF') ?></label>
                             <div class="input-wrapper">
                                 <i class="fa-regular fa-envelope input-icon"></i>
                                 <input type="text" id="username" name="usuario" placeholder="exemplo@facchini.com.br" required>
@@ -104,8 +105,8 @@
 
                         <div class="input-group">
                             <div class="label-row">
-                                <label for="password">SENHA</label>
-                                <a href="<?= BASE_PATH ?>/recuperar-senha" class="link-forgot">Recuperar senha?</a>
+                                <label for="password"><?= __('SENHA') ?></label>
+                                <a href="<?= BASE_PATH ?>/recuperar-senha" class="link-forgot"><?= __('Recuperar senha?') ?></a>
                             </div>
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-lock input-icon"></i>
@@ -117,11 +118,11 @@
                         </div>
 
                         <button type="submit" class="btn-login">
-                            ENTRAR NA PLATAFORMA <i class="fa-solid fa-chevron-right"></i>
+                            <?= __('ENTRAR NA PLATAFORMA') ?> <i class="fa-solid fa-chevron-right"></i>
                         </button>
 
                         <div class="form-footer">
-                            <p>Ainda não possui acesso? <a href="<?= BASE_PATH ?>/cadastro" class="link-register">Solicitar Registro</a></p>
+                            <p><?= __('Ainda não possui acesso?') ?> <a href="<?= BASE_PATH ?>/cadastro" class="link-register"><?= __('Solicitar Registro') ?></a></p>
                         </div>
                     </form>
                 </div>

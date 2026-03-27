@@ -11,21 +11,21 @@ if (count($nameParts) > 1) {
 }
 
 $routeTitles = [
-    '/dashboard' => 'Dashboard',
-    '/monitoring' => 'Monitoramento IA',
-    '/infractions' => 'Gestão de Infrações',
-    '/management/departments' => 'Gestão de Setores',
-    '/management/employees' => 'Funcionários',
-    '/management/history' => 'Histórico de EPIs',
-    '/settings' => 'Configurações'
+    '/dashboard' => __('Dashboard'),
+    '/monitoring' => __('Monitoramento IA'),
+    '/infractions' => __('Gestão de Infrações'),
+    '/management/departments' => __('Gestão de Setores'),
+    '/management/employees' => __('Funcionários'),
+    '/management/history' => __('Histórico de EPIs'),
+    '/settings' => __('Configurações')
 ];
 
-$headerTitle = $routeTitles[$currentRoute] ?? 'Seu Espaço';
+$headerTitle = $routeTitles[$currentRoute] ?? __('Seu Espaço');
 ?>
 <header class="header">
     <div class="page-title">
         <h1><?= htmlspecialchars($headerTitle) ?></h1>
-        <p>Olá <?= htmlspecialchars($userFirstName) ?>, bem-vindo de volta!</p>
+        <p><?= sprintf(__('Olá %s, bem-vindo de volta!'), htmlspecialchars($userFirstName)) ?></p>
     </div>
 
     <div class="header-actions">
@@ -42,7 +42,7 @@ $headerTitle = $routeTitles[$currentRoute] ?? 'Seu Espaço';
         </a>
 
         <button class="btn-export">
-            <i class="fa-solid fa-download"></i> Exportar
+            <i class="fa-solid fa-download"></i> <?= __('Exportar') ?>
         </button>
         
         <div class="user-profile-trigger">
@@ -56,3 +56,4 @@ $headerTitle = $routeTitles[$currentRoute] ?? 'Seu Espaço';
         </div>
     </div>
 </header>
+

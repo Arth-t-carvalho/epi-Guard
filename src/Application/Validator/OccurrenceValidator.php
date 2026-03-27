@@ -1,17 +1,22 @@
 <?php
-declare(strict_types = 1)
-;
+declare(strict_types = 1);
 
 namespace epiGuard\Application\Validator;
 
 use epiGuard\Application\DTO\Request\CreateOccurrenceRequest;
 use epiGuard\Domain\Exception\ValidationException;
 
+/**
+ * Validador para garantir a integridade dos dados no registro de novas ocorrências.
+ * Verifica campos obrigatórios e formatos de data.
+ */
 class OccurrenceValidator
 {
     /**
-     * @param CreateOccurrenceRequest $request
-     * @throws ValidationException
+     * Realiza a validação estrutural de uma nova ocorrência.
+     * 
+     * @param CreateOccurrenceRequest $request Dados da ocorrência a ser validada
+     * @throws ValidationException Se houver dados inconsistentes ou ausentes
      */
     public function validateCreation(CreateOccurrenceRequest $request): void
     {
@@ -25,14 +30,17 @@ class OccurrenceValidator
             $errors['epiItemId'] = 'Valid EPI Item ID is required.';
         }
 
+        // Tipo de ocorrência é obrigatório
         if (empty(trim($request->type))) {
             $errors['type'] = 'Occurrence type is required.';
         }
 
+        // Descrição deve ter um detalhamento mínimo para ser útil
         if (empty(trim($request->description)) || strlen(trim($request->description)) < 5) {
             $errors['description'] = 'Description must be at least 5 characters long.';
         }
 
+        // Validação rigorosa de data para evitar inconsistências no banco
         if (empty(trim($request->date))) {
             $errors['date'] = 'Date is required.';
         }

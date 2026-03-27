@@ -39,6 +39,8 @@ body::before {
     z-index: -2;
 }
 
+/* s */
+
 /* Camada de Padrão Corp Tech (Pontos) */
 body::after {
     content: '';
