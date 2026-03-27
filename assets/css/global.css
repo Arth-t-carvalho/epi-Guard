@@ -53,9 +53,7 @@ body {
 /* =========================================
    ANIMAÇÕES GLOBAIS
    ========================================= */
-.sidebar {
-    animation: fadeIn 0.8s ease forwards;
-}
+
 
 @keyframes fadeIn {
     from {

@@ -176,3 +176,102 @@
 .global-row {
     background: #fffafa;
 }
+
+/* =========================================
+   BOTTOM SHEET - Efeito Deslizante do Modal
+   ========================================= */
+.modal-premium.bottom-sheet {
+    align-items: center; /* Centraliza vertical e horizontalmente */
+    padding-bottom: 0;
+}
+
+.modal-premium.bottom-sheet .modal-premium-content {
+    margin: 0;
+    width: 100%;
+    max-width: 650px;
+    height: 125px; /* Tamanho exato apenas para o título e drag handle */
+    border-radius: 32px; /* Totalmente arredondado */
+    transform: scale(0.95) translateY(40px); /* Nascimento mais suave perto do centro */
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); /* Curva "Smooth Premium" super fluida */
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    background: #ffffff;
+    overflow: hidden; /* Corta o resto do conteúdo */
+}
+
+.modal-premium.bottom-sheet.active .modal-premium-content {
+    transform: scale(1) translateY(0);
+}
+
+/* EXPANDIDO MAGICAMENTE NO CENTRO */
+.modal-premium.bottom-sheet .modal-premium-content.expanded {
+    height: 85vh; /* Cresce verticalmente a partir do centro */
+    cursor: default;
+}
+
+/* Oculta os itens não vitais no estado pequeno */
+.modal-premium.bottom-sheet .modal-premium-body,
+.modal-premium.bottom-sheet .modal-premium-footer {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Comportamento da rolagem no corpo do modal */
+.modal-premium.bottom-sheet .modal-premium-body {
+    overflow-y: hidden; /* sem scroll quando pequeno */
+    flex: 1;
+    position: relative;
+    padding-bottom: 30px; /* espaco pra nao sobrepor botoes */
+}
+
+/* Esfumaçado no fundo da lista pra dar a ideia de que continua */
+.modal-premium.bottom-sheet .modal-premium-body::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(transparent, #ffffff);
+    pointer-events: none;
+    transition: opacity 0.4s;
+    z-index: 10;
+}
+
+.modal-premium.bottom-sheet .modal-premium-content.expanded .modal-premium-body,
+.modal-premium.bottom-sheet .modal-premium-content.expanded .modal-premium-footer {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-premium.bottom-sheet .modal-premium-content.expanded .modal-premium-body {
+    overflow-y: auto; /* permite scroll ao ampliar */
+}
+
+.modal-premium.bottom-sheet .modal-premium-content.expanded .modal-premium-body::after {
+    opacity: 0; /* Some com o esfumaçado quando expandido */
+}
+
+/* Drag handle visual cue */
+.drag-handle {
+    width: 48px;
+    height: 6px;
+    background-color: #cbd5e1;
+    border-radius: 10px;
+    margin: 16px auto -4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-premium-content:hover .drag-handle {
+    width: 64px;
+    background-color: #94a3b8;
+}
+
+.modal-premium-content.expanded .drag-handle {
+    width: 48px;
+    background-color: var(--primary);
+    opacity: 0.8;
+}

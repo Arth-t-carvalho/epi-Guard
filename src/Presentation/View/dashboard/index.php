@@ -235,15 +235,16 @@ ob_start();
     </div>
 </div>
 
-<!-- MODAL DE SELEÇÃO MINIMALISTA -->
-<div id="courseModal" class="modal-premium">
-    <div class="modal-premium-content">
+<!-- MODAL DE SELEÇÃO MINIMALISTA (AGORA COMO BOTTOM SHEET) -->
+<div id="courseModal" class="modal-premium bottom-sheet">
+    <div class="modal-premium-content" onclick="this.classList.add('expanded')">
+        <div class="drag-handle"></div>
         <div class="modal-premium-header">
             <div>
-                <h2>Selecione o Setor</h2>
+                <h2>Setores</h2>
                 <p>Filtre os dados do dashboard por área específica</p>
             </div>
-            <button class="close-premium" onclick="closeCourseModal()">&times;</button>
+            <button class="close-premium" onclick="event.stopPropagation(); this.closest('.modal-premium-content').classList.remove('expanded'); closeCourseModal();">&times;</button>
         </div>
         <div class="modal-premium-body">
             <!-- Barra de Pesquisa -->

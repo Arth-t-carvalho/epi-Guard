@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS ocorrencias (
   data_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   tipo ENUM('INFRACAO','CONFORMIDADE') NOT NULL,
   oculto BOOLEAN NOT NULL DEFAULT FALSE,
+  favorito BOOLEAN NOT NULL DEFAULT FALSE,
   criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_ocorrencia_funcionario (funcionario_id),
   INDEX idx_ocorrencia_data (data_hora),

@@ -178,12 +178,22 @@ function openCourseModal() {
         document.querySelector('.main-content').style.overflow = 'hidden';
         if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
         updateSelectionUI(); // Sincroniza checks com o estado
+        
+        // Animação automática de expansão super fluida conectada na abertura
+        setTimeout(() => {
+            const content = modal.querySelector('.modal-premium-content');
+            if (content) content.classList.add('expanded');
+        }, 50); // Delay quase imperceptível de 50ms pra virar uma animação contínua
     }
 }
 
 function closeCourseModal() {
     const modal = document.getElementById('courseModal');
     if (modal) {
+        // Retira a classe para que na próxima vez ele comece pequeno de novo
+        const content = modal.querySelector('.modal-premium-content');
+        if (content) content.classList.remove('expanded');
+        
         modal.classList.remove('active');
         document.querySelector('.main-content').style.overflow = '';
     }
