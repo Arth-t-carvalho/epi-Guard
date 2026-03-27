@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/sidebar.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/dashboard.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/management.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/modal.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         window.BASE_PATH = "<?= BASE_PATH ?>";

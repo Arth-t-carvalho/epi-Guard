@@ -46,7 +46,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Modal Detalhes (Gráfico)
         const detModal = document.getElementById('detailModal');
-        if (detModal && e.target === detModal) detModal.classList.remove('open');
+        if (detModal && e.target === detModal) {
+            detModal.classList.remove('open');
+            document.body.classList.remove('modal-open');
+        }
 
         // Card Instrutor
         const card = document.getElementById('instructorCard');
@@ -146,6 +149,8 @@ let selectedSectorIds = []; // Novo: Array de setores selecionados
 function openCourseModal() {
     const modal = document.getElementById('courseModal');
     if (modal) {
+        document.body.appendChild(modal); // Move para o root
+        document.body.classList.add('modal-open');
         modal.classList.add('active');
         if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
         updateSelectionUI(); // Sincroniza checks com o estado
@@ -154,7 +159,10 @@ function openCourseModal() {
 
 function closeCourseModal() {
     const modal = document.getElementById('courseModal');
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.classList.remove('modal-open');
+    }
 }
 
 function toggleAllSectors(checked) {
@@ -391,6 +399,8 @@ function toggleCalendar() {
     if (!modal) return;
 
     if (!modal.classList.contains('active')) {
+        document.body.appendChild(modal); // Move para o root
+        document.body.classList.add('modal-open');
         currCalYear = selectedDate.getFullYear();
         currCalMonth = selectedDate.getMonth();
         renderCalendarGrid();
@@ -398,6 +408,7 @@ function toggleCalendar() {
         if (typeof lucide !== 'undefined') lucide.createIcons();
     } else {
         modal.classList.remove('active');
+        document.body.classList.remove('modal-open');
     }
 }
 
@@ -496,8 +507,16 @@ function toggleInstructorCard() {
 }
 
 function exportData() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
+    // Robust detection of jsPDF
+    const jsPDFLib = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+    
+    if (!jsPDFLib) {
+        console.error('jsPDF not found. Libraries:', window.jspdf, window.jsPDF);
+        alert('Erro: Biblioteca de exportação (jsPDF) não carregada. Verifique sua conexão ou tente recarregar a página.');
+        return;
+    }
+
+    const doc = new jsPDFLib('p', 'mm', 'a4');
     const btn = document.querySelector('.btn-export');
     if (!btn) return;
 
@@ -505,6 +524,12 @@ function exportData() {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando PDF...';
     btn.style.color = '#E30613';
     btn.disabled = true;
+
+    function resetBtn() {
+        btn.innerHTML = originalHTML;
+        btn.style.color = '';
+        btn.disabled = false;
+    }
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -518,8 +543,12 @@ function exportData() {
     let doughnutChartImg = null;
 
     try {
-        if (mainChartInstance) mainChartImg = mainChartInstance.toBase64Image('image/png', 1);
-        if (doughnutChartInstance) doughnutChartImg = doughnutChartInstance.toBase64Image('image/png', 1);
+        if (typeof mainChartInstance !== 'undefined' && mainChartInstance) {
+            mainChartImg = mainChartInstance.toBase64Image('image/png', 1);
+        }
+        if (typeof doughnutChartInstance !== 'undefined' && doughnutChartInstance) {
+            doughnutChartImg = doughnutChartInstance.toBase64Image('image/png', 1);
+        }
     } catch (e) {
         console.warn('Nao foi possivel capturar graficos:', e);
     }
@@ -528,9 +557,7 @@ function exportData() {
         .then(res => res.json())
         .then(data => {
             if (data.status !== 'success') {
-                alert('Erro ao buscar dados para o relatorio.');
-                resetBtn();
-                return;
+                throw new Error(data.message || 'API error');
             }
 
             // ============================================================
@@ -714,7 +741,9 @@ function exportData() {
             y = 35;
 
             // Sectors Ranking Table
-            if (data.sectors_ranking && data.sectors_ranking.length > 0) {
+            if (typeof doc.autoTable !== 'function') {
+                console.error('jsPDF-AutoTable plugin not found');
+            } else if (data.sectors_ranking && data.sectors_ranking.length > 0) {
                 doc.setTextColor(...darkColor);
                 doc.setFontSize(13);
                 doc.setFont('helvetica', 'bold');
@@ -747,14 +776,14 @@ function exportData() {
                 y = doc.lastAutoTable.finalY + 15;
             }
 
-            // EPIs Ranking Table
-            if (data.epis_ranking && data.epis_ranking.length > 0) {
-                if (y > pageHeight - 60) { doc.addPage(); y = 20; }
+            // EPI Ranking Table
+            if (typeof doc.autoTable === 'function' && data.epis_ranking && data.epis_ranking.length > 0) {
+                if (y > pageHeight - 50) { doc.addPage(); y = 20; }
 
                 doc.setTextColor(...darkColor);
                 doc.setFontSize(13);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Ranking de EPIs Mais Infringidos', margin, y);
+                doc.text('Ranking de EPIs Menos Utilizados', margin, y);
                 y += 3;
                 doc.setDrawColor(...primaryColor);
                 doc.line(margin, y, margin + 55, y);
@@ -793,15 +822,9 @@ function exportData() {
         })
         .catch(err => {
             console.error('Erro ao gerar relatorio:', err);
-            alert('Erro ao gerar o relatorio PDF.');
-            resetBtn();
+            alert('Erro ao gerar o relatorio PDF: ' + err.message);
+            if (typeof resetBtn === 'function') resetBtn();
         });
-
-    function resetBtn() {
-        btn.innerHTML = originalHTML;
-        btn.style.color = '';
-        btn.disabled = false;
-    }
 }
 
 function openDetailModal(monthIndex, monthName, epiName = '') {
@@ -811,6 +834,10 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
     const thead = document.querySelector('.custom-table thead tr');
 
     if (!modal) return;
+    
+    document.body.appendChild(modal); // Move para o root
+    document.body.classList.add('modal-open');
+    
     const realMonth = monthIndex + 1;
     const currentYear = new Date().getFullYear();
     const isGlobal = (selectedSectorId === 'all');
@@ -1184,3 +1211,11 @@ const config = { childList: true, characterData: true, subtree: true };
 if (document.getElementById('kpiDia')) observer.observe(document.getElementById('kpiDia'), config);
 if (document.getElementById('kpiSemana')) observer.observe(document.getElementById('kpiSemana'), config);
 if (document.getElementById('kpiMes')) observer.observe(document.getElementById('kpiMes'), config);
+
+function closeModal() {
+    const modal = document.getElementById('detailModal');
+    if (modal) {
+        modal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+    }
+}

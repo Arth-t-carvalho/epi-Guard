@@ -245,8 +245,6 @@ $initials = mb_strtoupper($initials);
 
 <header class="header">
     <div class="page-title">
-        <h1>Dashboard</h1>
-        <p>Olá <?= htmlspecialchars($userName) ?>, bem-vindo de volta!</p>
     </div>
 
     <div class="header-actions">

@@ -1,0 +1,422 @@
+/* =========================================
+   MODAL BOTTOM SHEET
+   ========================================= */
+
+.modal-bottom-sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: flex-end; /* Alinha o modal na parte inferior */
+}
+
+.modal-bottom-sheet-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-bottom-sheet-container {
+    width: 100%;
+    height: 50vh; /* Metade da tela */
+    background: #ffffff;
+    border-radius: 24px 24px 0 0; /* Apenas cantos superiores */
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+    transform: translateY(100%); /* Começa fora da tela */
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-top: 1px solid rgba(227, 6, 19, 0.1);
+}
+
+.modal-bottom-sheet-overlay.active .modal-bottom-sheet-container {
+    transform: translateY(0);
+}
+
+/* Header do Modal */
+.modal-bottom-header {
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    background: #ffffff;
+    z-index: 2;
+}
+
+.modal-bottom-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-bottom-title i {
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 8px;
+    border-radius: 10px;
+}
+
+.modal-bottom-title h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--secondary);
+    margin: 0;
+}
+
+.btn-close-bottom-modal {
+    background: #f1f5f9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-close-bottom-modal:hover {
+    background: var(--primary);
+    color: white;
+    transform: rotate(90deg);
+}
+
+/* Body do Modal */
+.modal-bottom-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+/* Footer do Modal (Opcional) */
+.modal-bottom-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #f1f5f9;
+    background: #ffffff;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Scrollbar Custom */
+.modal-bottom-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-bottom-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .modal-bottom-sheet-container {
+    background: #1e293b;
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .modal-bottom-header,
+[data-theme="dark"] .modal-bottom-footer {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+[data-theme="dark"] .modal-bottom-title h2 {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .modal-bottom-content {
+    background: #0f172a;
+}
+
+[data-theme="dark"] .btn-close-bottom-modal {
+    background: #334155;
+    color: #94a3b8;
+}
+
+/* =========================================
+   MODAL CENTER (Premium)
+   ========================================= */
+
+.modal-center-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-center-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-center-container {
+    width: 100%;
+    max-width: 800px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 90vh;
+}
+
+.modal-center-overlay.active .modal-center-container {
+    transform: scale(1);
+}
+
+.modal-center-header {
+    padding: 24px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-center-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-center-title i {
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 8px;
+    border-radius: 10px;
+}
+
+.modal-center-title h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--secondary);
+    margin: 0;
+}
+
+.btn-close-center-modal {
+    background: #f1f5f9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-close-center-modal:hover {
+    background: var(--primary);
+    color: white;
+    transform: rotate(90deg);
+}
+
+/* FORM STYLES */
+.modal-center-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+.occurrence-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row.three-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text-main);
+    background: #ffffff;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.section-divider {
+    margin: 10px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.section-divider h5 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+.upload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.upload-btn {
+    aspect-ratio: 1/1;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #ffffff;
+}
+
+.upload-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.upload-btn i {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 4px;
+}
+
+.upload-btn span {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* FOOTER BUTTONS */
+.modal-center-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #f1f5f9;
+    background: #ffffff;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-cancel {
+    padding: 12px 24px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: var(--secondary);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.btn-confirm {
+    padding: 12px 24px;
+    border: none;
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(227, 6, 19, 0.2);
+}
+
+.btn-confirm:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(227, 6, 19, 0.3);
+}
+
+.btn-confirm:active {
+    transform: translateY(0);
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .modal-center-container,
+[data-theme="dark"] .modal-center-footer,
+[data-theme="dark"] .modal-center-header {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+[data-theme="dark"] .modal-center-content {
+    background: #0f172a;
+}
+
+[data-theme="dark"] .modal-center-title h2,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .section-divider h5 {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .upload-btn,
+[data-theme="dark"] .btn-cancel {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .btn-close-center-modal {
+    background: #334155;
+    color: #94a3b8;
+}

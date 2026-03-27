@@ -23,7 +23,7 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
 
     public function findById(int $id): ?Employee
     {
-        $stmt = $this->db->prepare("SELECT id, nome, setor_id, criado_em, atualizado_em FROM funcionarios WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, cpf, setor_id, criado_em, atualizado_em FROM funcionarios WHERE id = ?");
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -37,18 +37,28 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
 
     public function findByCpf(CPF $cpf): ?Employee
     {
+        $stmt = $this->db->prepare("SELECT id, nome, cpf, setor_id, criado_em, atualizado_em FROM funcionarios WHERE cpf = ?");
+        $cpfStr = (string) $cpf;
+        $stmt->bind_param('s', $cpfStr);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($row = $result->fetch_assoc()) {
+            return $this->hydrate($row);
+        }
+
         return null;
     }
 
     public function findByEnrollmentNumber(string $enrollmentNumber): ?Employee
     {
-        return null;
+        return $this->findById((int) $enrollmentNumber);
     }
 
     /** @return Employee[] */
     public function findAll(): array
     {
-        $result = $this->db->query("SELECT id, nome, setor_id, criado_em, atualizado_em FROM funcionarios ORDER BY nome ASC");
+        $result = $this->db->query("SELECT id, nome, cpf, setor_id, criado_em, atualizado_em FROM funcionarios ORDER BY nome ASC");
         $employees = [];
 
         while ($row = $result->fetch_assoc()) {
@@ -60,7 +70,7 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
 
     public function findByDepartment(int $departmentId): array
     {
-        $stmt = $this->db->prepare("SELECT id, nome, setor_id, criado_em, atualizado_em FROM funcionarios WHERE setor_id = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, cpf, setor_id, criado_em, atualizado_em FROM funcionarios WHERE setor_id = ?");
         $stmt->bind_param('i', $departmentId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -75,10 +85,11 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
 
     public function save(Employee $employee): void
     {
-        $stmt = $this->db->prepare("INSERT INTO funcionarios (nome, setor_id) VALUES (?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO funcionarios (nome, cpf, setor_id) VALUES (?, ?, ?)");
         $nome = $employee->getName();
+        $cpf = (string) $employee->getCpf();
         $setor_id = $employee->getDepartment()->getId();
-        $stmt->bind_param('si', $nome, $setor_id);
+        $stmt->bind_param('ssi', $nome, $cpf, $setor_id);
         $stmt->execute();
 
         $employee->setId((int) $this->db->insert_id);
@@ -86,11 +97,12 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
 
     public function update(Employee $employee): void
     {
-        $stmt = $this->db->prepare("UPDATE funcionarios SET nome = ?, setor_id = ? WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE funcionarios SET nome = ?, cpf = ?, setor_id = ? WHERE id = ?");
         $nome = $employee->getName();
+        $cpf = (string) $employee->getCpf();
         $setor_id = $employee->getDepartment()->getId();
         $id = $employee->getId();
-        $stmt->bind_param('sii', $nome, $setor_id, $id);
+        $stmt->bind_param('ssii', $nome, $cpf, $setor_id, $id);
         $stmt->execute();
     }
 
@@ -117,7 +129,7 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
         
         return new Employee(
             name: $row['nome'],
-            cpf: new CPF('12345678909'),
+            cpf: new CPF($row['cpf'] ?? '000.000.000-00'),
             enrollmentNumber: (string) $row['id'],
             department: $department,
             id: (int) $row['id'],

@@ -26,9 +26,9 @@ return [
     '/api/departments/update' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'update'],
     '/api/departments/delete' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'delete'],
     '/api/departments/employees' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'employees'],
-    '/api/check_notificacoes' => [\epiGuard\Presentation\Controller\Api\NotificationApiController::class, 'check'],
     '/api/marcar_lida' => [\epiGuard\Presentation\Controller\Api\NotificationApiController::class, 'markAsRead'],
     '/monitoring' => [\epiGuard\Presentation\Controller\MonitoringController::class, 'index'],
+    '/api/occurrence/store' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'store'],
     '/api/export-insights' => [\epiGuard\Presentation\Controller\Api\ExportApiController::class, 'insights'],
     '/logout' => [AuthController::class, 'logout'],
 ];
