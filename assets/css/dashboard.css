@@ -1,6 +1,10 @@
 /* =========================================
    VARIÁVEIS GERAIS
    ========================================= */
+@view-transition {
+    navigation: auto;
+}
+
 :root {
     --primary: #E30613;
     /* Vermelho SENAI */
@@ -179,9 +183,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: 44px;
-    /* Aumentado para distanciar mais os elementos */
-    animation: fadeInUpContent 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-    animation-delay: 0.1s;
 }
 
 #page-content-wrapper {
@@ -466,6 +467,12 @@ body {
 .btn-premium-filter i {
     width: 16px;
     height: 16px;
+}
+
+html.dark-mode .btn-premium-filter {
+    background: var(--bg-card);
+    color: white;
+    border-color: var(--primary);
 }
 
 /* ESTILO PADRÃO DOS CARDS */
@@ -2065,11 +2072,11 @@ body {
     transition: all 0.2s ease;
 }
 
-.custom-checkbox:hover input ~ .checkmark {
+.custom-checkbox:hover input~.checkmark {
     border-color: var(--primary);
 }
 
-.custom-checkbox input:checked ~ .checkmark {
+.custom-checkbox input:checked~.checkmark {
     background-color: var(--primary);
     border-color: var(--primary);
 }
@@ -2080,7 +2087,7 @@ body {
     display: none;
 }
 
-.custom-checkbox input:checked ~ .checkmark:after {
+.custom-checkbox input:checked~.checkmark:after {
     display: block;
 }
 
@@ -2162,7 +2169,7 @@ body {
     overflow: hidden;
     border: 2px solid #e2e8f0;
     background: #f8fafc;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .employee-avatar {
@@ -2217,7 +2224,7 @@ body {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .status-badge-premium.pending {
@@ -2479,6 +2486,7 @@ body {
 .global-row {
     background: #fffafa;
 }
+
 /* =========================================
    VARIÁVEIS GERAIS
    ========================================= */
@@ -4522,8 +4530,13 @@ body {
     transition: transform 0.3s;
 }
 
-.sector-dot.global { background: var(--primary); }
-.sector-dot.active { background: #10b981; }
+.sector-dot.global {
+    background: var(--primary);
+}
+
+.sector-dot.active {
+    background: #10b981;
+}
 
 .course-row:hover .sector-dot {
     transform: scale(1.5);
@@ -4567,15 +4580,15 @@ html.dark-theme,
     --primary: #EF4444;
     --primary-dark: #B91C1C;
     --primary-light: rgba(239, 68, 68, 0.15);
-    
+
     --secondary: #F8FAFC;
     --text-main: #E2E8F0;
     --text-muted: #94A3B8;
-    
+
     --bg-body: #0F172A;
     --bg-card: #1E293B;
     --border: #334155;
-    
+
     --success: #10B981;
     --danger: #EF4444;
 }
@@ -4646,3 +4659,19 @@ html.dark-theme .user-profile-trigger {
     background: var(--text-muted);
 }
 
+/* =========================================
+   PAGE TRANSITION ANIMATION
+   ========================================= */
+.content-fade {
+    animation: smoothSlideUp 0.3s ease-out forwards;
+}
+
+@keyframes smoothSlideUp {
+    0% {
+        transform: translateY(10px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
