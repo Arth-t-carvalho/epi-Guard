@@ -240,3 +240,108 @@ function processExport(format) {
         }, 1500);
     }, 2500);
 }
+
+/* ==============================
+   FAVORITOS (BOOKMARK)
+   ============================== */
+async function toggleBookmark(btn, occId) {
+    try {
+        const formData = new FormData();
+        formData.append('id', occId);
+
+        const response = await fetch(`${window.BASE_PATH}/api/occurrence/toggle-favorite`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            const card = document.getElementById(`card-infraction-${occId}`);
+            const row = document.getElementById(`row-infraction-${occId}`);
+
+            if (result.favorito) {
+                if (card) card.classList.add('is-bookmarked');
+                if (row) row.classList.add('is-bookmarked');
+                btn.classList.add('active');
+            } else {
+                if (card) card.classList.remove('is-bookmarked');
+                if (row) row.classList.remove('is-bookmarked');
+                btn.classList.remove('active');
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao favoritar:', error);
+    }
+}
+
+/* ==============================
+   OCULTAR INFRAÇÃO (SOFT DELETE)
+   ============================== */
+let hideTargetId = null;
+
+function confirmHideInfraction(id, name) {
+    hideTargetId = id;
+    const modal = document.getElementById('confirmHideModal');
+    const nameEl = document.getElementById('hideTargetName');
+    
+    if (nameEl) nameEl.textContent = name;
+    if (modal) modal.classList.add('active');
+    
+    // Configurar o botão de confirmação
+    const btnDoHide = document.getElementById('btnDoHide');
+    if (btnDoHide) {
+        btnDoHide.onclick = () => doHideInfraction(id);
+    }
+}
+
+function closeConfirmHideModal() {
+    const modal = document.getElementById('confirmHideModal');
+    if (modal) modal.classList.remove('active');
+    hideTargetId = null;
+}
+
+async function doHideInfraction(id) {
+    const btn = document.getElementById('btnDoHide');
+    const originalText = btn.textContent;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Ocultando...';
+
+    try {
+        const formData = new FormData();
+        formData.append('id', id);
+
+        const response = await fetch(`${window.BASE_PATH}/api/occurrence/hide`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            // Fechar modal
+            closeConfirmHideModal();
+            
+            // Remover da tela com animação
+            const card = document.getElementById(`card-infraction-${id}`);
+            const row = document.getElementById(`row-infraction-${id}`);
+            
+            if (card) {
+                card.classList.add('fade-out-infraction');
+                setTimeout(() => card.remove(), 500);
+            }
+            if (row) {
+                row.classList.add('fade-out-infraction');
+                setTimeout(() => row.remove(), 500);
+            }
+        } else {
+            alert('Erro ao ocultar: ' + (result.message || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao processar solicitação.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+

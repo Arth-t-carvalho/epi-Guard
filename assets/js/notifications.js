@@ -10,13 +10,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Elementos da UI
     const badge = document.getElementById('bell-badge');
+    const panel = document.getElementById('notificationPanel');
+    const panelBody = document.getElementById('notificationPanelBody');
 
-    // Inicialização do container de notificações
+    // Inicialização do container de notificações (Toasts)
     if (!document.getElementById('notification-container')) {
         const container = document.createElement('div');
         container.id = 'notification-container';
         document.body.appendChild(container);
     }
+
+    /**
+     * Alternar Visibilidade do Painel
+     */
+    window.toggleNotificationPanel = function() {
+        if (!panel) return;
+        const isActive = panel.classList.toggle('active');
+        if (isActive) {
+            setUnseenCount(0); // Zera o badge ao abrir o painel
+        }
+    };
 
     /**
      * Gerenciamento de Contador Não Lido (localStorage)
@@ -32,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateBadgeUI(count) {
         if (!badge) return;
-        badge.textContent = count > 99 ? '99+' : count;
+        badge.textContent = count > 0 ? '+' : '';
         
         if (count > 0) {
             badge.classList.remove('hidden');
@@ -42,13 +55,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Verifica se deve resetar o contador (se estiver na página de infrações)
+     * Adicionar Notificação ao Painel
      */
-    function checkAndResetIfOnInfractions() {
-        // Verifica tanto a URL atual quanto o estado do sistema de navegação AJAX
-        const isInfractionsPage = window.location.pathname.includes('/infractions');
-        if (isInfractionsPage) {
-            setUnseenCount(0);
+    function addNotificationToPanel(data, isInitial = false) {
+        if (!panelBody) return;
+
+        // Remover mensagem de "vazio" se existir
+        const emptyMsg = panelBody.querySelector('.notification-empty');
+        if (emptyMsg) emptyMsg.remove();
+
+        const item = document.createElement('div');
+        item.className = 'notification-item';
+        
+        const timeStr = data.data_hora ? new Date(data.data_hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Agora';
+
+        item.innerHTML = `
+            <div class="notification-item-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="notification-item-content">
+                <span class="notification-item-title">EPI Ausente: ${data.epi_nome || 'EPI'}</span>
+                <span class="notification-item-desc"><strong>${data.funcionario_nome}</strong> no setor <strong>${data.setor_sigla || 'Geral'}</strong>.</span>
+                <span class="notification-item-time">${timeStr}</span>
+            </div>
+        `;
+
+        if (isInitial) {
+            panelBody.appendChild(item);
+        } else {
+            panelBody.insertBefore(item, panelBody.firstChild);
         }
     }
 
@@ -56,34 +91,25 @@ document.addEventListener('DOMContentLoaded', () => {
      * Inicia o monitoramento
      */
     async function initPolling() {
-        // Garantir que os ícones (se houver Lucide) sejam processados
         if (window.lucide) lucide.createIcons();
 
-        checkAndResetIfOnInfractions();
         updateBadgeUI(getUnseenCount());
 
         try {
-            // Buscamos o estado atual + infrações recentes (24h)
             const response = await fetch(`${window.BASE_PATH}/api/check_notificacoes?last_id=0`);
             const result = await response.json();
             
             if (result.status === 'init' || result.status === 'success') {
                 lastOccurrenceId = result.last_id;
                 
-                // Se houver dados pendentes (24h), atualizamos o contador inicial
                 if (result.dados && result.dados.length > 0) {
-                    const currentUnseen = getUnseenCount();
-                    // Se o usuário já tem contagem, somamos apenas se não estiver na página de infrações
-                    if (!window.location.pathname.includes('/infractions')) {
-                        setUnseenCount(Math.max(currentUnseen, result.dados.length));
-                    }
+                    result.dados.forEach(occ => addNotificationToPanel(occ, true));
                 }
 
-                console.log(`[Notifications] Monitoramento iniciado (ID: ${lastOccurrenceId})`);
                 setInterval(checkNewOccurrences, POLLING_INTERVAL);
             }
         } catch (error) {
-            console.error('[Notifications] Falha no roteiro de polling:', error);
+            console.error('[Notifications] Falha no polling:', error);
         }
     }
 
@@ -91,9 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
      * Busca novas ocorrências
      */
     async function checkNewOccurrences() {
-        // Verifica reset a cada ciclo (útil para navegação parcial)
-        checkAndResetIfOnInfractions();
-
         try {
             const response = await fetch(`${window.BASE_PATH}/api/check_notificacoes?last_id=${lastOccurrenceId}`);
             const result = await response.json();
@@ -101,14 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.status === 'success' && result.dados && result.dados.length > 0) {
                 lastOccurrenceId = result.last_id;
 
-                // Se NÃO estivermos na página de infrações, incrementamos o contador
-                if (!window.location.pathname.includes('/infractions')) {
+                // Incrementar contador se o painel estiver fechado
+                if (!panel.classList.contains('active')) {
                     const newCount = getUnseenCount() + result.dados.length;
                     setUnseenCount(newCount);
                 }
 
-                // Mostrar os toasts (cards flutuantes)
+                // Mostrar Toasts e adicionar ao painel
                 result.dados.forEach((occ, index) => {
+                    addNotificationToPanel(occ);
                     setTimeout(() => showEpiNotification(occ), index * 400);
                 });
             }
@@ -118,10 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Renderiza o card (Toast)
+     * Renderiza o card (Toast flutuante)
      */
     function showEpiNotification(data) {
         const container = document.getElementById('notification-container');
+        if (!container) return;
+
         const toast = document.createElement('div');
         toast.className = 'epi-alert-toast';
         
@@ -132,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="toast-details">
                     <div class="toast-detail">Nome: <span>${data.funcionario_nome}</span></div>
                     <div class="toast-detail">Setor: <span>${data.setor_sigla || 'Geral'}</span></div>
-                    <div class="toast-detail">EPI ausente: <span>${data.epi_nome || 'Não identificado'}</span></div>
+                    <div class="toast-detail">EPI ausente: <span>${data.epi_nome}</span></div>
                 </div>
             </div>
             <div class="toast-progress" style="animation: progressShrink ${DISPLAY_DURATION}ms linear forwards"></div>
@@ -149,8 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializar sistema
     initPolling();
 
-    // Listener para o sistema de navegação AJAX (se existir)
-    document.addEventListener('pageChanged', () => {
-        checkAndResetIfOnInfractions();
+    // Fechar painel ao clicar fora
+    document.addEventListener('click', (e) => {
+        const bellBtn = document.getElementById('notificationBellBtn');
+        if (panel && panel.classList.contains('active') && 
+            !panel.contains(e.target) && 
+            !bellBtn.contains(e.target)) {
+            panel.classList.remove('active');
+        }
     });
 });

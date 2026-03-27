@@ -8,12 +8,20 @@ $extraHead = '
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";</script>
     <style>
+        /* Desativar scroll da página e tornar a tabela flexível */
+        .main-content { overflow-y: hidden !important; }
+        #page-content-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; margin-top: -50px; }
+
+        /* Remover cabeçalho de boas-vindas redundante */
+        .welcome-container { display: none !important; }
+
         /* === PAGE STYLES === */
         .setor-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
+            flex-shrink: 0;
         }
 
         .setor-header .page-title h1 {
@@ -43,6 +51,7 @@ $extraHead = '
             font-family: "Inter", sans-serif;
             transition: 0.2s;
             box-shadow: 0 4px 14px rgba(227, 6, 19, 0.25);
+            margin-left: auto; /* Empurra para o final da linha */
         }
 
         .btn-add-setor:hover {
@@ -56,6 +65,7 @@ $extraHead = '
             display: flex;
             gap: 12px;
             margin-bottom: 24px;
+            flex-shrink: 0;
         }
 
         .search-box {
@@ -117,7 +127,8 @@ $extraHead = '
             background: #fff;
             border-radius: 16px;
             border: 1px solid #f0f0f5;
-            overflow: hidden;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .setor-table {
@@ -134,6 +145,10 @@ $extraHead = '
             letter-spacing: 0.8px;
             color: #94a3b8;
             border-bottom: 1px solid #f0f0f5;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 10;
         }
 
         .setor-table tbody tr {
@@ -569,9 +584,6 @@ ob_start();
         <h1>Gestão de Setor</h1>
         <p>Gerencie as áreas e os respectivos EPIs obrigatórios</p>
     </div>
-    <button class="btn-add-setor" onclick="openModal()">
-        <i class="fa-solid fa-plus"></i> Adicionar Setor
-    </button>
 </div>
 
 <!-- Filtros -->
@@ -591,6 +603,12 @@ ob_start();
         <option value="medio" <?= ($filters['risk'] ?? 'todos') === 'medio' ? 'selected' : '' ?>>Médio (5% - 10%)</option>
         <option value="alto" <?= ($filters['risk'] ?? 'todos') === 'alto' ? 'selected' : '' ?>>Alto (>= 10%)</option>
     </select>
+    
+    <!-- Botão Adicionar Ajustado para a mesma linha -->
+    <button type="button" class="btn-add-setor" onclick="openModal()">
+        <i class="fa-solid fa-plus"></i> Adicionar Setor
+    </button>
+
     <button type="submit" style="display: none;"></button>
 </form>
 

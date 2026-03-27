@@ -80,7 +80,7 @@ ob_start();
         <?php if ($filters['visualizacao'] === 'cards'): ?>
             <div class="cards-grid" id="infractionsCardsGrid">
                 <?php foreach ($infractions as $infraction): ?>
-                    <div class="infraction-card">
+                    <div class="infraction-card<?= !empty($infraction['favorito']) ? ' is-bookmarked' : '' ?>" id="card-infraction-<?= $infraction['id'] ?>">
                         <div class="card-image-box">
                             <?php
                             $photoPath = !empty($infraction['funcionario_foto']) ? BASE_PATH . '/' . $infraction['funcionario_foto'] : BASE_PATH . '/assets/img/default-avatar.png';
@@ -107,11 +107,9 @@ ob_start();
                                 <span><?= date('d/m/Y - H:i', strtotime($infraction['data_hora'])) ?></span>
                             </div>
                             <div class="card-footer-premium">
-                                <button class="btn-card-action" title="Ver detalhes"><i class="fa-solid fa-eye"></i></button>
-                                <button class="btn-card-action secondary" title="Salvar para revisão"><i
+                                <button class="btn-card-action" title="Ver detalhes" onclick="openEvidenceModal('<?= htmlspecialchars($infraction['funcionario_nome']) ?>', '<?= htmlspecialchars($infraction['epi_nome'] ?? 'N/A') ?>', '<?= date('d/m/Y H:i', strtotime($infraction['data_hora'])) ?>', '<?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?>', '<?= !empty($infraction['evidencia_foto']) ? BASE_PATH . $infraction['evidencia_foto'] : '' ?>', <?= $infraction['id'] ?>, <?= $infraction['funcionario_id'] ?>, <?= $infraction['setor_id'] ?? 'null' ?>, <?= $infraction['epi_id'] ?? 'null' ?>)"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn-card-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>" title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
                                         class="fa-solid fa-bookmark"></i></button>
-                                <button class="btn-card-action info" title="Assinar Ocorrência"><i
-                                        class="fa-solid fa-signature"></i></button>
                                 <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
                                     <button class="btn-card-action success" title="Resolver"><i
                                             class="fa-solid fa-check"></i></button>
@@ -143,7 +141,7 @@ ob_start();
                         </tr>
                     <?php else: ?>
                         <?php foreach ($infractions as $infraction): ?>
-                            <tr>
+                            <tr id="row-infraction-<?= $infraction['id'] ?>" class="<?= !empty($infraction['favorito']) ? 'is-bookmarked' : '' ?>">
                                 <td><?= date('d/m/Y', strtotime($infraction['data_hora'])) ?></td>
                                 <td class="employee-cell">
                                     <?php if ($filters['visualizacao'] === 'foto'): ?>
@@ -161,7 +159,8 @@ ob_start();
                                 </td>
                                 <td><?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?></td>
                                 <td data-epi="<?= strtolower($infraction['epi_nome'] ?? '') ?>">
-                                    <?= htmlspecialchars($infraction['epi_nome'] ?? 'N/A') ?></td>
+                                    <?= htmlspecialchars($infraction['epi_nome'] ?? 'N/A') ?>
+                                </td>
                                 <td><?= date('H:i', strtotime($infraction['data_hora'])) ?></td>
                                 <td data-status="<?= htmlspecialchars($infraction['status'] ?? 'pendente') ?>">
                                     <span
@@ -170,17 +169,15 @@ ob_start();
                                 </td>
                                 <td>
                                     <div class="table-actions">
-                                        <button class="btn-action" title="Ver detalhes"><i class="fa-solid fa-eye"></i></button>
-                                        <button class="btn-action secondary" title="Salvar para revisão"><i
+                                        <button class="btn-action" title="Ver detalhes" onclick="openEvidenceModal('<?= htmlspecialchars($infraction['funcionario_nome']) ?>', '<?= htmlspecialchars($infraction['epi_nome'] ?? 'N/A') ?>', '<?= date('d/m/Y H:i', strtotime($infraction['data_hora'])) ?>', '<?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?>', '<?= !empty($infraction['evidencia_foto']) ? BASE_PATH . $infraction['evidencia_foto'] : '' ?>', <?= $infraction['id'] ?>, <?= $infraction['funcionario_id'] ?>, <?= $infraction['setor_id'] ?? 'null' ?>, <?= $infraction['epi_id'] ?? 'null' ?>)"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="btn-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>" title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
                                                 class="fa-solid fa-bookmark"></i></button>
-                                        <button class="btn-action info" title="Assinar Ocorrência"><i
-                                                class="fa-solid fa-signature"></i></button>
                                         <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
                                             <button class="btn-action success" title="Resolver"><i
                                                     class="fa-solid fa-check"></i></button>
                                         <?php endif; ?>
                                         <button class="btn-action danger" title="Excluir"
-                                            onclick="deleteInfraction(<?= $infraction['id'] ?>, this)"><i
+                                            onclick="confirmHideInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
                                                 class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </td>
@@ -238,7 +235,7 @@ ob_start();
                             <input type="checkbox" id="selectAllEmployees"
                                 onchange="toggleAllExportEmployees(this.checked)">
                             <span class="checkmark"></span>
-                            <span class="label-text">Selecionar Todos</span>
+                            <span class="label-text"> Selecionar Todos</span>
                         </label>
                         <span class="selected-count" id="selectedCount">0 selecionados</span>
                     </div>
@@ -270,6 +267,303 @@ ob_start();
         </div>
     </div>
 </div>
+
+<!-- MODAL DE CONFIRMAÇÃO PARA OCULTAR INFRAÇÃO -->
+<div id="confirmHideModal" class="modal-premium confirmation-modal">
+    <div class="modal-premium-content confirm-modal-content" style="max-width: 400px;">
+        <div class="modal-premium-header">
+            <div>
+                <h2>Ocultar Registro</h2>
+                <p>Tem certeza que deseja remover este registro da visualização?</p>
+            </div>
+            <button class="close-premium" onclick="closeConfirmHideModal()">&times;</button>
+        </div>
+        <div class="modal-premium-body" style="padding: 24px; text-align: center;">
+            <div class="warning-icon" style="font-size: 48px; color: #f59e0b; margin-bottom: 16px;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">
+                O registro de <strong><span id="hideTargetName"></span></strong> deixará de aparecer na listagem, mas continuará salvo no histórico do banco de dados.
+            </p>
+        </div>
+        <div class="modal-premium-footer" style="padding: 16px 24px; display: flex; gap: 12px; justify-content: center; background: #fafafa; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;">
+            <button class="btn-cancel-premium" onclick="closeConfirmHideModal()" style="padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; font-weight: 600;">Cancelar</button>
+            <button class="btn-confirm-hide" id="btnDoHide" style="padding: 10px 24px; border-radius: 10px; border: none; background: #E30613; color: #fff; cursor: pointer; font-weight: 700; box-shadow: 0 4px 12px rgba(227, 6, 19, 0.2);">Ocultar Registro</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fechar modais ao clicar fora
+    window.addEventListener('click', (e) => {
+        const confirmModal = document.getElementById('confirmHideModal');
+        const evidenceModal = document.getElementById('evidenceModal');
+        const exportModal = document.getElementById('exportModal');
+        
+        if (e.target === confirmModal) closeConfirmHideModal();
+        if (e.target === evidenceModal) closeEvidenceModal();
+        if (e.target === exportModal) closeExportModal();
+    });
+</script>
+
+<!-- MODAL DE VISUALIZAÇÃO DE EVIDÊNCIA -->
+<div id="evidenceModal" class="evidence-modal-overlay">
+    <div class="evidence-modal-card">
+        <button class="evidence-modal-close" onclick="closeEvidenceModal()">&times;</button>
+        <div class="evidence-modal-image-box">
+            <img id="evidenceModalImg" src="" alt="Evidência">
+            <div id="evidenceNoPhoto" class="evidence-no-photo" style="display:none;">
+                <i class="fa-solid fa-camera-slash" style="font-size:48px; margin-bottom:16px; opacity:0.3;"></i>
+                <p>Nenhuma evidência fotográfica registrada para esta ocorrência.</p>
+            </div>
+        </div>
+        <div class="evidence-modal-info">
+            <h3 id="evidenceModalName">-</h3>
+            <div class="evidence-info-grid">
+                <div class="evidence-info-item">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span id="evidenceModalEpi">-</span>
+                </div>
+                <div class="evidence-info-item">
+                    <i class="fa-solid fa-building"></i>
+                    <span id="evidenceModalSetor">-</span>
+                </div>
+                <div class="evidence-info-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <span id="evidenceModalData">-</span>
+                </div>
+            </div>
+            <div class="evidence-modal-actions">
+                <a id="evidenceDownloadBtn" href="" download class="evidence-btn download">
+                    <i class="fa-solid fa-download"></i> Baixar Evidência
+                </a>
+                <button class="evidence-btn sign" onclick="signOccurrence()">
+                    <i class="fa-solid fa-signature"></i> Assinar Ocorrência
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ===== MODAL DE EVIDÊNCIA ===== */
+    .evidence-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        animation: fadeInOverlay 0.3s ease;
+    }
+    .evidence-modal-overlay.active { display: flex; }
+    @keyframes fadeInOverlay {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .evidence-modal-card {
+        background: #fff;
+        border-radius: 24px;
+        width: 90%;
+        max-width: 560px;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+        overflow: hidden;
+        position: relative;
+        animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes scaleIn {
+        from { transform: scale(0.85); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .evidence-modal-close {
+        position: absolute;
+        top: 16px; right: 16px;
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(4px);
+        font-size: 22px;
+        color: #64748b;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .evidence-modal-close:hover {
+        background: #fee2e2;
+        color: #E30613;
+        transform: rotate(90deg);
+    }
+    .evidence-modal-image-box {
+        width: 100%;
+        aspect-ratio: 16/10;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .evidence-modal-image-box img {
+        width: 100%; height: 100%;
+        object-fit: contain;
+    }
+    .evidence-no-photo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        padding: 20px;
+    }
+    .evidence-modal-info {
+        padding: 24px 28px;
+    }
+    .evidence-modal-info h3 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1F2937;
+        margin: 0 0 16px 0;
+    }
+    .evidence-info-grid {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .evidence-info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+    }
+    .evidence-info-item i {
+        color: #E30613;
+        font-size: 14px;
+    }
+    .evidence-modal-actions {
+        display: flex;
+        gap: 12px;
+    }
+    .evidence-btn {
+        flex: 1;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        border: none;
+        font-family: 'Inter', sans-serif;
+    }
+    .evidence-btn.download {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+    .evidence-btn.download:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+    .evidence-btn.sign {
+        background: #E30613;
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(227, 6, 19, 0.25);
+    }
+    .evidence-btn.sign:hover {
+        background: #c40510;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(227, 6, 19, 0.35);
+    }
+</style>
+
+<script>
+    let currentEvidenceOccId = null;
+    let currentEmployeeId = null;
+    let currentSectorId = null;
+    let currentEpiId = null;
+    let currentDateTime = null;
+
+    function openEvidenceModal(nome, epi, data, setor, fotoUrl, occId, funcId, sectorId, epiId) {
+        currentEvidenceOccId = occId;
+        currentEmployeeId = funcId;
+        currentSectorId = sectorId;
+        currentEpiId = epiId;
+        currentDateTime = data;
+
+        const modal = document.getElementById('evidenceModal');
+        const img = document.getElementById('evidenceModalImg');
+        const noPhoto = document.getElementById('evidenceNoPhoto');
+        const downloadBtn = document.getElementById('evidenceDownloadBtn');
+
+        document.getElementById('evidenceModalName').textContent = nome;
+        document.getElementById('evidenceModalEpi').textContent = 'EPI: ' + epi;
+        document.getElementById('evidenceModalSetor').textContent = 'Setor: ' + setor;
+        document.getElementById('evidenceModalData').textContent = data;
+
+        if (fotoUrl && fotoUrl.trim() !== '') {
+            img.src = fotoUrl;
+            img.style.display = 'block';
+            noPhoto.style.display = 'none';
+            downloadBtn.href = fotoUrl;
+            downloadBtn.style.display = 'flex';
+        } else {
+            img.style.display = 'none';
+            noPhoto.style.display = 'flex';
+            downloadBtn.style.display = 'none';
+        }
+
+        document.body.appendChild(modal);
+        modal.classList.add('active');
+    }
+
+    function closeEvidenceModal() {
+        const modal = document.getElementById('evidenceModal');
+        modal.classList.remove('active');
+    }
+
+    function signOccurrence() {
+        if (!currentEmployeeId) return;
+        
+        // Formatar data para o input datetime-local (YYYY-MM-DDTHH:MM)
+        // A data vem no formato dd/mm/yyyy hh:ii
+        const parts = currentDateTime.split(' ');
+        const dateParts = parts[0].split('/');
+        const timePart = parts[1];
+        const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T${timePart}`;
+
+        const params = new URLSearchParams({
+            employee_id: currentEmployeeId,
+            sector_id: currentSectorId || '',
+            epi_id: currentEpiId || '',
+            datetime: formattedDate,
+            original_id: currentEvidenceOccId
+        });
+
+        window.location.href = window.BASE_PATH + '/occurrences?' + params.toString();
+    }
+
+    // Fechar ao clicar fora
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('evidenceModal');
+        if (modal && e.target === modal) closeEvidenceModal();
+    });
+</script>
 
 <script src="<?= BASE_PATH ?>/assets/js/infractions.js"></script>
 

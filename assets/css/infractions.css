@@ -260,3 +260,39 @@
     background: #F0FDF4;
     color: #16A34A;
 }
+
+/* =========================================
+   BOOKMARK & GLOW EFFECTS
+   ========================================= */
+.is-bookmarked {
+    border-color: #E30613 !important;
+    box-shadow: 0 0 20px rgba(227, 6, 19, 0.35) !important;
+    animation: pulsateGlow 2s infinite ease-in-out !important;
+}
+
+tr.is-bookmarked {
+    background: rgba(227, 6, 19, 0.05) !important;
+    border-left: 4px solid #E30613 !important;
+}
+
+.btn-card-action.secondary.active,
+.btn-action.secondary.active {
+    color: #E30613 !important;
+    background: rgba(227, 6, 19, 0.1) !important;
+    border-color: #E30613 !important;
+}
+
+@keyframes pulsateGlow {
+    0% { box-shadow: 0 0 10px rgba(227, 6, 19, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(227, 6, 19, 0.5); }
+    100% { box-shadow: 0 0 10px rgba(227, 6, 19, 0.2); }
+}
+
+/* Hide Animation */
+.fade-out-infraction {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.5s ease;
+    pointer-events: none;
+}
+

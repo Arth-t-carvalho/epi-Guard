@@ -20,6 +20,58 @@
     transform: scale(1) translateY(0) rotateX(0deg);
 }
 
+/* HEADER */
+.modal-premium-header {
+    background: linear-gradient(to right, rgba(227, 6, 19, 0.05), transparent);
+    padding: 24px 30px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+
+.modal-premium-header h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.modal-premium-header p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 4px 0 0 0;
+}
+
+/* BOTÃO DE FECHAR (com rotação e espaçamento interno) */
+.close-premium {
+    background: #f1f5f9;
+    top: 20px;
+    right: 20px;
+    border: none;
+    width: 38px;
+    height: 38px;
+    padding: 8px; /* espaçamento interno */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.close-premium:hover {
+    background: #fee2e2;
+    color: var(--primary);
+    transform: rotate(90deg); /* animação de rotação */
+    box-shadow: 0 4px 10px rgba(227, 6, 19, 0.15);
+}
+
 /* BODY */
 .modal-selection-list {
     display: flex;

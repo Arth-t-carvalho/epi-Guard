@@ -132,7 +132,6 @@ function renderInterface() {
         });
 
         if (dailyData.length > 0) {
-            // Modo Empresarial: Todos vêem o agrupamento por SETOR
             const grouped = {};
             dailyData.forEach(item => {
                 const key = item.name || 'Desconhecido';
@@ -141,12 +140,11 @@ function renderInterface() {
                 grouped[key].items.push(item);
             });
 
+            let htmlBuffer = '';
             Object.keys(grouped).forEach(name => {
                 const data = grouped[name];
                 const initials = name.substring(0, 2).toUpperCase();
-
-                // Em modo Empresarial, a ação padrão é abrir o detalhamento do curso/setor
-                list.innerHTML += `
+                htmlBuffer += `
                     <div class="occurrence-item" onclick="applyCourseFilterByName('${name.replace(/'/g, "\\'")}')" style="cursor:pointer;" title="Clique para detalhes deste setor">
                         <div class="occ-avatar">${initials}</div>
                         <div class="occ-info">
@@ -156,8 +154,15 @@ function renderInterface() {
                         <div class="occ-time">❯</div>
                     </div>`;
             });
+            list.innerHTML = htmlBuffer;
         } else {
-            list.innerHTML = '';
+            list.innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="calendar-check"></i>
+                    <p>Nenhuma ocorrência registrada para este dia.</p>
+                </div>
+            `;
+            if (typeof lucide !== 'undefined') lucide.createIcons({ root: list });
         }
     }
 
@@ -770,6 +775,10 @@ function loadCharts() {
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
+                    animation: { duration: 400, easing: 'easeOutQuart' },
+                    normalized: true,
+                    spanGaps: false,
+                    elements: { point: { radius: 0 } },
                     interaction: {
                         mode: 'index',
                         intersect: false,
@@ -826,6 +835,7 @@ function loadCharts() {
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    animation: { duration: 400, easing: 'easeOutQuart' },
                     onClick: (evt, active, chart) => {
                         if (active.length > 0) {
                             const index = active[0].index;

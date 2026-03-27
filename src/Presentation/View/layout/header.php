@@ -17,10 +17,24 @@
     <div class="header-actions">
 
         <!-- Notificações -->
-        <button class="header-icon-btn notification-btn">
+        <button class="header-icon-btn notification-btn" id="notificationBellBtn" onclick="toggleNotificationPanel()">
             <i class="fa-solid fa-bell"></i>
             <span class="notification-badge hidden" id="bell-badge">0</span>
         </button>
+
+        <!-- Painel de Notificações -->
+        <div class="notification-panel" id="notificationPanel">
+            <div class="notification-panel-header">
+                <h3><i class="fa-solid fa-bell"></i> Notificações</h3>
+                <button class="notification-panel-close" onclick="toggleNotificationPanel()">&times;</button>
+            </div>
+            <div class="notification-panel-body" id="notificationPanelBody">
+                <div class="notification-empty">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <p>Nenhuma notificação pendente</p>
+                </div>
+            </div>
+        </div>
 
         <!-- Configurações -->
         <button class="header-icon-btn">
