@@ -190,3 +190,53 @@
     background: #e2e8f0;
     color: #1e293b;
 }
+
+/* =========================================
+   DARK MODE OVERRIDES (PICKER)
+   ========================================= */
+
+html.dark-theme .modern-picker-trigger {
+    background: var(--bg-card);
+    border-color: var(--border);
+}
+
+html.dark-theme .modern-picker-trigger .trigger-value {
+    color: var(--text-main);
+}
+
+html.dark-theme .modern-picker-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+}
+
+html.dark-theme .modern-picker-header h3 {
+    color: var(--text-main);
+}
+
+html.dark-theme .modern-picker-option {
+    background: #0f172a;
+}
+
+html.dark-theme .modern-picker-option:hover {
+    background: #1e293b;
+}
+
+html.dark-theme .modern-picker-option span {
+    color: var(--text-main);
+}
+
+html.dark-theme .modern-picker-option.selected {
+    background: rgba(227, 6, 19, 0.15);
+    border-color: var(--primary);
+}
+
+html.dark-theme .modern-picker-close {
+    background: #1e293b;
+    color: var(--text-muted);
+}
+
+html.dark-theme .modern-picker-close:hover {
+    background: var(--border);
+    color: var(--text-main);
+}
+

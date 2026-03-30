@@ -322,3 +322,46 @@
     display: flex;
     gap: 8px;
 }
+
+/* =========================================
+   DARK MODE OVERRIDES
+   ========================================= */
+
+html.dark-theme .filter-bar input,
+html.dark-theme .filter-bar select {
+    background: var(--bg-card);
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+html.dark-theme .summary-icon.red { background: rgba(227, 6, 19, 0.15); }
+html.dark-theme .summary-icon.amber { background: rgba(245, 158, 11, 0.15); }
+html.dark-theme .summary-icon.green { background: rgba(22, 163, 74, 0.15); }
+html.dark-theme .summary-icon.blue { background: rgba(59, 130, 246, 0.15); }
+
+html.dark-theme .data-table th {
+    background: #1e293b;
+    border-bottom: 2px solid var(--border);
+    color: #cbd5e1;
+}
+
+html.dark-theme .data-table td {
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+html.dark-theme .data-table tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-theme .btn-action {
+    background: var(--bg-card);
+    border-color: var(--border);
+    color: var(--text-muted);
+}
+
+html.dark-theme .btn-action:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}

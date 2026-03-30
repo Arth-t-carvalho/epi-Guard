@@ -59,6 +59,22 @@ ob_start();
     .selection-row.hidden {
         display: none;
     }
+
+    /* DARK MODE RELACIONADO AO BUSCADOR INTERNO */
+    html.dark-theme .modal-search-wrapper {
+        border-bottom-color: var(--border);
+    }
+
+    html.dark-theme #sectorSearchInput {
+        background: #0f172a;
+        border-color: var(--border);
+        color: var(--text-main);
+    }
+
+    html.dark-theme #sectorSearchInput:focus {
+        border-color: var(--primary);
+        background: #1e293b;
+    }
 </style>
 
 <!-- Global Variables for JS -->
@@ -93,8 +109,8 @@ ob_start();
         </div>
     </div>
 
-    <div class="kpi-card card" id="cardKpiMedia">
-        <span class="kpi-header">CONFORMIDADE</span>
+    <div class="kpi-card card" id="cardKpiMedia" onclick="openConformityModal()" style="cursor: pointer;">
+        <span class="kpi-header" id="kpiMediaHeader">CONFORMIDADE (DIÁRIA)</span>
         <div class="kpi-value">
             <span id="kpiMedia">0%</span>
         </div>
@@ -135,10 +151,10 @@ ob_start();
 
             <div class="date-display"
                 style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-                <div id="displayDayNum" style="color: #E30613; font-size: 28px; font-weight: 800; line-height: 1;">
+                <div id="displayDayNum" style="font-size: 28px; font-weight: 800; line-height: 1;">
                     --
                 </div>
-                <div id="displayMonthStr" style="color: #64748B; font-size: 13px; font-weight: 600;">
+                <div id="displayMonthStr" style="font-size: 13px; font-weight: 600;">
                     --
                 </div>
 
@@ -318,6 +334,59 @@ ob_start();
             <button class="btn-light-shadow" onclick="closeConfirmModal()">
                 Cancelar
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ESCOLHA DE PERÍODO DA CONFORMIDADE -->
+<div id="conformityModal" class="modal-premium">
+    <div class="modal-premium-content" style="max-width: 400px;">
+        <div class="modal-premium-header">
+            <div>
+                <h2>Período de Conformidade</h2>
+                <p>Você deseja ver a conformidade de qual período?</p>
+            </div>
+            <button class="close-premium" onclick="closeConformityModal()">&times;</button>
+        </div>
+        <div class="modal-premium-body" style="padding-top: 24px;">
+            <div class="modal-selection-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="selection-row" onclick="selectConformityPeriod('diaria')" style="cursor: pointer; padding: 16px;">
+                    <div class="selection-main">
+                        <div class="sector-cell" style="display:flex; align-items:center;">
+                            <i data-lucide="calendar" style="color:var(--primary);"></i>
+                            <span style="margin-left:12px; font-weight: 600;">Diária</span>
+                        </div>
+                    </div>
+                    <span class="status-tag">Selecionar</span>
+                </div>
+                <div class="selection-row" onclick="selectConformityPeriod('semanal')" style="cursor: pointer; padding: 16px;">
+                    <div class="selection-main">
+                        <div class="sector-cell" style="display:flex; align-items:center;">
+                            <i data-lucide="calendar-days" style="color:var(--primary);"></i>
+                            <span style="margin-left:12px; font-weight: 600;">Semanal</span>
+                        </div>
+                    </div>
+                    <span class="status-tag">Selecionar</span>
+                </div>
+                <div class="selection-row" onclick="selectConformityPeriod('mensal')" style="cursor: pointer; padding: 16px;">
+                    <div class="selection-main">
+                        <div class="sector-cell" style="display:flex; align-items:center;">
+                            <i data-lucide="calendar-range" style="color:var(--primary);"></i>
+                            <span style="margin-left:12px; font-weight: 600;">Mensal</span>
+                        </div>
+                    </div>
+                    <span class="status-tag">Selecionar</span>
+                </div>
+                <div class="selection-row" onclick="selectConformityPeriod('anual')" style="cursor: pointer; padding: 16px;">
+                    <div class="selection-main">
+                        <div class="sector-cell" style="display:flex; align-items:center;">
+                            <i data-lucide="calendar-clock" style="color:var(--primary);"></i>
+                            <span style="margin-left:12px; font-weight: 600;">Anual</span>
+                        </div>
+                    </div>
+                    <span class="status-tag">Selecionar</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -19,6 +19,12 @@ if (!function_exists('__')) {
                 'Preferência regional para alertas e datas.' => 'Regional preference for alerts and dates.',
                 'Português (Brasil)' => 'Portuguese (Brazil)',
                 'English (US)' => 'English (US)',
+                'Paleta de Cores dos Gráficos' => 'Chart Color Palette',
+                'Personalize as cores utilizadas nos gráficos da Dashboard.' => 'Customize the colors used in the Dashboard charts.',
+                'Padrão (Senai)' => 'Default (Senai)',
+                'Azul Corporativo' => 'Corporate Blue',
+                'Verde Sustentável' => 'Sustainable Green',
+                'Roxo Vibrante' => 'Vibrant Purple',
                 'Notificações' => 'Notifications',
                 'Alertas de Infração por E-mail' => 'Email Infraction Alerts',
                 'Receba um e-mail imediato sempre que uma infração Grave for registrada.' => 'Receive an immediate email whenever a Severe infraction is registered.',
@@ -84,6 +90,21 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                         <select class="settings-select" id="languageSelect" onchange="changeLanguage(this.value)">
                             <option value="pt-br" <?= ($_COOKIE['epiguard-lang'] ?? 'pt-br') === 'pt-br' ? 'selected' : '' ?>><?= __('Português (Brasil)') ?></option>
                             <option value="en" <?= ($_COOKIE['epiguard-lang'] ?? '') === 'en' ? 'selected' : '' ?>><?= __('English (US)') ?></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3><?= __('Paleta de Cores dos Gráficos') ?></h3>
+                        <p><?= __('Personalize as cores utilizadas nos gráficos da Dashboard.') ?></p>
+                    </div>
+                    <div class="setting-action">
+                        <select class="settings-select" id="chartColorSelect" onchange="changeChartColor(this.value)">
+                            <option value="default"><?= __('Padrão (Senai)') ?></option>
+                            <option value="blue"><?= __('Azul Corporativo') ?></option>
+                            <option value="emerald"><?= __('Verde Sustentável') ?></option>
+                            <option value="purple"><?= __('Roxo Vibrante') ?></option>
                         </select>
                     </div>
                 </div>
@@ -185,6 +206,10 @@ function changeLanguage(lang) {
     window.location.reload();
 }
 
+function changeChartColor(palette) {
+    localStorage.setItem('epiguard-chart-palette', palette);
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     var isDark = document.documentElement.classList.contains('dark-theme');
     const themeIcon = document.getElementById("theme-icon-display");
@@ -197,6 +222,10 @@ document.addEventListener("DOMContentLoaded", function() {
     if (themeLabel) {
         themeLabel.textContent = isDark ? "<?= __('Tema Claro') ?>" : "<?= __('Tema Escuro') ?>";
     }
+
+    const savedPalette = localStorage.getItem('epiguard-chart-palette') || 'default';
+    const chartSelect = document.getElementById('chartColorSelect');
+    if (chartSelect) chartSelect.value = savedPalette;
     
     // Inicia a renderização de ícones para o modo respectivo
     if (window.lucide) {

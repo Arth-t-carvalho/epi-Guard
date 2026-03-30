@@ -53,11 +53,13 @@ html.dark-theme .instructor-card {
 }
 
 html.dark-theme .welcome-text {
-    background: linear-gradient(135deg, #f1f5f9 30%, #94a3b8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: #f1f5f9;
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: #0f172a; /* Texto preto/escuro como solicitado */
+    background-color: rgba(255, 255, 255, 0.8); /* Fundo claro para o texto preto */
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-weight: 700;
 }
 
 html.dark-theme .user-avatar {

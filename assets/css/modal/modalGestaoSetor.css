@@ -228,3 +228,73 @@
 .global-row {
     background: #fffafa;
 }
+
+/* =========================================
+   DARK MODE OVERRIDES (MODAL GESTÃO SETOR)
+   ========================================= */
+
+html.dark-theme .modal-premium-content {
+    background: #1e293b;
+    border: 1px solid var(--border);
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.6);
+}
+
+html.dark-theme .modal-premium-header {
+    background: linear-gradient(to right, rgba(227, 6, 19, 0.1), transparent);
+    border-bottom-color: var(--border);
+}
+
+html.dark-theme .modal-premium-header h2 {
+    color: var(--text-main);
+}
+
+html.dark-theme .modal-premium-header p {
+    color: var(--text-muted);
+}
+
+html.dark-theme .close-premium {
+    background: #334155;
+    color: var(--text-muted);
+}
+
+html.dark-theme .close-premium:hover {
+    background: rgba(227, 6, 19, 0.2);
+    color: var(--primary);
+}
+
+html.dark-theme .selection-row {
+    border-bottom-color: var(--border);
+}
+
+html.dark-theme .selection-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-theme .selection-row span,
+html.dark-theme .sector-cell span {
+    color: var(--text-main);
+}
+
+html.dark-theme .status-tag {
+    background: #334155;
+    color: var(--text-muted);
+}
+
+html.dark-theme .modal-premium-footer {
+    border-top-color: var(--border);
+}
+
+html.dark-theme .global-row {
+    background: rgba(227, 6, 19, 0.05);
+}
+
+/* Checkbox fix for dark mode */
+html.dark-theme .checkmark {
+    background-color: #334155;
+    border: 1px solid var(--border);
+}
+
+html.dark-theme .custom-checkbox input:checked ~ .checkmark {
+    background-color: var(--primary);
+}
+

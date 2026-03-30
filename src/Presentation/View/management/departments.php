@@ -294,6 +294,159 @@ $extraHead = '
             color: #991b1b;
         }
 
+        /* =========================================
+           DARK MODE OVERRIDES (DEPARTMENTS)
+           ========================================= */
+        html.dark-theme .setor-filters select,
+        html.dark-theme .search-box {
+            background: var(--bg-card);
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        html.dark-theme .search-box input {
+            color: var(--text-main);
+            background: transparent;
+        }
+        
+        html.dark-theme .search-box i {
+            color: var(--text-muted);
+        }
+        
+        html.dark-theme .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .setor-table-wrapper {
+            background: var(--bg-card);
+            border-color: var(--border);
+        }
+
+        html.dark-theme .setor-table thead th {
+            background: var(--bg-card);
+            border-bottom-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .setor-table tbody tr:hover {
+            background: var(--bg-main);
+        }
+
+        html.dark-theme .setor-table tbody td {
+            border-bottom-color: var(--border);
+        }
+
+        html.dark-theme .setor-nome,
+        html.dark-theme .setor-count {
+            color: var(--text-main);
+        }
+
+        html.dark-theme .epi-icon-badge {
+            background: var(--bg-main);
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .btn-edit,
+        html.dark-theme .btn-delete {
+            background: var(--bg-main);
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .btn-edit:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        html.dark-theme .btn-delete:hover {
+            background: rgba(2ef, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        html.dark-theme .risk-badge.baixo {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        html.dark-theme .risk-badge.medio {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        html.dark-theme .risk-badge.alto {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        /* MODAL DARK MODE (DEPARTMENTS) */
+        html.dark-theme .modal-setor {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        html.dark-theme .modal-setor-header h2,
+        html.dark-theme .form-label {
+            color: var(--text-main);
+        }
+
+        html.dark-theme .form-input {
+            background: var(--bg-main);
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        html.dark-theme .upload-area {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        html.dark-theme .epi-card {
+            background: #0f172a;
+            border-color: var(--border);
+        }
+
+        html.dark-theme .epi-card-info .epi-card-name {
+            color: var(--text-main);
+        }
+
+        html.dark-theme .epi-card-icon {
+            background: #1e293b;
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .epi-card.selected {
+            background: rgba(227, 6, 19, 0.15);
+            border-color: var(--primary);
+        }
+
+        html.dark-theme .epi-card.selected .epi-card-icon {
+            background: rgba(227, 6, 19, 0.25);
+            color: var(--primary);
+        }
+
+        html.dark-theme .modal-setor-footer {
+            border-top-color: var(--border);
+        }
+
+        html.dark-theme .btn-cancel {
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .btn-cancel:hover {
+            color: var(--text-main);
+        }
+
+        /* Status colors in dark mode */
+        html.dark-theme .status-indicator {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
         /* ============ MODAL ============ */
         .modal-setor-overlay {
             position: fixed;

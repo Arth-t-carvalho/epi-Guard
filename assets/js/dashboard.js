@@ -12,11 +12,27 @@ let doughnutChartInstance = null;
 let selectedCourseId = 'all'; // Legado, mantido para compatibilidade de funções
 let selectedSectorId = 'all'; // Novo: Filtro de setor para visão empresarial
 let pendingRedirectPeriod = 'todos'; // Armazena o período para o modal de confirmação
+let conformityPeriod = 'diaria'; // Novo: Armazena o periodo da conformidade
 
-// Cores para os gráficos
-const colorHelmet = '#1F2937';
-const colorGlasses = '#9CA3AF';
-const colorAll = '#E30613';
+// Paletas de Cores Dinâmicas
+const chartPalettes = {
+    default: { helmet: '#1F2937', glasses: '#9CA3AF', all: '#E30613', extra1: '#f59e0b', extra2: '#3b82f6' },
+    blue: { helmet: '#1e3a8a', glasses: '#60a5fa', all: '#2563eb', extra1: '#93c5fd', extra2: '#1d4ed8' },
+    emerald: { helmet: '#064e3b', glasses: '#34d399', all: '#10b981', extra1: '#6ee7b7', extra2: '#047857' },
+    purple: { helmet: '#4c1d95', glasses: '#a78bfa', all: '#7c3aed', extra1: '#c4b5fd', extra2: '#5b21b6' }
+};
+
+const savedPaletteKey = localStorage.getItem('epiguard-chart-palette') || 'default';
+const activePalette = chartPalettes[savedPaletteKey] || chartPalettes.default;
+
+Chart.defaults.color = 'var(--text-color)';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+let colorHelmet = activePalette.helmet;
+let colorGlasses = activePalette.glasses;
+let colorAll = activePalette.all;
+let colorExtra1 = activePalette.extra1;
+let colorExtra2 = activePalette.extra2;
 
 // Arrays auxiliares
 const monthsFull = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -352,6 +368,30 @@ function goToInfractions() {
     window.location.href = `${window.BASE_PATH}/infractions?periodo=${period}`;
 }
 
+// --- LÓGICA DE CONFIRMAÇÃO DE CONFORMIDADE ---
+function openConformityModal() {
+    const modal = document.getElementById('conformityModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.querySelector('.main-content').style.overflow = 'hidden';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
+    }
+}
+
+function closeConformityModal() {
+    const modal = document.getElementById('conformityModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.querySelector('.main-content').style.overflow = '';
+    }
+}
+
+function selectConformityPeriod(period) {
+    conformityPeriod = period;
+    updateKPICards();
+    closeConformityModal();
+}
+
 function changeDay(delta) {
     const oldMonth = selectedDate.getMonth();
     selectedDate.setDate(selectedDate.getDate() + delta);
@@ -389,6 +429,9 @@ function updateKPICards() {
     const selMonth = selectedDate.getMonth();
     const selYear = selectedDate.getFullYear();
     const uniqueStudentsToday = new Set();
+    const uniqueStudentsWeek = new Set();
+    const uniqueStudentsMonth = new Set();
+    const uniqueStudentsYear = new Set();
 
     allOccurrences.forEach(item => {
         const dbDateString = item.full_date || item.data_hora || item.date;
@@ -400,8 +443,23 @@ function updateKPICards() {
                 uniqueStudentsToday.add(item.aluno_id || item.student_id);
             }
         }
-        if (isSameWeek(selectedDate, itemDate)) countWeek++;
-        if (itemDate.getMonth() === selMonth && itemDate.getFullYear() === selYear) countMonth++;
+        if (isSameWeek(selectedDate, itemDate)) {
+            countWeek++;
+            if (item.aluno_id || item.student_id) {
+                uniqueStudentsWeek.add(item.aluno_id || item.student_id);
+            }
+        }
+        if (itemDate.getMonth() === selMonth && itemDate.getFullYear() === selYear) {
+            countMonth++;
+            if (item.aluno_id || item.student_id) {
+                uniqueStudentsMonth.add(item.aluno_id || item.student_id);
+            }
+        }
+        if (itemDate.getFullYear() === selYear) {
+            if (item.aluno_id || item.student_id) {
+                uniqueStudentsYear.add(item.aluno_id || item.student_id);
+            }
+        }
     });
 
     const elDia = document.getElementById('kpiDia');
@@ -449,10 +507,29 @@ function updateKPICards() {
 
     if (elMedia) {
         const total = window.totalStudents || 20;
-        const infra = uniqueStudentsToday.size;
+        let infra = 0;
+        let periodHeader = 'DIÁRIA';
+        
+        if (conformityPeriod === 'diaria') { 
+            infra = uniqueStudentsToday.size; 
+            periodHeader = 'DIÁRIA'; 
+        } else if (conformityPeriod === 'semanal') { 
+            infra = uniqueStudentsWeek.size; 
+            periodHeader = 'SEMANAL'; 
+        } else if (conformityPeriod === 'mensal') { 
+            infra = uniqueStudentsMonth.size; 
+            periodHeader = 'MENSAL'; 
+        } else if (conformityPeriod === 'anual') { 
+            infra = uniqueStudentsYear.size; 
+            periodHeader = 'ANUAL'; 
+        }
+        
         const conformidade = Math.round(((total - infra) / total) * 100);
         elMedia.innerText = `${Math.max(0, conformidade)}%`;
         updateConformityStatus(conformidade);
+        
+        const headerEl = document.getElementById('kpiMediaHeader');
+        if (headerEl) headerEl.innerText = `CONFORMIDADE (${periodHeader})`;
     }
 }
 
@@ -1013,7 +1090,7 @@ function loadCharts() {
             });
 
             const isDoughnutEmpty = response.doughnut.total === 0;
-            const doughnutBgColor = isDoughnutEmpty ? ['#f1f5f9'] : [colorHelmet, colorGlasses, colorAll, '#f59e0b', '#3b82f6'];
+            const doughnutBgColor = isDoughnutEmpty ? ['#f1f5f9'] : [colorHelmet, colorGlasses, colorAll, colorExtra1, colorExtra2];
             const doughnutHoverColor = isDoughnutEmpty ? ['#e2e8f0'] : undefined;
 
             const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');

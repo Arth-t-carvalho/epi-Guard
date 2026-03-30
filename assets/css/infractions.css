@@ -437,3 +437,101 @@ tr.is-bookmarked {
     pointer-events: none;
 }
 
+/* =========================================
+   DARK MODE OVERRIDES
+   ========================================= */
+
+html.dark-theme .modern-picker-trigger {
+    background: var(--bg-card);
+    border-color: var(--border);
+}
+
+html.dark-theme .modern-picker-trigger .trigger-value {
+    color: var(--text-main);
+}
+
+html.dark-theme .select-search input {
+    background: var(--bg-card) !important;
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+html.dark-theme .modern-picker-container {
+    background: var(--bg-card);
+}
+
+html.dark-theme .modern-picker-header h3 {
+    color: var(--text-main);
+}
+
+html.dark-theme .modern-picker-option {
+    background: var(--bg-main);
+}
+
+html.dark-theme .modern-picker-option:hover {
+    background: var(--border);
+}
+
+html.dark-theme .modern-picker-option span {
+    color: var(--text-main);
+}
+
+html.dark-theme .modern-picker-close {
+    background: var(--bg-main);
+    color: var(--text-muted);
+}
+
+html.dark-theme .modern-picker-close:hover {
+    background: var(--border);
+    color: var(--text-main);
+}
+
+html.dark-theme .table-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border) !important;
+}
+
+html.dark-theme .employee-avatar-wrapper {
+    background: var(--bg-main);
+    border-color: var(--border);
+}
+
+html.dark-theme .infraction-card {
+    background: var(--bg-card);
+    border-color: var(--border);
+}
+
+html.dark-theme .card-image-box {
+    background: var(--bg-main);
+}
+
+html.dark-theme .employee-name {
+    color: var(--text-main);
+}
+
+html.dark-theme .btn-card-action {
+    background: var(--bg-main);
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+html.dark-theme .btn-card-action:hover {
+    background: var(--primary-light);
+}
+
+html.dark-theme .card-footer-premium {
+    border-top-color: var(--border);
+}
+
+html.dark-theme .status-badge-premium.pending {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+html.dark-theme .status-badge-premium.resolved {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+}
+

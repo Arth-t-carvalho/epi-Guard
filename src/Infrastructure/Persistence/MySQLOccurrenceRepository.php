@@ -458,7 +458,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
             }
         }
 
-        $sql .= " ORDER BY o.data_hora DESC";
+        $sql .= " ORDER BY o.favorito DESC, o.data_hora DESC";
 
         $stmt = $this->db->prepare($sql);
         if (!empty($params)) {

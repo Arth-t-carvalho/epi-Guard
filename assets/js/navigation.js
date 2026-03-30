@@ -66,100 +66,110 @@ async function navigateViaSPA(destino) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         
-        // Timer visual para garantir que a transição de slide termine
-        setTimeout(() => {
-            // A. Atualizar Header e Título
-            document.title = doc.title;
-            window.history.pushState({}, '', destino);
+        // PRELOAD DOS  NOVOS CSS
+        // Evita FOUC (Flash of Unstyled Content) fazendo o preloading antes de inserir no DOM
+        const newStylesHrefs = Array.from(doc.querySelectorAll('link[rel="stylesheet"]')).map(l => l.getAttribute('href'));
+        const cssPromises = [];
+        
+        doc.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && !document.querySelector(`link[href="${href}"]`)) {
+                const newLink = document.createElement('link');
+                newLink.rel = 'stylesheet';
+                newLink.href = href;
+                
+                // Mapeia uma promise para aguardar o recarregamento assíncrono do arquivo CSS do apache
+                cssPromises.push(new Promise(resolve => {
+                    newLink.onload = resolve;
+                    newLink.onerror = resolve; // Não travar o fluxo se o CSS não existir
+                }));
+                
+                document.head.appendChild(newLink);
+            }
+        });
+
+        // Aguarda os CSS terminarem de carregar E o timeout de animação em paralelo
+        await Promise.all([
+            ...cssPromises,
+            new Promise(r => setTimeout(r, 280))
+        ]);
+
+        // A. Atualizar Header e Título
+        document.title = doc.title;
+        window.history.pushState({}, '', destino);
+        
+        // B. Muta o miolo 
+        const newMain = doc.querySelector('.main-content');
+        if (newMain && wrapper) {
+            // Remove as animações pendentes antes da troca
+            wrapper.style.animation = 'none';
+            wrapper.innerHTML = newMain.innerHTML;
+            wrapper.className = newMain.className; // Copiar classes exclusivas
+        }
+
+        // C. Remove CSS antigos vazados (Prevenção de Bug Visual)
+        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && !newStylesHrefs.includes(href)) {
+                link.remove();
+            }
+        });
+
+        // 3. Limpa e atualiza os blocos <style> inline do <head> (ex: overrides via PHP)
+        document.querySelectorAll('head style').forEach(s => s.remove());
+        doc.querySelectorAll('head style').forEach(s => {
+            const newStyle = document.createElement('style');
+            newStyle.innerHTML = s.innerHTML;
+            document.head.appendChild(newStyle);
+        });
+
+        // D. Injeta Scripts Isolados (e re-executa JS de tela)
+        const newScripts = doc.querySelectorAll('body script');
+        newScripts.forEach(script => {
+            const src = script.getAttribute('src');
             
-            // B. Muta o miolo 
-            const newMain = doc.querySelector('.main-content');
-            if (newMain && wrapper) {
-                // Remove as animações pendentes antes da troca
-                wrapper.style.animation = 'none';
-                wrapper.innerHTML = newMain.innerHTML;
-                wrapper.className = newMain.className; // Copiar classes exclusivas
+            // Evitar duplicação ou travamento de bibliotecas do sidebar/globais
+            if (src && (
+                src.includes('lucide') || 
+                src.includes('navigation.js') || 
+                src.includes('notifications.js')
+            )) return;
+
+            // Remove a versão antiga do JS da página para não acavalar
+            if (src && document.querySelector(`script[src="${src}"]`)) {
+                document.querySelector(`script[src="${src}"]`).remove();
             }
 
-            // C. Injeta CSS novos e Remove CSS antigos vazados (Prevenção de Bug Visual)
-            const newStylesHrefs = Array.from(doc.querySelectorAll('link[rel="stylesheet"]')).map(l => l.getAttribute('href'));
-            
-            // 1. Remove os arquivos .css anteriores que não pertencem a nova tela
-            document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-                const href = link.getAttribute('href');
-                if (href && !newStylesHrefs.includes(href)) {
-                    link.remove();
-                }
-            });
-
-            // 2. Adiciona os arquivos .css da nova tela que ainda não temos
-            doc.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-                const href = link.getAttribute('href');
-                if (href && !document.querySelector(`link[href="${href}"]`)) {
-                    const newLink = document.createElement('link');
-                    newLink.rel = 'stylesheet';
-                    newLink.href = href;
-                    document.head.appendChild(newLink);
-                }
-            });
-
-            // 3. Limpa e atualiza os blocos <style> inline do <head> (ex: overrides via PHP)
-            document.querySelectorAll('head style').forEach(s => s.remove());
-            doc.querySelectorAll('head style').forEach(s => {
-                const newStyle = document.createElement('style');
-                newStyle.innerHTML = s.innerHTML;
-                document.head.appendChild(newStyle);
-            });
-
-            // D. Injeta Scripts Isolados (e re-executa JS de tela)
-            const newScripts = doc.querySelectorAll('body script');
-            newScripts.forEach(script => {
-                const src = script.getAttribute('src');
-                
-                // Evitar duplicação ou travamento de bibliotecas do sidebar/globais
-                if (src && (
-                    src.includes('lucide') || 
-                    src.includes('navigation.js') || 
-                    src.includes('notifications.js')
-                )) return;
-
-                // Remove a versão antiga do JS da página para não acavalar
-                if (src && document.querySelector(`script[src="${src}"]`)) {
-                    document.querySelector(`script[src="${src}"]`).remove();
-                }
-
-                // Cria o nodo real do Script para forçar a avaliação (o innerHTML bruto no DOM não executa)
-                const newScript = document.createElement('script');
-                if (src) {
-                    newScript.src = src;
-                } else {
-                    // Evita redeclarar variáveis globais usando const
-                    if (script.innerHTML.includes('window.BASE_PATH')) return; 
-                    newScript.innerHTML = script.innerHTML;
-                }
-                
-                document.body.appendChild(newScript);
-            });
-            
-            // E. Dispara evento DOMContentLoaded Fake para Inicializar a view
-            window.document.dispatchEvent(new Event("DOMContentLoaded", {
-                bubbles: true,
-                cancelable: true
-            }));
-
-            // F. Re-inicia os links internos da nova Main
-            setupLinks();
-            
-            // G. Animação de Entrada
-            if (wrapper) {
-                void wrapper.offsetWidth; // Reflow
-                wrapper.style.animation = "slideFromRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
+            // Cria o nodo real do Script para forçar a avaliação (o innerHTML bruto no DOM não executa)
+            const newScript = document.createElement('script');
+            if (src) {
+                newScript.src = src;
+            } else {
+                // Evita redeclarar variáveis globais usando const
+                if (script.innerHTML.includes('window.BASE_PATH')) return; 
+                newScript.innerHTML = script.innerHTML;
             }
+            
+            document.body.appendChild(newScript);
+        });
+        
+        // E. Dispara evento DOMContentLoaded Fake para Inicializar a view
+        window.document.dispatchEvent(new Event("DOMContentLoaded", {
+            bubbles: true,
+            cancelable: true
+        }));
 
-            // H. Ajustar marcações visuais na Sidebar (Ativo/Inativo)
-            updateSidebarActiveItem();
+        // F. Re-inicia os links internos da nova Main
+        setupLinks();
+        
+        // G. Animação de Entrada
+        if (wrapper) {
+            void wrapper.offsetWidth; // Reflow
+            wrapper.style.animation = "slideFromRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
+        }
 
-        }, 280); // Fim do delay das animações CSS
+        // H. Ajustar marcações visuais na Sidebar (Ativo/Inativo)
+        updateSidebarActiveItem();
         
     } catch (err) {
         console.warn("[SPA] Fallback disparado devido a erro:", err);
