@@ -260,8 +260,20 @@ async function toggleBookmark(btn, occId) {
             const row = document.getElementById(`row-infraction-${occId}`);
 
             if (result.favorito) {
-                if (card) card.classList.add('is-bookmarked');
-                if (row) row.classList.add('is-bookmarked');
+                if (card) {
+                    card.classList.add('is-bookmarked');
+                    // Mover para o topo da grid
+                    if (card.parentNode) {
+                        card.parentNode.prepend(card);
+                    }
+                }
+                if (row) {
+                    row.classList.add('is-bookmarked');
+                    // Mover para o topo da tabela
+                    if (row.parentNode) {
+                        row.parentNode.prepend(row);
+                    }
+                }
                 btn.classList.add('active');
             } else {
                 if (card) card.classList.remove('is-bookmarked');

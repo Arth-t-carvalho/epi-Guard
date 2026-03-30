@@ -70,30 +70,30 @@ ob_start();
 
 <!-- KPI CARDS -->
 <div class="kpi-grid">
-    <div class="kpi-card card" onclick="confirmRedirect('hoje')" style="cursor: pointer;">
+    <div class="kpi-card card" id="cardKpiHoje">
         <span class="kpi-header">INFRAÇÕES HOJE</span>
         <div class="kpi-value">
             <span id="kpiDia">0</span>
-            <span class="badge" id="badgeDia">0%</span>
+            <span class="badge" id="badgeDia" style="display:none;">0%</span>
         </div>
     </div>
 
-    <div class="kpi-card card" onclick="confirmRedirect('semana')" style="cursor: pointer;">
+    <div class="kpi-card card" id="cardKpiSemana">
         <span class="kpi-header">INFRAÇÕES SEMANA</span>
         <div class="kpi-value">
             <span id="kpiSemana">0</span>
-            <span class="badge" id="badgeSemana">0%</span>
+            <span class="badge" id="badgeSemana" style="display:none;">0%</span>
         </div>
     </div>
 
-    <div class="kpi-card card" onclick="confirmRedirect('mes')" style="cursor: pointer;">
+    <div class="kpi-card card" id="cardKpiMes">
         <span class="kpi-header">INFRAÇÕES MÊS</span>
         <div class="kpi-value">
             <span id="kpiMes">0</span>
         </div>
     </div>
 
-    <div class="kpi-card card">
+    <div class="kpi-card card" id="cardKpiMedia">
         <span class="kpi-header">CONFORMIDADE</span>
         <div class="kpi-value">
             <span id="kpiMedia">0%</span>
@@ -127,9 +127,6 @@ ob_start();
     <div class="card">
         <div class="section-header">
             <h3 class="section-title">Registro Diário</h3>
-            <button class="calendar-trigger" onclick="toggleCalendar()">
-                <i data-lucide="calendar"></i>
-            </button>
         </div>
         <div class="calendar-nav" onclick="toggleCalendar()" onmouseover="this.style.transform='scale(1.01)'"
             onmouseout="this.style.transform='scale(1)'">

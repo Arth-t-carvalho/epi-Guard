@@ -143,7 +143,20 @@ ob_start();
                                 <span><?= date('d/m/Y - H:i', strtotime($infraction['data_hora'])) ?></span>
                             </div>
                             <div class="card-footer-premium">
-                                <button class="btn-card-action" title="Ver detalhes" onclick="openEvidenceModal('<?= htmlspecialchars($infraction['funcionario_nome']) ?>', '<?= htmlspecialchars($infraction['epi_nome'] ?? 'N/A') ?>', '<?= date('d/m/Y H:i', strtotime($infraction['data_hora'])) ?>', '<?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?>', '<?= !empty($infraction['evidencia_foto']) ? BASE_PATH . $infraction['evidencia_foto'] : '' ?>', <?= $infraction['id'] ?>, <?= $infraction['funcionario_id'] ?>, <?= $infraction['setor_id'] ?? 'null' ?>, <?= $infraction['epi_id'] ?? 'null' ?>)"><i class="fa-solid fa-eye"></i></button>
+                                <?php
+                                $args = json_encode([
+                                    $infraction['funcionario_nome'],
+                                    $infraction['epi_nome'] ?? 'N/A',
+                                    date('d/m/Y H:i', strtotime($infraction['data_hora'])),
+                                    $infraction['setor_sigla'] ?? 'N/A',
+                                    !empty($infraction['evidencia_foto']) ? BASE_PATH . '/' . ltrim(str_replace('\\', '/', $infraction['evidencia_foto']), '/') : '',
+                                    $infraction['id'],
+                                    $infraction['funcionario_id'],
+                                    $infraction['setor_id'] ?: null,
+                                    $infraction['epi_id'] ?: null
+                                ]);
+                                ?>
+                                <button class="btn-card-action" title="Ver detalhes" onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($args, ENT_QUOTES, 'UTF-8') ?>)"><i class="fa-solid fa-eye"></i></button>
                                 <button class="btn-card-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>" title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
                                         class="fa-solid fa-bookmark"></i></button>
                                 <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
@@ -205,7 +218,20 @@ ob_start();
                                 </td>
                                 <td>
                                     <div class="table-actions">
-                                        <button class="btn-action" title="Ver detalhes" onclick="openEvidenceModal('<?= htmlspecialchars($infraction['funcionario_nome']) ?>', '<?= htmlspecialchars($infraction['epi_nome'] ?? 'N/A') ?>', '<?= date('d/m/Y H:i', strtotime($infraction['data_hora'])) ?>', '<?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?>', '<?= !empty($infraction['evidencia_foto']) ? BASE_PATH . $infraction['evidencia_foto'] : '' ?>', <?= $infraction['id'] ?>, <?= $infraction['funcionario_id'] ?>, <?= $infraction['setor_id'] ?? 'null' ?>, <?= $infraction['epi_id'] ?? 'null' ?>)"><i class="fa-solid fa-eye"></i></button>
+                                        <?php
+                                        $argsTable = json_encode([
+                                            $infraction['funcionario_nome'],
+                                            $infraction['epi_nome'] ?? 'N/A',
+                                            date('d/m/Y H:i', strtotime($infraction['data_hora'])),
+                                            $infraction['setor_sigla'] ?? 'N/A',
+                                            !empty($infraction['evidencia_foto']) ? BASE_PATH . '/' . ltrim(str_replace('\\', '/', $infraction['evidencia_foto']), '/') : '',
+                                            $infraction['id'],
+                                            $infraction['funcionario_id'],
+                                            $infraction['setor_id'] ?: null,
+                                            $infraction['epi_id'] ?: null
+                                        ]);
+                                        ?>
+                                        <button class="btn-action" title="Ver detalhes" onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($argsTable, ENT_QUOTES, 'UTF-8') ?>)"><i class="fa-solid fa-eye"></i></button>
                                         <button class="btn-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>" title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
                                                 class="fa-solid fa-bookmark"></i></button>
                                         <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>

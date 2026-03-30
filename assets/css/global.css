@@ -44,6 +44,27 @@ html.dark-theme {
     --danger: #ef4444;
 }
 
+/* OVERRIDES ESPECÍFICOS DE MODO ESCURO */
+html.dark-theme .header-icon-btn,
+html.dark-theme .btn-export,
+html.dark-theme .user-profile-trigger,
+html.dark-theme .instructor-card {
+    background: var(--bg-card);
+}
+
+html.dark-theme .welcome-text {
+    background: linear-gradient(135deg, #f1f5f9 30%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #f1f5f9;
+}
+
+html.dark-theme .user-avatar {
+    background: #334155;
+    color: #f8fafc;
+}
+
 /* =========================================
    RESET E BASE
    ========================================= */

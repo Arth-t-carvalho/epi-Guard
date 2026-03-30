@@ -157,9 +157,9 @@ function renderInterface() {
             list.innerHTML = htmlBuffer;
         } else {
             list.innerHTML = `
-                <div class="empty-state">
-                    <i data-lucide="calendar-check"></i>
-                    <p>Nenhuma ocorrência registrada para este dia.</p>
+                <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; color: var(--text-muted); padding: 40px 20px;">
+                    <i data-lucide="calendar-check" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.4;"></i>
+                    <p style="font-size: 14px; font-weight: 500;">Nenhuma ocorrência registrada para este dia.</p>
                 </div>
             `;
             if (typeof lucide !== 'undefined') lucide.createIcons({ root: list });
@@ -412,6 +412,40 @@ function updateKPICards() {
     if (elDia) elDia.innerText = countDay;
     if (elSemana) elSemana.innerText = countWeek;
     if (elMes) elMes.innerText = countMonth;
+    
+    // Tornar cards clicáveis apentas quando tiver infrações
+    const cardHoje = document.getElementById('cardKpiHoje');
+    if (cardHoje) {
+        if (countDay > 0) {
+            cardHoje.onclick = () => confirmRedirect('hoje');
+            cardHoje.style.cursor = 'pointer';
+        } else {
+            cardHoje.onclick = null;
+            cardHoje.style.cursor = 'default';
+        }
+    }
+
+    const cardSemana = document.getElementById('cardKpiSemana');
+    if (cardSemana) {
+        if (countWeek > 0) {
+            cardSemana.onclick = () => confirmRedirect('semana');
+            cardSemana.style.cursor = 'pointer';
+        } else {
+            cardSemana.onclick = null;
+            cardSemana.style.cursor = 'default';
+        }
+    }
+
+    const cardMes = document.getElementById('cardKpiMes');
+    if (cardMes) {
+        if (countMonth > 0) {
+            cardMes.onclick = () => confirmRedirect('mes');
+            cardMes.style.cursor = 'pointer';
+        } else {
+            cardMes.onclick = null;
+            cardMes.style.cursor = 'default';
+        }
+    }
 
     if (elMedia) {
         const total = window.totalStudents || 20;
