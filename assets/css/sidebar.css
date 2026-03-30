@@ -82,7 +82,6 @@
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     /* Garante que o pseudo-elemento respeite os cantos */
@@ -177,7 +176,6 @@
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
-    transition: all 0.2s;
 }
 
 .nav-subitem:hover {

@@ -36,45 +36,6 @@ ob_start();
 </header>
 
 <div class="page-content">
-    <!-- Summary Cards -->
-    <div class="summary-row">
-        <div class="summary-card">
-            <div class="summary-icon red">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="summary-info">
-                <span class="summary-label">Total Infrações</span>
-                <span class="summary-value" id="totalInfracoes"><?= count($infractions) ?></span>
-            </div>
-        </div>
-        <div class="summary-card">
-            <div class="summary-icon amber">
-                <i class="fa-solid fa-clock"></i>
-            </div>
-            <div class="summary-info">
-                <span class="summary-label">Pendentes</span>
-                <span class="summary-value" id="totalPendentes"><?= count(array_filter($infractions, fn($i) => ($i['status'] ?? '') === 'pendente')) ?: 0 ?></span>
-            </div>
-        </div>
-        <div class="summary-card">
-            <div class="summary-icon green">
-                <i class="fa-solid fa-check-circle"></i>
-            </div>
-            <div class="summary-info">
-                <span class="summary-label">Resolvidas</span>
-                <span class="summary-value" id="totalResolvidas"><?= count(array_filter($infractions, fn($i) => ($i['status'] ?? '') === 'resolvido')) ?: 0 ?></span>
-            </div>
-        </div>
-        <div class="summary-card">
-            <div class="summary-icon blue">
-                <i class="fa-solid fa-users"></i>
-            </div>
-            <div class="summary-info">
-                <span class="summary-label">Funcionários Afetados</span>
-                <span class="summary-value" id="totalAlunos"><?= count(array_unique(array_column($infractions, 'funcionario_nome'))) ?></span>
-            </div>
-        </div>
-    </div>
 
     <!-- Filters -->
     <form action="<?= BASE_PATH ?>/infractions" method="GET" class="filter-bar">
@@ -139,7 +100,7 @@ ob_start();
                         </div>
                         <div class="card-content-premium">
                             <h4 class="employee-name"><?= htmlspecialchars($infraction['funcionario_nome']) ?></h4>
-                            <div class="info-row-premium">
+                             <div class="info-row-premium">
                                 <i class="fa-solid fa-briefcase"></i>
                                 <span><?= __('Setor:') ?> <?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?></span>
                             </div>

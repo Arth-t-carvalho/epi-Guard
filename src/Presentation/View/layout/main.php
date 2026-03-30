@@ -46,7 +46,7 @@
         <main class="main-content">
             <?php include __DIR__ . '/header.php'; ?>
             
-            <div id="page-content-wrapper" class="content-fade">
+            <div id="page-content-wrapper">
                 <?= $content ?? '' ?>
             </div>
         </main>

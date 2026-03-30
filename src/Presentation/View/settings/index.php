@@ -5,7 +5,7 @@ $userRole = $_SESSION['user_cargo'] ?? 'Gestor de Segurança';
 $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
 ?>
 
-<div class="settings-container fade-in">
+<div class="settings-container">
     <div class="settings-header">
         <div>
             <h1><?= __('Configurações do Sistema') ?></h1>

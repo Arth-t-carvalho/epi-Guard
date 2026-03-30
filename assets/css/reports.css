@@ -323,13 +323,9 @@
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--border, #e2e8f0);
     overflow: hidden;
-    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     margin: 0 auto;
 }
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+
 .card-header-premium {
     padding: 30px 40px;
     background: #E30613;
@@ -545,7 +541,6 @@ body.modal-open {
     padding: 0;
     overflow: hidden;
     display: none;
-    animation: fadeIn 0.3s ease;
 }
 .employee-details-table {
     width: 100%;
@@ -572,9 +567,6 @@ body.modal-open {
 .employee-details-table tr:last-child td {
     border-bottom: none;
 }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+
 
 .evidence-preview:hover { transform: scale(1.05); transition: transform 0.2s; cursor: pointer; border-color: var(--primary); }
