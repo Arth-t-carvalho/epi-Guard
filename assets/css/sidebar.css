@@ -422,3 +422,84 @@
     background: transparent;
     padding-left: 0;
 }
+
+/* =========================================
+   DARK MODE OVERRIDES (SIDEBAR)
+   ========================================= */
+
+html.dark-theme .sidebar {
+    background: var(--bg-card);
+    border-right-color: var(--border);
+}
+
+html.dark-theme .nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-theme .nav-item.active {
+    background: #0f172a !important; /* Um pouco mais escuro que o bg-card para destaque */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+html.dark-theme .ai-toggle-btn {
+    background: var(--bg-card);
+    border-color: var(--border);
+    color: var(--text-main);
+    text-shadow: none;
+    box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.4);
+}
+
+html.dark-theme .ai-toggle-btn i,
+html.dark-theme .ai-toggle-btn svg {
+    color: var(--primary);
+}
+
+html.dark-theme .ai-chat-window {
+    background: var(--bg-card);
+    border-color: var(--border);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+html.dark-theme .ai-chat-header {
+    background: #1e293b;
+    border-bottom-color: var(--border);
+    color: var(--text-main);
+}
+
+html.dark-theme .ai-chat-messages {
+    background: #0f172a;
+}
+
+html.dark-theme .ai-message.bot {
+    background: #cbd5e1; /* Cinza claro para comportar texto preto */
+    color: #0f172a;    /* Texto preto/escuro como solicitado */
+}
+
+html.dark-theme .ai-message.user {
+    background: var(--primary);
+    color: white;
+}
+
+html.dark-theme .ai-chat-input {
+    background: var(--bg-card);
+    border-top-color: var(--border);
+}
+
+html.dark-theme .ai-chat-input input {
+    background: #0f172a;
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+html.dark-theme .ai-chat-input input:focus {
+    border-color: var(--primary);
+}
+
+html.dark-theme .ai-chat-window.expanded {
+    background: #1e293b;
+    border-color: var(--border);
+}
+
+html.dark-theme .ai-chat-window.expanded::after {
+    background: rgba(255, 255, 255, 0.05);
+}

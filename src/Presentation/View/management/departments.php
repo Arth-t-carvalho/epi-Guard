@@ -3,17 +3,26 @@ $pageTitle = 'epiGuard - Gestão de Setor';
 $extraHead = '
     <!-- Page CSS -->
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">
+    <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/picker.css">
     <!-- Bibliotecas de Processamento de Arquivos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";</script>
     <style>
+        /* Desativar scroll da página e tornar a tabela flexível */
+        .main-content { overflow-y: hidden !important; }
+        #page-content-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; margin-top: -50px; }
+
+        /* Remover cabeçalho de boas-vindas redundante */
+        .welcome-container { display: none !important; }
+
         /* === PAGE STYLES === */
         .setor-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
+            flex-shrink: 0;
         }
 
         .setor-header .page-title h1 {
@@ -43,6 +52,7 @@ $extraHead = '
             font-family: "Inter", sans-serif;
             transition: 0.2s;
             box-shadow: 0 4px 14px rgba(227, 6, 19, 0.25);
+            margin-left: auto; /* Empurra para o final da linha */
         }
 
         .btn-add-setor:hover {
@@ -56,6 +66,7 @@ $extraHead = '
             display: flex;
             gap: 12px;
             margin-bottom: 24px;
+            flex-shrink: 0;
         }
 
         .search-box {
@@ -117,7 +128,8 @@ $extraHead = '
             background: #fff;
             border-radius: 16px;
             border: 1px solid #f0f0f5;
-            overflow: hidden;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .setor-table {
@@ -134,6 +146,10 @@ $extraHead = '
             letter-spacing: 0.8px;
             color: #94a3b8;
             border-bottom: 1px solid #f0f0f5;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 10;
         }
 
         .setor-table tbody tr {
@@ -276,6 +292,159 @@ $extraHead = '
         .risk-badge.alto {
             background: #fee2e2;
             color: #991b1b;
+        }
+
+        /* =========================================
+           DARK MODE OVERRIDES (DEPARTMENTS)
+           ========================================= */
+        html.dark-theme .setor-filters select,
+        html.dark-theme .search-box {
+            background: var(--bg-card);
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        html.dark-theme .search-box input {
+            color: var(--text-main);
+            background: transparent;
+        }
+        
+        html.dark-theme .search-box i {
+            color: var(--text-muted);
+        }
+        
+        html.dark-theme .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .setor-table-wrapper {
+            background: var(--bg-card);
+            border-color: var(--border);
+        }
+
+        html.dark-theme .setor-table thead th {
+            background: var(--bg-card);
+            border-bottom-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .setor-table tbody tr:hover {
+            background: var(--bg-main);
+        }
+
+        html.dark-theme .setor-table tbody td {
+            border-bottom-color: var(--border);
+        }
+
+        html.dark-theme .setor-nome,
+        html.dark-theme .setor-count {
+            color: var(--text-main);
+        }
+
+        html.dark-theme .epi-icon-badge {
+            background: var(--bg-main);
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .btn-edit,
+        html.dark-theme .btn-delete {
+            background: var(--bg-main);
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .btn-edit:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        html.dark-theme .btn-delete:hover {
+            background: rgba(2ef, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        html.dark-theme .risk-badge.baixo {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        html.dark-theme .risk-badge.medio {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        html.dark-theme .risk-badge.alto {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        /* MODAL DARK MODE (DEPARTMENTS) */
+        html.dark-theme .modal-setor {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        html.dark-theme .modal-setor-header h2,
+        html.dark-theme .form-label {
+            color: var(--text-main);
+        }
+
+        html.dark-theme .form-input {
+            background: var(--bg-main);
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        html.dark-theme .upload-area {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        html.dark-theme .epi-card {
+            background: #0f172a;
+            border-color: var(--border);
+        }
+
+        html.dark-theme .epi-card-info .epi-card-name {
+            color: var(--text-main);
+        }
+
+        html.dark-theme .epi-card-icon {
+            background: #1e293b;
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .epi-card.selected {
+            background: rgba(227, 6, 19, 0.15);
+            border-color: var(--primary);
+        }
+
+        html.dark-theme .epi-card.selected .epi-card-icon {
+            background: rgba(227, 6, 19, 0.25);
+            color: var(--primary);
+        }
+
+        html.dark-theme .modal-setor-footer {
+            border-top-color: var(--border);
+        }
+
+        html.dark-theme .btn-cancel {
+            color: var(--text-muted);
+        }
+
+        html.dark-theme .btn-cancel:hover {
+            color: var(--text-main);
+        }
+
+        /* Status colors in dark mode */
+        html.dark-theme .status-indicator {
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         /* ============ MODAL ============ */
@@ -569,28 +738,53 @@ ob_start();
         <h1>Gestão de Setor</h1>
         <p>Gerencie as áreas e os respectivos EPIs obrigatórios</p>
     </div>
-    <button class="btn-add-setor" onclick="openModal()">
-        <i class="fa-solid fa-plus"></i> Adicionar Setor
-    </button>
 </div>
 
 <!-- Filtros -->
-<form action="<?= BASE_PATH ?>/management/departments" method="GET" class="setor-filters">
+<form action="<?= BASE_PATH ?>/management/departments" method="GET" class="setor-filters" id="filterForm">
     <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
         <input type="text" id="searchInputSettings" name="search" placeholder="Pesquisar setores..." oninput="filterSetores()" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
     </div>
-    <select name="status" onchange="this.form.submit()">
-        <option value="todos" <?= ($filters['status'] ?? 'todos') === 'todos' ? 'selected' : '' ?>>Filtrar Status (Todos)</option>
-        <option value="ativo" <?= ($filters['status'] ?? 'todos') === 'ativo' ? 'selected' : '' ?>>Ativos</option>
-        <option value="inativo" <?= ($filters['status'] ?? 'todos') === 'inativo' ? 'selected' : '' ?>>Inativos</option>
-    </select>
-    <select name="risk" onchange="this.form.submit()">
-        <option value="todos" <?= ($filters['risk'] ?? 'todos') === 'todos' ? 'selected' : '' ?>>Filtrar Risco (Todos)</option>
-        <option value="baixo" <?= ($filters['risk'] ?? 'todos') === 'baixo' ? 'selected' : '' ?>>Baixo (< 5%)</option>
-        <option value="medio" <?= ($filters['risk'] ?? 'todos') === 'medio' ? 'selected' : '' ?>>Médio (5% - 10%)</option>
-        <option value="alto" <?= ($filters['risk'] ?? 'todos') === 'alto' ? 'selected' : '' ?>>Alto (>= 10%)</option>
-    </select>
+
+    <!-- Hidden Fields for Filters -->
+    <input type="hidden" name="status" id="hiddenStatus" value="<?= htmlspecialchars($filters['status'] ?? 'todos') ?>">
+    <input type="hidden" name="risk" id="hiddenRisk" value="<?= htmlspecialchars($filters['risk'] ?? 'todos') ?>">
+
+    <!-- Modern Triggers -->
+    <div class="modern-picker-trigger" onclick="openModernPicker('status')">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="trigger-info">
+            <span class="trigger-label">Status</span>
+            <span class="trigger-value" id="label-status">
+                <?php 
+                $statusLabels = ['todos' => 'Todos os Status', 'ativo' => 'Ativos', 'inativo' => 'Inativos'];
+                echo $statusLabels[$filters['status'] ?? 'todos'] ?? 'Todos';
+                ?>
+            </span>
+        </div>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+
+    <div class="modern-picker-trigger" onclick="openModernPicker('risk')">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div class="trigger-info">
+            <span class="trigger-label">Risco</span>
+            <span class="trigger-value" id="label-risk">
+                <?php 
+                $riskLabels = ['todos' => 'Todos os Riscos', 'baixo' => 'Baixo (< 5%)', 'medio' => 'Médio (5% - 10%)', 'alto' => 'Alto (>= 10%)'];
+                echo $riskLabels[$filters['risk'] ?? 'todos'] ?? 'Todos';
+                ?>
+            </span>
+        </div>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+    
+    <!-- Botão Adicionar Ajustado para a mesma linha -->
+    <button type="button" class="btn-add-setor" onclick="openModal()">
+        <i class="fa-solid fa-plus"></i> Adicionar Setor
+    </button>
+
     <button type="submit" style="display: none;"></button>
 </form>
 
@@ -1025,6 +1219,38 @@ ob_start();
         const row = btn.closest('tr');
         openModal(true, row);
     }
+</script>
+
+<!-- Modern Picker Modal (Apple Style) -->
+<div class="modern-picker-modal" id="modernPicker">
+    <div class="modern-picker-backdrop"></div>
+    <div class="modern-picker-container">
+        <div class="modern-picker-header">
+            <h3 id="pickerTitle">Selecionar</h3>
+            <p id="pickerSubtitle">Escolha uma opção abaixo</p>
+        </div>
+        <div class="modern-picker-options" id="pickerOptionsContainer"></div>
+        <button class="modern-picker-close" onclick="closeModernPicker()">Cancelar</button>
+    </div>
+</div>
+
+<script src="<?= BASE_PATH ?>/assets/js/picker.js"></script>
+
+<script>
+    // Opções para o Picker Moderno (Setores)
+    window.PICKER_OPTIONS = {
+        status: [
+            { value: 'todos', label: 'Todos os Status' },
+            { value: 'ativo', label: 'Ativos' },
+            { value: 'inativo', label: 'Inativos' }
+        ],
+        risk: [
+            { value: 'todos', label: 'Todos os Riscos' },
+            { value: 'baixo', label: 'Baixo (< 5%)' },
+            { value: 'medio', label: 'Médio (5% - 10%)' },
+            { value: 'alto', label: 'Alto (>= 10%)' }
+        ]
+    };
 </script>
 
 <?php

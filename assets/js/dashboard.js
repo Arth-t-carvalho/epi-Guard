@@ -12,11 +12,27 @@ let doughnutChartInstance = null;
 let selectedCourseId = 'all'; // Legado, mantido para compatibilidade de funções
 let selectedSectorId = 'all'; // Novo: Filtro de setor para visão empresarial
 let pendingRedirectPeriod = 'todos'; // Armazena o período para o modal de confirmação
+let conformityPeriod = 'diaria'; // Novo: Armazena o periodo da conformidade
 
-// Cores para os gráficos
-const colorHelmet = '#1F2937';
-const colorGlasses = '#9CA3AF';
-const colorAll = '#E30613';
+// Paletas de Cores Dinâmicas
+const chartPalettes = {
+    default: { helmet: '#1F2937', glasses: '#9CA3AF', all: '#E30613', extra1: '#f59e0b', extra2: '#3b82f6' },
+    blue: { helmet: '#1e3a8a', glasses: '#60a5fa', all: '#2563eb', extra1: '#93c5fd', extra2: '#1d4ed8' },
+    emerald: { helmet: '#064e3b', glasses: '#34d399', all: '#10b981', extra1: '#6ee7b7', extra2: '#047857' },
+    purple: { helmet: '#4c1d95', glasses: '#a78bfa', all: '#7c3aed', extra1: '#c4b5fd', extra2: '#5b21b6' }
+};
+
+const savedPaletteKey = localStorage.getItem('epiguard-chart-palette') || 'default';
+const activePalette = chartPalettes[savedPaletteKey] || chartPalettes.default;
+
+Chart.defaults.color = 'var(--text-color)';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+let colorHelmet = activePalette.helmet;
+let colorGlasses = activePalette.glasses;
+let colorAll = activePalette.all;
+let colorExtra1 = activePalette.extra1;
+let colorExtra2 = activePalette.extra2;
 
 // Arrays auxiliares
 const monthsFull = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -132,7 +148,6 @@ function renderInterface() {
         });
 
         if (dailyData.length > 0) {
-            // Modo Empresarial: Todos vêem o agrupamento por SETOR
             const grouped = {};
             dailyData.forEach(item => {
                 const key = item.name || 'Desconhecido';
@@ -141,12 +156,11 @@ function renderInterface() {
                 grouped[key].items.push(item);
             });
 
+            let htmlBuffer = '';
             Object.keys(grouped).forEach(name => {
                 const data = grouped[name];
                 const initials = name.substring(0, 2).toUpperCase();
-
-                // Em modo Empresarial, a ação padrão é abrir o detalhamento do curso/setor
-                list.innerHTML += `
+                htmlBuffer += `
                     <div class="occurrence-item" onclick="applyCourseFilterByName('${name.replace(/'/g, "\\'")}')" style="cursor:pointer;" title="Clique para detalhes deste setor">
                         <div class="occ-avatar">${initials}</div>
                         <div class="occ-info">
@@ -156,8 +170,15 @@ function renderInterface() {
                         <div class="occ-time">❯</div>
                     </div>`;
             });
+            list.innerHTML = htmlBuffer;
         } else {
-            list.innerHTML = '';
+            list.innerHTML = `
+                <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; color: var(--text-muted); padding: 40px 20px;">
+                    <i data-lucide="calendar-check" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.4;"></i>
+                    <p style="font-size: 14px; font-weight: 500;">Nenhuma ocorrência registrada para este dia.</p>
+                </div>
+            `;
+            if (typeof lucide !== 'undefined') lucide.createIcons({ root: list });
         }
     }
 
@@ -178,22 +199,12 @@ function openCourseModal() {
         document.querySelector('.main-content').style.overflow = 'hidden';
         if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
         updateSelectionUI(); // Sincroniza checks com o estado
-        
-        // Animação automática de expansão super fluida conectada na abertura
-        setTimeout(() => {
-            const content = modal.querySelector('.modal-premium-content');
-            if (content) content.classList.add('expanded');
-        }, 50); // Delay quase imperceptível de 50ms pra virar uma animação contínua
     }
 }
 
 function closeCourseModal() {
     const modal = document.getElementById('courseModal');
     if (modal) {
-        // Retira a classe para que na próxima vez ele comece pequeno de novo
-        const content = modal.querySelector('.modal-premium-content');
-        if (content) content.classList.remove('expanded');
-        
         modal.classList.remove('active');
         document.querySelector('.main-content').style.overflow = '';
     }
@@ -357,6 +368,30 @@ function goToInfractions() {
     window.location.href = `${window.BASE_PATH}/infractions?periodo=${period}`;
 }
 
+// --- LÓGICA DE CONFIRMAÇÃO DE CONFORMIDADE ---
+function openConformityModal() {
+    const modal = document.getElementById('conformityModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.querySelector('.main-content').style.overflow = 'hidden';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
+    }
+}
+
+function closeConformityModal() {
+    const modal = document.getElementById('conformityModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.querySelector('.main-content').style.overflow = '';
+    }
+}
+
+function selectConformityPeriod(period) {
+    conformityPeriod = period;
+    updateKPICards();
+    closeConformityModal();
+}
+
 function changeDay(delta) {
     const oldMonth = selectedDate.getMonth();
     selectedDate.setDate(selectedDate.getDate() + delta);
@@ -394,6 +429,9 @@ function updateKPICards() {
     const selMonth = selectedDate.getMonth();
     const selYear = selectedDate.getFullYear();
     const uniqueStudentsToday = new Set();
+    const uniqueStudentsWeek = new Set();
+    const uniqueStudentsMonth = new Set();
+    const uniqueStudentsYear = new Set();
 
     allOccurrences.forEach(item => {
         const dbDateString = item.full_date || item.data_hora || item.date;
@@ -405,8 +443,23 @@ function updateKPICards() {
                 uniqueStudentsToday.add(item.aluno_id || item.student_id);
             }
         }
-        if (isSameWeek(selectedDate, itemDate)) countWeek++;
-        if (itemDate.getMonth() === selMonth && itemDate.getFullYear() === selYear) countMonth++;
+        if (isSameWeek(selectedDate, itemDate)) {
+            countWeek++;
+            if (item.aluno_id || item.student_id) {
+                uniqueStudentsWeek.add(item.aluno_id || item.student_id);
+            }
+        }
+        if (itemDate.getMonth() === selMonth && itemDate.getFullYear() === selYear) {
+            countMonth++;
+            if (item.aluno_id || item.student_id) {
+                uniqueStudentsMonth.add(item.aluno_id || item.student_id);
+            }
+        }
+        if (itemDate.getFullYear() === selYear) {
+            if (item.aluno_id || item.student_id) {
+                uniqueStudentsYear.add(item.aluno_id || item.student_id);
+            }
+        }
     });
 
     const elDia = document.getElementById('kpiDia');
@@ -417,13 +470,66 @@ function updateKPICards() {
     if (elDia) elDia.innerText = countDay;
     if (elSemana) elSemana.innerText = countWeek;
     if (elMes) elMes.innerText = countMonth;
+    
+    // Tornar cards clicáveis apentas quando tiver infrações
+    const cardHoje = document.getElementById('cardKpiHoje');
+    if (cardHoje) {
+        if (countDay > 0) {
+            cardHoje.onclick = () => confirmRedirect('hoje');
+            cardHoje.style.cursor = 'pointer';
+        } else {
+            cardHoje.onclick = null;
+            cardHoje.style.cursor = 'default';
+        }
+    }
+
+    const cardSemana = document.getElementById('cardKpiSemana');
+    if (cardSemana) {
+        if (countWeek > 0) {
+            cardSemana.onclick = () => confirmRedirect('semana');
+            cardSemana.style.cursor = 'pointer';
+        } else {
+            cardSemana.onclick = null;
+            cardSemana.style.cursor = 'default';
+        }
+    }
+
+    const cardMes = document.getElementById('cardKpiMes');
+    if (cardMes) {
+        if (countMonth > 0) {
+            cardMes.onclick = () => confirmRedirect('mes');
+            cardMes.style.cursor = 'pointer';
+        } else {
+            cardMes.onclick = null;
+            cardMes.style.cursor = 'default';
+        }
+    }
 
     if (elMedia) {
         const total = window.totalStudents || 20;
-        const infra = uniqueStudentsToday.size;
+        let infra = 0;
+        let periodHeader = 'DIÁRIA';
+        
+        if (conformityPeriod === 'diaria') { 
+            infra = uniqueStudentsToday.size; 
+            periodHeader = 'DIÁRIA'; 
+        } else if (conformityPeriod === 'semanal') { 
+            infra = uniqueStudentsWeek.size; 
+            periodHeader = 'SEMANAL'; 
+        } else if (conformityPeriod === 'mensal') { 
+            infra = uniqueStudentsMonth.size; 
+            periodHeader = 'MENSAL'; 
+        } else if (conformityPeriod === 'anual') { 
+            infra = uniqueStudentsYear.size; 
+            periodHeader = 'ANUAL'; 
+        }
+        
         const conformidade = Math.round(((total - infra) / total) * 100);
         elMedia.innerText = `${Math.max(0, conformidade)}%`;
         updateConformityStatus(conformidade);
+        
+        const headerEl = document.getElementById('kpiMediaHeader');
+        if (headerEl) headerEl.innerText = `CONFORMIDADE (${periodHeader})`;
     }
 }
 
@@ -569,50 +675,203 @@ function toggleInstructorCard() {
 }
 
 function exportData() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    // 1. Instanciar o jsPDF de forma segura
+    const jsPDFLib = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+    if (!jsPDFLib) return alert('Biblioteca jsPDF não carregada adequadamente.');
+    const doc = new jsPDFLib('p', 'mm', 'a4');
     const btn = document.querySelector('.btn-export');
-    if (!btn) return;
+    
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = 'Gerando PDF...';
-    btn.style.color = '#E30613';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando PDF...';
+    btn.disabled = true;
 
-    doc.setFontSize(18);
-    doc.text("Relatório de Ocorrências - EPI Guard", 14, 20);
-    doc.setFontSize(11);
-    doc.setTextColor(100);
-    doc.text(`Data de Geração: ${new Date().toLocaleDateString()}`, 14, 30);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    const contentWidth = pageWidth - margin * 2;
+    const primaryColor = [227, 6, 19];
+    const darkColor = [31, 41, 55];
+    const grayBorder = [226, 232, 240];
+    const grayText = [100, 116, 139];
 
-    const currentMonth = selectedDate.getMonth() + 1;
-    const currentYear = selectedDate.getFullYear();
+    // Helper: Draw Premium Card
+    const drawCard = (x, y, title, mainText, subText) => {
+        const h = 26;
+        // Fundo com borda
+        doc.setDrawColor(...grayBorder);
+        doc.setFillColor(250, 250, 252);
+        doc.roundedRect(x, y, contentWidth, h, 2, 2, 'FD');
+        // Faixa vermelha lateral
+        doc.setFillColor(...primaryColor);
+        doc.rect(x, y, 3, h, 'F');
+        // Textos
+        doc.setFontSize(10);
+        doc.setTextColor(...darkColor);
+        doc.setFont(undefined, 'bold');
+        doc.text(title, x + 8, y + 7);
+        doc.setFontSize(14);
+        doc.setTextColor(...primaryColor);
+        doc.text(mainText, x + 8, y + 15);
+        doc.setFontSize(8);
+        doc.setTextColor(...grayText);
+        doc.setFont(undefined, 'normal');
+        doc.text(subText, x + 8, y + 21);
+    };
 
-    fetch(`${window.BASE_PATH}/api/modal_details?month=${currentMonth}&year=${currentYear}`)
+    let mainChartImg = null;
+    let doughnutChartImg = null;
+    try {
+        if (typeof mainChartInstance !== 'undefined' && mainChartInstance) {
+            mainChartImg = mainChartInstance.toBase64Image('image/png', 1);
+        }
+        if (typeof doughnutChartInstance !== 'undefined' && doughnutChartInstance) {
+            doughnutChartImg = doughnutChartInstance.toBase64Image('image/png', 1);
+        }
+    } catch (e) { console.warn('Falha captura graficos', e); }
+
+    fetch(`${window.BASE_PATH}/api/export-insights`)
         .then(res => res.json())
         .then(data => {
-            if (!data || data.length === 0) {
-                alert("Nenhuma ocorrência encontrada para exportar neste mês.");
-                btn.innerHTML = originalHTML;
-                btn.style.color = '';
-                return;
+            // ================= PÁGINA 1: CAPA =================
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 45, 'F'); 
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont(undefined, 'bold');
+            doc.text('Relatorio de Seguranca EPI', margin, 20);
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(`EPI Guard - Gerado em ${data.generated_at}`, margin, 32);
+            doc.text(`Ano de Referencia: ${data.year}`, margin, 38);
+            
+            let yCursor = 60;
+            
+            // Subtítulo
+            doc.setTextColor(...darkColor);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Resumo Executivo', margin, yCursor);
+            
+            // Underline Red
+            doc.setDrawColor(...primaryColor);
+            doc.setLineWidth(0.8);
+            doc.line(margin, yCursor + 2, margin + 45, yCursor + 2);
+            
+            yCursor += 12;
+
+            // Cards
+            const worstSectorNome = data.worst_sector ? data.worst_sector.nome : 'Nenhum';
+            const worstSectorTotal = data.worst_sector ? data.worst_sector.total : 0;
+            drawCard(margin, yCursor, 'Setor com Mais Infracoes', worstSectorNome, `${worstSectorTotal} infracao(oes) registrada(s) no ano\nEste setor apresenta o maior numero de ocorrencias de nao conformidade com EPIs.`);
+            
+            yCursor += 32;
+            const worstEpisStr = (data.worst_epis && data.worst_epis.length > 0) ? data.worst_epis.map(e => e.nome).join(', ') : 'Nenhum';
+            const firstEpiTotal = (data.worst_epis && data.worst_epis.length > 0) ? data.worst_epis[0].total : 0;
+            drawCard(margin, yCursor, 'EPIs Menos Utilizados', worstEpisStr, `${data.worst_epis[0] ? data.worst_epis[0].nome : 'EPI'}: ${firstEpiTotal} infracao(oes)\nEquipamentos de protecao com maior indice de nao utilizacao pelos colaboradores.`);
+
+            yCursor += 32;
+            const worstMonthNome = data.worst_month ? data.worst_month.nome : 'Nenhum';
+            const worstMonthTotal = data.worst_month ? data.worst_month.total : 0;
+            drawCard(margin, yCursor, 'Mes Critico', worstMonthNome, `${worstMonthTotal} infracao(oes) registrada(s)\nMes do ano com maior concentracao de infracoes relacionadas a EPIs.`);
+
+            yCursor += 32;
+            const worstDayNome = data.worst_day_of_week ? data.worst_day_of_week.nome : 'Nenhum';
+            const worstDayTotal = data.worst_day_of_week ? data.worst_day_of_week.total : 0;
+            drawCard(margin, yCursor, 'Dia da Semana Critico', worstDayNome, `${worstDayTotal} infracao(oes) registrada(s)\nDia da semana em que ocorre o maior numero de infracoes.`);
+
+
+            // ================= PÁGINA 2: RANKINGS =================
+            doc.addPage();
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 30, 'F'); 
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('Rankings Detalhados', margin, 20);
+
+            yCursor = 45;
+            doc.setTextColor(...darkColor);
+            doc.setFontSize(14);
+            doc.text('Ranking de Setores', margin, yCursor);
+            doc.setDrawColor(...primaryColor);
+            doc.setLineWidth(0.8);
+            doc.line(margin, yCursor + 2, margin + 40, yCursor + 2);
+            
+            if (data.sectors_ranking && data.sectors_ranking.length > 0) {
+                doc.autoTable({
+                    startY: yCursor + 6,
+                    head: [['#', 'Setor', 'Infracoes', 'Nivel de Risco']],
+                    body: data.sectors_ranking.map((s, i) => {
+                        let risk = 'Baixo';
+                        if(s.total > 20) risk = 'Critico';
+                        else if(s.total > 10) risk = 'Medio';
+                        return [i + 1, s.nome, s.total, risk];
+                    }),
+                    theme: 'striped',
+                    headStyles: { fillColor: primaryColor }
+                });
             }
-            const head = [['Data', 'Aluno', 'EPI', 'Hora', 'Status']];
-            const body = data.map(row => [row.data, row.aluno, row.epis, row.hora, row.status_formatado]);
-            doc.autoTable({
-                startY: 35,
-                head: head,
-                body: body,
-                theme: 'striped',
-                headStyles: { fillColor: [227, 6, 19] }
-            });
-            doc.save(`relatorio_epi_${currentMonth}_${currentYear}.pdf`);
+
+            yCursor = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : yCursor + 30;
+
+            doc.setTextColor(...darkColor);
+            doc.setFontSize(14);
+            doc.text('Ranking de EPIs Menos Utilizados', margin, yCursor);
+            doc.setDrawColor(...primaryColor);
+            doc.line(margin, yCursor + 2, margin + 55, yCursor + 2);
+
+            if (data.epis_ranking && data.epis_ranking.length > 0) {
+                doc.autoTable({
+                    startY: yCursor + 6,
+                    head: [['#', 'Equipamento (EPI)', 'Total de Infracoes']],
+                    body: data.epis_ranking.map((e, i) => [i + 1, e.nome, e.total]),
+                    theme: 'striped',
+                    headStyles: { fillColor: primaryColor }
+                });
+            }
+
+            // ================= PÁGINA 3: GRÁFICOS =================
+            if (mainChartImg || doughnutChartImg) {
+                doc.addPage();
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, pageWidth, 30, 'F'); 
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(18);
+                doc.setFont(undefined, 'bold');
+                doc.text('Analise Grafica', margin, 20);
+
+                let gCursor = 45;
+
+                if (mainChartImg) {
+                    doc.setTextColor(...darkColor);
+                    doc.setFontSize(12);
+                    doc.text('Infracoes por Mes (Geral vs EPIs)', margin, gCursor);
+                    const chartHeight = 75;
+                    doc.addImage(mainChartImg, 'PNG', margin, gCursor + 5, contentWidth, chartHeight);
+                    gCursor += chartHeight + 20;
+                }
+
+                if (doughnutChartImg && gCursor < 250) {
+                    doc.setTextColor(...darkColor);
+                    doc.setFontSize(12);
+                    doc.text('Distribuicao Total de EPIs Ausentes', margin, gCursor);
+                    const dogHeight = 70;
+                    // Doughnut usually proportional
+                    doc.addImage(doughnutChartImg, 'PNG', margin + (contentWidth/2) - 35, gCursor + 5, 70, dogHeight);
+                }
+            }
+
+            // 4. Concluir e Baixar o Arquivo
+            doc.save(`relatorio_${data.year}.pdf`);
+            
             btn.innerHTML = originalHTML;
-            btn.style.color = '';
+            btn.disabled = false;
         })
         .catch(err => {
-            console.error(err);
-            alert("Erro ao gerar PDF.");
+            alert('Erro ao exportar PDF: ' + err.message);
             btn.innerHTML = originalHTML;
-            btn.style.color = '';
+            btn.disabled = false;
         });
 }
 
@@ -695,6 +954,14 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
             console.error(err);
             tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center">Erro na conexão.</td></tr>`;
         });
+}
+
+function closeModal() {
+    const modal = document.getElementById('detailModal');
+    if (modal) {
+        modal.classList.remove('open');
+        document.querySelector('.main-content').style.overflow = '';
+    }
 }
 
 function loadCharts() {
@@ -780,6 +1047,10 @@ function loadCharts() {
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
+                    animation: { duration: 400, easing: 'easeOutQuart' },
+                    normalized: true,
+                    spanGaps: false,
+                    elements: { point: { radius: 0 } },
                     interaction: {
                         mode: 'index',
                         intersect: false,
@@ -819,7 +1090,7 @@ function loadCharts() {
             });
 
             const isDoughnutEmpty = response.doughnut.total === 0;
-            const doughnutBgColor = isDoughnutEmpty ? ['#f1f5f9'] : [colorHelmet, colorGlasses, colorAll, '#f59e0b', '#3b82f6'];
+            const doughnutBgColor = isDoughnutEmpty ? ['#f1f5f9'] : [colorHelmet, colorGlasses, colorAll, colorExtra1, colorExtra2];
             const doughnutHoverColor = isDoughnutEmpty ? ['#e2e8f0'] : undefined;
 
             const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
@@ -836,6 +1107,7 @@ function loadCharts() {
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    animation: { duration: 400, easing: 'easeOutQuart' },
                     onClick: (evt, active, chart) => {
                         if (active.length > 0) {
                             const index = active[0].index;

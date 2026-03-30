@@ -31,7 +31,7 @@ $currentRoute = str_replace($basePath, '', $currentPath);
             <i data-lucide="file-text"></i>
             <span>Ocorrências</span>
         </a>
-        <a href="#" class="nav-item">
+        <a href="<?= BASE_PATH ?>/settings" class="nav-item <?= ($currentRoute === '/settings') ? 'active' : '' ?>">
             <i data-lucide="settings"></i>
             <span>Configurações</span>
         </a>

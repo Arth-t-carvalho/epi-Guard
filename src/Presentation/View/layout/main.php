@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?? 'EPI Guard' ?></title>
+    <!-- Leitura imediata de tema (Evita FOUC - Flash of Unstyled Content) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('epiguard-theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -37,26 +46,6 @@
     </script>
     <script src="<?= BASE_PATH ?>/assets/js/notifications.js"></script>
     <?= $extraScripts ?? '' ?>
-    <script>
-        // Animação de troca de slide ao navegar
-        document.addEventListener("DOMContentLoaded", () => {
-            const wrapper = document.querySelector('.main-content') || document.body;
-            wrapper.style.animation = "slideFromRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
-            
-            document.querySelectorAll('a[href]').forEach(link => {
-                link.addEventListener('click', e => {
-                    const href = link.getAttribute('href');
-                    if (href && !href.startsWith('#') && !href.startsWith('javascript') && link.target !== '_blank') {
-                        e.preventDefault();
-                        wrapper.style.animation = "slideToLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards";
-                        setTimeout(() => {
-                            window.location.href = link.href;
-                        }, 280);
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>

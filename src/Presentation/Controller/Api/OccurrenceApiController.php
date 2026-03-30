@@ -138,4 +138,32 @@ class OccurrenceApiController
 
         echo json_encode($data);
     }
+
+    public function hide()
+    {
+        header('Content-Type: application/json');
+        $id = (int) ($_POST['id'] ?? 0);
+
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID inválido.']);
+            return;
+        }
+
+        $success = $this->occurrenceRepo->hide($id);
+        echo json_encode(['success' => $success]);
+    }
+
+    public function toggleFavorite()
+    {
+        header('Content-Type: application/json');
+        $id = (int) ($_POST['id'] ?? 0);
+
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID inválido.']);
+            return;
+        }
+
+        $result = $this->occurrenceRepo->toggleFavorite($id);
+        echo json_encode($result);
+    }
 }

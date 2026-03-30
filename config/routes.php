@@ -27,4 +27,10 @@ return [
     '/api/departments/delete' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'delete'],
     '/api/departments/employees' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'employees'],
     '/monitoring' => [\epiGuard\Presentation\Controller\MonitoringController::class, 'index'],
+    '/api/occurrence/store' => [\epiGuard\Presentation\Controller\Api\OccurrenceStoreApiController::class, 'store'],
+    '/api/occurrence/hide' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'hide'],
+    '/api/occurrence/toggle-favorite' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'toggleFavorite'],
+    '/api/simulate-occurrence' => [\epiGuard\Presentation\Controller\Api\SimulationApiController::class, 'simulate'],
+    '/api/export-insights' => [\epiGuard\Presentation\Controller\Api\ExportApiController::class, 'insights'],
+    '/settings' => [\epiGuard\Presentation\Controller\SettingsController::class, 'index'],
 ];

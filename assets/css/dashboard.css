@@ -612,3 +612,121 @@
     transform: translateY(2px);
     color: var(--primary);
 }
+
+/* =========================================
+   DARK MODE OVERRIDES (DASHBOARD)
+   ========================================= */
+
+html.dark-theme .btn-premium-filter {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-color: var(--border);
+    color: var(--text-main);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+html.dark-theme .btn-premium-filter:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+html.dark-theme .calendar-nav {
+    background: var(--bg-card);
+    border-color: var(--border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+html.dark-theme .nav-btn {
+    background: #334155;
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+html.dark-theme .nav-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+html.dark-theme #displayDayNum {
+    color: var(--primary);
+}
+
+html.dark-theme #displayMonthStr {
+    color: var(--text-muted);
+}
+
+html.dark-theme .chart-title,
+html.dark-theme .section-title {
+    color: var(--text-main);
+}
+
+html.dark-theme .kpi-header {
+    color: var(--text-muted);
+}
+
+html.dark-theme .kpi-value {
+    color: var(--text-main);
+}
+
+html.dark-theme .list-item {
+    border-bottom-color: var(--border);
+}
+
+html.dark-theme .occ-name {
+    color: var(--text-main);
+}
+
+html.dark-theme .occ-avatar {
+    background: #334155;
+    color: var(--text-main);
+}
+
+html.dark-theme .occurrence-item {
+    border-bottom-color: var(--border);
+}
+
+html.dark-theme .progress-bar {
+    background: #334155;
+}
+
+html.dark-theme .chart-popup {
+    background: rgba(15, 23, 42, 0.9);
+}
+
+html.dark-theme .popup-content {
+    background: #1e293b;
+    border-color: var(--border);
+}
+
+html.dark-theme .popup-header {
+    border-bottom-color: var(--border);
+}
+
+html.dark-theme .popup-header span {
+    color: var(--text-main);
+}
+
+html.dark-theme .popup-list li {
+    background-color: #0f172a;
+    color: var(--text-main);
+}
+
+html.dark-theme .btn-close-popup {
+    background: #334155;
+    color: var(--text-muted);
+}
+
+html.dark-theme .btn-close-popup:hover {
+    background: var(--primary);
+    color: white;
+}
+
+html.dark-theme .minimal-filter-trigger {
+    background: var(--bg-card);
+    border-color: var(--border);
+}
+
+html.dark-theme .filter-value {
+    color: var(--text-main);
+}

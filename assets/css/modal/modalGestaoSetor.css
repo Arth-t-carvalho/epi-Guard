@@ -20,6 +20,58 @@
     transform: scale(1) translateY(0) rotateX(0deg);
 }
 
+/* HEADER */
+.modal-premium-header {
+    background: linear-gradient(to right, rgba(227, 6, 19, 0.05), transparent);
+    padding: 24px 30px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+
+.modal-premium-header h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.modal-premium-header p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 4px 0 0 0;
+}
+
+/* BOTÃO DE FECHAR (com rotação e espaçamento interno) */
+.close-premium {
+    background: #f1f5f9;
+    top: 20px;
+    right: 20px;
+    border: none;
+    width: 38px;
+    height: 38px;
+    padding: 8px; /* espaçamento interno */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.close-premium:hover {
+    background: #fee2e2;
+    color: var(--primary);
+    transform: rotate(90deg); /* animação de rotação */
+    box-shadow: 0 4px 10px rgba(227, 6, 19, 0.15);
+}
+
 /* BODY */
 .modal-selection-list {
     display: flex;
@@ -178,100 +230,71 @@
 }
 
 /* =========================================
-   BOTTOM SHEET - Efeito Deslizante do Modal
+   DARK MODE OVERRIDES (MODAL GESTÃO SETOR)
    ========================================= */
-.modal-premium.bottom-sheet {
-    align-items: center; /* Centraliza vertical e horizontalmente */
-    padding-bottom: 0;
+
+html.dark-theme .modal-premium-content {
+    background: #1e293b;
+    border: 1px solid var(--border);
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.6);
 }
 
-.modal-premium.bottom-sheet .modal-premium-content {
-    margin: 0;
-    width: 100%;
-    max-width: 650px;
-    height: 125px; /* Tamanho exato apenas para o título e drag handle */
-    border-radius: 32px; /* Totalmente arredondado */
-    transform: scale(0.95) translateY(40px); /* Nascimento mais suave perto do centro */
-    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); /* Curva "Smooth Premium" super fluida */
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    background: #ffffff;
-    overflow: hidden; /* Corta o resto do conteúdo */
+html.dark-theme .modal-premium-header {
+    background: linear-gradient(to right, rgba(227, 6, 19, 0.1), transparent);
+    border-bottom-color: var(--border);
 }
 
-.modal-premium.bottom-sheet.active .modal-premium-content {
-    transform: scale(1) translateY(0);
+html.dark-theme .modal-premium-header h2 {
+    color: var(--text-main);
 }
 
-/* EXPANDIDO MAGICAMENTE NO CENTRO */
-.modal-premium.bottom-sheet .modal-premium-content.expanded {
-    height: 85vh; /* Cresce verticalmente a partir do centro */
-    cursor: default;
+html.dark-theme .modal-premium-header p {
+    color: var(--text-muted);
 }
 
-/* Oculta os itens não vitais no estado pequeno */
-.modal-premium.bottom-sheet .modal-premium-body,
-.modal-premium.bottom-sheet .modal-premium-footer {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
+html.dark-theme .close-premium {
+    background: #334155;
+    color: var(--text-muted);
 }
 
-/* Comportamento da rolagem no corpo do modal */
-.modal-premium.bottom-sheet .modal-premium-body {
-    overflow-y: hidden; /* sem scroll quando pequeno */
-    flex: 1;
-    position: relative;
-    padding-bottom: 30px; /* espaco pra nao sobrepor botoes */
+html.dark-theme .close-premium:hover {
+    background: rgba(227, 6, 19, 0.2);
+    color: var(--primary);
 }
 
-/* Esfumaçado no fundo da lista pra dar a ideia de que continua */
-.modal-premium.bottom-sheet .modal-premium-body::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background: linear-gradient(transparent, #ffffff);
-    pointer-events: none;
-    transition: opacity 0.4s;
-    z-index: 10;
+html.dark-theme .selection-row {
+    border-bottom-color: var(--border);
 }
 
-.modal-premium.bottom-sheet .modal-premium-content.expanded .modal-premium-body,
-.modal-premium.bottom-sheet .modal-premium-content.expanded .modal-premium-footer {
-    opacity: 1;
-    pointer-events: auto;
+html.dark-theme .selection-row:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
-.modal-premium.bottom-sheet .modal-premium-content.expanded .modal-premium-body {
-    overflow-y: auto; /* permite scroll ao ampliar */
+html.dark-theme .selection-row span,
+html.dark-theme .sector-cell span {
+    color: var(--text-main);
 }
 
-.modal-premium.bottom-sheet .modal-premium-content.expanded .modal-premium-body::after {
-    opacity: 0; /* Some com o esfumaçado quando expandido */
+html.dark-theme .status-tag {
+    background: #334155;
+    color: var(--text-muted);
 }
 
-/* Drag handle visual cue */
-.drag-handle {
-    width: 48px;
-    height: 6px;
-    background-color: #cbd5e1;
-    border-radius: 10px;
-    margin: 16px auto -4px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+html.dark-theme .modal-premium-footer {
+    border-top-color: var(--border);
 }
 
-.modal-premium-content:hover .drag-handle {
-    width: 64px;
-    background-color: #94a3b8;
+html.dark-theme .global-row {
+    background: rgba(227, 6, 19, 0.05);
 }
 
-.modal-premium-content.expanded .drag-handle {
-    width: 48px;
+/* Checkbox fix for dark mode */
+html.dark-theme .checkmark {
+    background-color: #334155;
+    border: 1px solid var(--border);
+}
+
+html.dark-theme .custom-checkbox input:checked ~ .checkmark {
     background-color: var(--primary);
-    opacity: 0.8;
 }
+

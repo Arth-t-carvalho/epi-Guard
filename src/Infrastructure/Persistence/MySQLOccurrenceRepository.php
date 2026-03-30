@@ -399,15 +399,37 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $stmt->execute();
     }
 
+    public function hide(int $id): bool
+    {
+        $stmt = $this->db->prepare("UPDATE ocorrencias SET oculto = TRUE WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        return $stmt->execute();
+    }
+
+    public function toggleFavorite(int $id): array
+    {
+        $stmt = $this->db->prepare("UPDATE ocorrencias SET favorito = NOT favorito WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+
+        $stmt2 = $this->db->prepare("SELECT favorito FROM ocorrencias WHERE id = ?");
+        $stmt2->bind_param('i', $id);
+        $stmt2->execute();
+        $row = $stmt2->get_result()->fetch_assoc();
+        return ['success' => true, 'favorito' => (bool) $row['favorito']];
+    }
+
     public function findInfractions(array $filters = []): array
     {
-        $sql = "SELECT o.id, o.data_hora, o.tipo, f.nome as funcionario_nome, f.foto_referencia as funcionario_foto, s.sigla as setor_sigla, e.nome as epi_nome, o.criado_em
+        $sql = "SELECT o.id, o.data_hora, o.tipo, o.favorito, f.id as funcionario_id, f.nome as funcionario_nome, f.foto_referencia as funcionario_foto, s.id as setor_id, s.sigla as setor_sigla, s.nome as setor_nome, e.id as epi_id, e.nome as epi_nome, o.criado_em,
+                (SELECT ev.caminho_imagem FROM evidencias ev WHERE ev.ocorrencia_id = o.id LIMIT 1) as evidencia_foto,
+                (CASE WHEN EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id) THEN 'resolvido' ELSE 'pendente' END) as status
                 FROM ocorrencias o
                 JOIN funcionarios f ON o.funcionario_id = f.id
                 LEFT JOIN setores s ON f.setor_id = s.id
                 LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                 LEFT JOIN epis e ON oe.epi_id = e.id
-                WHERE o.tipo = 'INFRACAO'";
+                WHERE o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         $params = [];
         $types = "";
@@ -436,7 +458,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
             }
         }
 
-        $sql .= " ORDER BY o.data_hora DESC";
+        $sql .= " ORDER BY o.favorito DESC, o.data_hora DESC";
 
         $stmt = $this->db->prepare($sql);
         if (!empty($params)) {
@@ -465,7 +487,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 LEFT JOIN setores s ON f.setor_id = s.id
                 LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                 LEFT JOIN epis e ON oe.epi_id = e.id
-                WHERE {$where} AND o.tipo = 'INFRACAO'
+                WHERE {$where} AND o.tipo = 'INFRACAO' AND o.oculto = FALSE
                 ORDER BY o.id ASC";
 
         $stmt = $this->db->prepare($sql);
