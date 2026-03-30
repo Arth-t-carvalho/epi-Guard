@@ -19,7 +19,9 @@ const chartPalettes = {
     default: { helmet: '#1F2937', glasses: '#9CA3AF', all: '#E30613', extra1: '#f59e0b', extra2: '#3b82f6' },
     blue: { helmet: '#1e3a8a', glasses: '#60a5fa', all: '#2563eb', extra1: '#93c5fd', extra2: '#1d4ed8' },
     emerald: { helmet: '#064e3b', glasses: '#34d399', all: '#10b981', extra1: '#6ee7b7', extra2: '#047857' },
-    purple: { helmet: '#4c1d95', glasses: '#a78bfa', all: '#7c3aed', extra1: '#c4b5fd', extra2: '#5b21b6' }
+    purple: { helmet: '#4c1d95', glasses: '#a78bfa', all: '#7c3aed', extra1: '#c4b5fd', extra2: '#5b21b6' },
+    sunset: { helmet: '#7c2d12', glasses: '#f97316', all: '#fbbf24', extra1: '#fde68a', extra2: '#ea580c' },
+    ocean:  { helmet: '#0c4a6e', glasses: '#0ea5e9', all: '#06b6d4', extra1: '#67e8f9', extra2: '#0284c7' }
 };
 
 const savedPaletteKey = localStorage.getItem('epiguard-chart-palette') || 'default';
@@ -28,11 +30,16 @@ const activePalette = chartPalettes[savedPaletteKey] || chartPalettes.default;
 Chart.defaults.color = 'var(--text-color)';
 Chart.defaults.font.family = "'Inter', sans-serif";
 
-let colorHelmet = activePalette.helmet;
-let colorGlasses = activePalette.glasses;
-let colorAll = activePalette.all;
-let colorExtra1 = activePalette.extra1;
-let colorExtra2 = activePalette.extra2;
+// Helper para Buscar Cor Customizada por EPI
+function getEPIColor(epiKey, fallback) {
+    return localStorage.getItem('epiguard-color-' + epiKey) || fallback;
+}
+
+let colorHelmet  = getEPIColor('capacete', activePalette.helmet);
+let colorGlasses = getEPIColor('oculos', activePalette.glasses);
+let colorAll     = getEPIColor('total', activePalette.all); // Especial: Cor padrão do 'Total'
+let colorExtra1  = activePalette.extra1;
+let colorExtra2  = activePalette.extra2;
 
 // Arrays auxiliares
 const monthsFull = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -989,16 +996,16 @@ function loadCharts() {
             if (doughnutChartInstance) doughnutChartInstance.destroy();
 
             const epiColors = {
-                'capacete': { bg: '#1F2937', label: 'Capacete' },
-                'oculos': { bg: '#9CA3AF', label: 'Óculos' },
-                'óculos': { bg: '#9CA3AF', label: 'Óculos' },
-                'jaqueta': { bg: '#f59e0b', label: 'Jaqueta' },
-                'avental': { bg: '#3b82f6', label: 'Avental' },
-                'luvas': { bg: '#10b981', label: 'Luvas' },
-                'luva': { bg: '#10b981', label: 'Luvas' },
-                'mascara': { bg: '#6366f1', label: 'Máscara' },
-                'máscara': { bg: '#6366f1', label: 'Máscara' },
-                'protetor': { bg: '#ec4899', label: 'Protetor' }
+                'capacete': { bg: getEPIColor('capacete', '#1F2937'), label: 'Capacete' },
+                'oculos': { bg: getEPIColor('oculos', '#9CA3AF'), label: 'Óculos' },
+                'óculos': { bg: getEPIColor('oculos', '#9CA3AF'), label: 'Óculos' },
+                'jaqueta': { bg: getEPIColor('jaqueta', '#f59e0b'), label: 'Jaqueta' },
+                'avental': { bg: getEPIColor('avental', '#3b82f6'), label: 'Avental' },
+                'luvas': { bg: getEPIColor('luvas', '#10b981'), label: 'Luvas' },
+                'luva': { bg: getEPIColor('luvas', '#10b981'), label: 'Luvas' },
+                'mascara': { bg: getEPIColor('mascara', '#4b5563'), label: 'Máscara' },
+                'máscara': { bg: getEPIColor('mascara', '#4b5563'), label: 'Máscara' },
+                'protetor': { bg: getEPIColor('protetor', '#6b7280'), label: 'Protetor' }
             };
 
             const datasets = [];
@@ -1033,8 +1040,8 @@ function loadCharts() {
             datasets.push({
                 label: 'Total',
                 data: response.bar.total,
-                backgroundColor: '#E30613',
-                borderColor: '#E30613',
+                backgroundColor: colorAll,
+                borderColor: colorAll,
                 borderRadius: 4
             });
 
@@ -1129,11 +1136,23 @@ function loadCharts() {
                     dataLabels.forEach((label, i) => {
                         if (dataValues[i] > 0) {
                             const pct = Math.round((dataValues[i] / max) * 100);
+                            
+                            // Busca a cor correspondente ao EPI para a progress bar
+                            let barColor = colorAll; // Default
+                            const lowerLabel = label.toLowerCase();
+                            if (lowerLabel.includes('capacete')) barColor = colorHelmet;
+                            else if (lowerLabel.includes('oculos') || lowerLabel.includes('óculos')) barColor = colorGlasses;
+                            else if (lowerLabel.includes('jaqueta')) barColor = getEPIColor('jaqueta', '#f59e0b');
+                            else if (lowerLabel.includes('avental')) barColor = getEPIColor('avental', '#3b82f6');
+                            else if (lowerLabel.includes('luva')) barColor = getEPIColor('luvas', '#10b981');
+                            else if (lowerLabel.includes('mascara') || lowerLabel.includes('máscara')) barColor = getEPIColor('mascara', '#6366f1');
+                            else if (lowerLabel.includes('protetor')) barColor = getEPIColor('protetor', '#ec4899');
+
                             topList.innerHTML += `
                                 <div class="list-item">
                                     <span class="occ-name">${label}</span>
                                     <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${pct}%;"></div>
+                                        <div class="progress-fill" style="width: ${pct}%; background-color: ${barColor};"></div>
                                     </div>
                                 </div>
                             `;

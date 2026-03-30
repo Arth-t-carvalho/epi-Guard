@@ -25,6 +25,8 @@ if (!function_exists('__')) {
                 'Azul Corporativo' => 'Corporate Blue',
                 'Verde Sustentável' => 'Sustainable Green',
                 'Roxo Vibrante' => 'Vibrant Purple',
+                'Pôr do Sol' => 'Sunset',
+                'Oceano' => 'Ocean',
                 'Notificações' => 'Notifications',
                 'Alertas de Infração por E-mail' => 'Email Infraction Alerts',
                 'Receba um e-mail imediato sempre que uma infração Grave for registrada.' => 'Receive an immediate email whenever a Severe infraction is registered.',
@@ -94,19 +96,46 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                     </div>
                 </div>
 
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <h3><?= __('Paleta de Cores dos Gráficos') ?></h3>
-                        <p><?= __('Personalize as cores utilizadas nos gráficos da Dashboard.') ?></p>
+
+            </div>
+        </div>
+
+        <!-- CARD EXTRA: Cores Individuais dos EPIs -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <div class="icon-wrapper epi-icon tint-icon">
+                    <i data-lucide="brush"></i>
+                </div>
+                <h2><?= __('Personalização por EPI') ?></h2>
+                <button class="btn-reset-colors" onclick="resetEpiColors()" title="<?= __('Resetar para cores padrão') ?>">
+                    <i data-lucide="rotate-ccw"></i>
+                    <span><?= __('Resetar Padrão') ?></span>
+                </button>
+            </div>
+            <div class="settings-card-body">
+                <p class="setting-description-text"><?= __('Defina cores específicas para cada equipamento nos gráficos.') ?></p>
+                <div class="epi-color-grid">
+                    <?php 
+                    $epis = [
+                        ['id' => 'capacete', 'label' => 'Capacete'],
+                        ['id' => 'oculos', 'label' => 'Óculos'],
+                        ['id' => 'jaqueta', 'label' => 'Jaqueta'],
+                        ['id' => 'avental', 'label' => 'Avental'],
+                        ['id' => 'luvas', 'label' => 'Luvas'],
+                        ['id' => 'mascara', 'label' => 'Máscara'],
+                        ['id' => 'protetor', 'label' => 'Protetor'],
+                        ['id' => 'total', 'label' => 'Total'],
+                    ];
+                    foreach ($epis as $epi): ?>
+                    <div class="epi-color-item">
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="color-<?= $epi['id'] ?>" 
+                                   class="epi-color-picker" 
+                                   onchange="changeEpiColor('<?= $epi['id'] ?>', this.value)">
+                        </div>
+                        <label for="color-<?= $epi['id'] ?>"><?= __($epi['label']) ?></label>
                     </div>
-                    <div class="setting-action">
-                        <select class="settings-select" id="chartColorSelect" onchange="changeChartColor(this.value)">
-                            <option value="default"><?= __('Padrão (Senai)') ?></option>
-                            <option value="blue"><?= __('Azul Corporativo') ?></option>
-                            <option value="emerald"><?= __('Verde Sustentável') ?></option>
-                            <option value="purple"><?= __('Roxo Vibrante') ?></option>
-                        </select>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
@@ -206,9 +235,90 @@ function changeLanguage(lang) {
     window.location.reload();
 }
 
-function changeChartColor(palette) {
-    localStorage.setItem('epiguard-chart-palette', palette);
+function resetEpiColors() {
+    if (confirm("<?= __('Deseja resetar todas as cores dos EPIs para o padrão?') ?>")) {
+        const epis = ['capacete', 'oculos', 'jaqueta', 'avental', 'luvas', 'mascara', 'protetor', 'total'];
+        epis.forEach(epi => {
+            localStorage.removeItem('epiguard-color-' + epi);
+        });
+        // Reseta também a paleta global para o padrão oficial Senai
+        localStorage.setItem('epiguard-chart-palette', 'default');
+        
+        loadEpiColors();
+        
+        // Toast de feedback
+        let existing = document.getElementById('paletteToast');
+        if (existing) existing.remove();
+        const checkSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+        const toast = document.createElement('div');
+        toast.id = 'paletteToast';
+        toast.className = 'palette-toast';
+        toast.innerHTML = checkSVG + ` Cores resetadas para o padrão!`;
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
 }
+
+function changeEpiColor(epi, color) {
+    localStorage.setItem('epiguard-color-' + epi, color);
+    showEpiColorToast(epi);
+}
+
+function loadEpiColors() {
+    const epis = ['capacete', 'oculos', 'jaqueta', 'avental', 'luvas', 'mascara', 'protetor', 'total'];
+    const defaults = {
+        'capacete': '#1F2937',
+        'oculos': '#9CA3AF',
+        'jaqueta': '#f59e0b',
+        'avental': '#3b82f6',
+        'luvas': '#10b981',
+        'mascara': '#4b5563', // Mudado de roxo para cinza escuro corporativo
+        'protetor': '#6b7280', // Mudado de rosa para cinza médio
+        'total': '#E30613'
+    };
+
+    epis.forEach(epi => {
+        const savedColor = localStorage.getItem('epiguard-color-' + epi) || defaults[epi];
+        const input = document.getElementById('color-' + epi);
+        if (input) input.value = savedColor;
+    });
+}
+
+function showEpiColorToast(epi) {
+    let existing = document.getElementById('paletteToast');
+    if (existing) existing.remove();
+
+    const names = {
+        capacete: 'Capacete',
+        oculos: 'Óculos',
+        jaqueta: 'Jaqueta',
+        avental: 'Avental',
+        luvas: 'Luvas',
+        mascara: 'Máscara',
+        protetor: 'Protetor',
+        total: 'Total'
+    };
+
+    const checkSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+
+    const toast = document.createElement('div');
+    toast.id = 'paletteToast';
+    toast.className = 'palette-toast';
+    toast.innerHTML = checkSVG + ` Cor do <strong>${names[epi] || epi}</strong> atualizada!`;
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
+
 
 document.addEventListener("DOMContentLoaded", function() {
     var isDark = document.documentElement.classList.contains('dark-theme');
@@ -223,9 +333,7 @@ document.addEventListener("DOMContentLoaded", function() {
         themeLabel.textContent = isDark ? "<?= __('Tema Claro') ?>" : "<?= __('Tema Escuro') ?>";
     }
 
-    const savedPalette = localStorage.getItem('epiguard-chart-palette') || 'default';
-    const chartSelect = document.getElementById('chartColorSelect');
-    if (chartSelect) chartSelect.value = savedPalette;
+    loadEpiColors();
     
     // Inicia a renderização de ícones para o modo respectivo
     if (window.lucide) {
