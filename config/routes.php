@@ -33,4 +33,5 @@ return [
     '/api/simulate-occurrence' => [\epiGuard\Presentation\Controller\Api\SimulationApiController::class, 'simulate'],
     '/api/export-insights' => [\epiGuard\Presentation\Controller\Api\ExportApiController::class, 'insights'],
     '/settings' => [\epiGuard\Presentation\Controller\SettingsController::class, 'index'],
+    '/logout' => [\epiGuard\Presentation\Controller\AuthController::class, 'logout'],
 ];

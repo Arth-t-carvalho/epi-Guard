@@ -295,10 +295,10 @@ function confirmHideInfraction(id, name) {
     hideTargetId = id;
     const modal = document.getElementById('confirmHideModal');
     const nameEl = document.getElementById('hideTargetName');
-    
+
     if (nameEl) nameEl.textContent = name;
     if (modal) modal.classList.add('active');
-    
+
     // Configurar o botão de confirmação
     const btnDoHide = document.getElementById('btnDoHide');
     if (btnDoHide) {
@@ -315,7 +315,7 @@ function closeConfirmHideModal() {
 async function doHideInfraction(id) {
     const btn = document.getElementById('btnDoHide');
     const originalText = btn.textContent;
-    
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Ocultando...';
 
@@ -332,11 +332,11 @@ async function doHideInfraction(id) {
         if (result.success) {
             // Fechar modal
             closeConfirmHideModal();
-            
+
             // Remover da tela com animação
             const card = document.getElementById(`card-infraction-${id}`);
             const row = document.getElementById(`row-infraction-${id}`);
-            
+
             if (card) {
                 card.classList.add('fade-out-infraction');
                 setTimeout(() => card.remove(), 500);
@@ -358,3 +358,39 @@ async function doHideInfraction(id) {
 }
 
 // As funções do Modern Picker (Apple Style) foram movidas para assets/js/picker.js
+
+/* ==============================
+   FILTRO DE DATA PERSONALIZADO
+   ============================== */
+
+function applyCustomDateRange() {
+    const startInput = document.getElementById('uiDateInicio');
+    const endInput = document.getElementById('uiDateFim');
+    const start = startInput ? startInput.value : '';
+    const end = endInput ? endInput.value : '';
+    
+    if (!start || !end) {
+        alert('Por favor, selecione as duas datas para filtrar.');
+        return;
+    }
+
+    if (new Date(start) > new Date(end)) {
+        alert('A data de início não pode ser maior que a data de fim.');
+        return;
+    }
+
+    // Atualizar os inputs ocultos e submeter o form
+    const hStart = document.getElementById('hiddenDataInicio');
+    const hEnd = document.getElementById('hiddenDataFim');
+    if (hStart) hStart.value = start;
+    if (hEnd) hEnd.value = end;
+
+    const form = document.querySelector('.filter-bar') || document.getElementById('filterForm');
+    if (form) {
+        // Mostrar loading no botão
+        const btn = document.querySelector('.btn-mini-apply');
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        
+        form.submit();
+    }
+}

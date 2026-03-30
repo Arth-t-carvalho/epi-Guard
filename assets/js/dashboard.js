@@ -25,20 +25,26 @@ const chartPalettes = {
 const savedPaletteKey = localStorage.getItem('epiguard-chart-palette') || 'default';
 const activePalette = chartPalettes[savedPaletteKey] || chartPalettes.default;
 
-Chart.defaults.color = 'var(--text-color)';
-Chart.defaults.font.family = "'Inter', sans-serif";
-
-let colorHelmet = activePalette.helmet;
-let colorGlasses = activePalette.glasses;
-let colorAll = activePalette.all;
-let colorExtra1 = activePalette.extra1;
-let colorExtra2 = activePalette.extra2;
+// Cores globais (inicializadas no DOMContentLoaded)
+let colorHelmet, colorGlasses, colorAll, colorExtra1, colorExtra2;
 
 // Arrays auxiliares
 const monthsFull = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
 // --- INICIALIZAÇÃO ---
 document.addEventListener("DOMContentLoaded", function () {
+    // Configurações Globais do Chart.js (Protegido)
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#64748b';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        
+        colorHelmet = activePalette.helmet;
+        colorGlasses = activePalette.glasses;
+        colorAll = activePalette.all;
+        colorExtra1 = activePalette.extra1;
+        colorExtra2 = activePalette.extra2;
+    }
+
     loadCalendarData(); // Carrega dados da API
     loadCharts();       // Carrega Gráficos
 
@@ -965,9 +971,20 @@ function closeModal() {
 }
 
 function loadCharts() {
+    console.log('[Dashboard] Iniciando carregamento de gráficos...');
+    
+    if (typeof Chart === 'undefined') {
+        console.error('[Dashboard] Biblioteca Chart.js não detectada!');
+        return;
+    }
+
     fetch(`${window.BASE_PATH}/api/charts?sector_id=${selectedSectorId}`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
         .then(response => {
+            console.log('[Dashboard] Dados recebidos:', response);
             if (response.summary) {
                 window.totalStudents = response.summary.total_students;
                 const elDia = document.getElementById('kpiDia');

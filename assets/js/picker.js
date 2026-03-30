@@ -21,7 +21,8 @@ function openModernPicker(type) {
         visualizacao: 'Tipo de Visualização',
         risk: 'Nível de Risco',
         cargo: 'Selecionar Cargo',
-        setor: 'Selecionar Setor'
+        setor: 'Selecionar Setor',
+        ordenacao: 'Escolher Ordenação'
     };
     
     const subtitles = {
@@ -31,7 +32,8 @@ function openModernPicker(type) {
         visualizacao: 'Escolha como os dados serão exibidos',
         risk: 'Filtre setores pelo nível de infrações',
         cargo: 'Filtre instrutores por nível hierárquico',
-        setor: 'Filtre instrutores por área de atuação'
+        setor: 'Filtre instrutores por área de atuação',
+        ordenacao: 'Defina como os registros serão organizados'
     };
 
     title.textContent = titles[type] || 'Selecionar';
@@ -81,6 +83,34 @@ function selectModernOption(type, value, label) {
     const labelEl = document.getElementById(labelId);
     if (labelEl) {
         labelEl.textContent = label;
+    }
+
+    // Caso especial para Infrações: Período Personalizado
+    if (type === 'periodo' && value === 'personalizado') {
+        const customBox = document.getElementById('customDateRangeBox');
+        if (customBox) {
+            customBox.style.display = 'flex';
+            customBox.classList.add('highlight-pulse');
+            
+            // Focar no primeiro input de data
+            setTimeout(() => {
+                const dateStart = document.getElementById('uiDateInicio');
+                if (dateStart) dateStart.focus();
+            }, 300);
+        }
+        closeModernPicker();
+        return; // Não envia o form ainda!
+    } else {
+        const customBox = document.getElementById('customDateRangeBox');
+        if (customBox) customBox.style.display = 'none';
+        
+        // Limpa as datas se mudar para um período pré-definido
+        if (type === 'periodo') {
+            const hStart = document.getElementById('hiddenDataInicio');
+            const hEnd = document.getElementById('hiddenDataFim');
+            if (hStart) hStart.value = '';
+            if (hEnd) hEnd.value = '';
+        }
     }
 
     closeModernPicker();

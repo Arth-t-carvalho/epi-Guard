@@ -115,6 +115,7 @@ class AuthController
                 }
                 $_SESSION['user_id'] = $user->getId();
                 $_SESSION['user_nome'] = $user->getName();
+                $_SESSION['user_email'] = $user->getEmail()->getValue();
                 $_SESSION['user_cargo'] = $user->getRole()->getValue();
                 
                 header("Location: " . BASE_PATH . "/dashboard");

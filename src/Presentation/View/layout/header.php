@@ -16,31 +16,36 @@
 
     <div class="header-actions">
 
-        <!-- Botão de Simulação Real -->
-        <button class="header-icon-btn" onclick="testNotification()" style="color: #3b82f6;" title="Simular Detecção Real (Banco de Dados)">
-            <i class="fa-solid fa-vial"></i>
-        </button>
 
         <!-- Notificações Dropdown -->
         <div style="position: relative; display: flex;">
             <!-- Botão principal do sino com o contador -->
             <button class="header-icon-btn notification-btn" id="notifBtn">
                 <i data-lucide="bell"></i>
-                <span class="notification-badge visible" id="notifBadge" style="display:none;">0</span>
+                <!-- O badge começa escondido (display:none). O JS controla a visibilidade -->
+                <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
             </button>
             
-            <!-- Modal (Dropdown) -->
+            <!-- Modal (Dropdown) que aparece ao clicar no sino -->
             <div class="notification-dropdown" id="notifDropdown">
                 <div class="notif-dropdown-header">
                     <span>Notificações</span>
                     <button class="notif-clear-btn" id="notifClearBtn" style="display:none;">Lidas</button>
                 </div>
                 
+                <!-- Lista de notificações — preenchida pelo JavaScript -->
                 <div class="notif-list" id="notifList">
                     <div class="notif-empty" id="notifEmpty">
                         <i data-lucide="bell-off"></i>
                         <span>Nenhuma infração nova</span>
                     </div>
+                </div>
+
+                <!-- Footer com link para página completa -->
+                <div class="notif-dropdown-footer">
+                    <a href="<?= BASE_PATH ?>/infractions" class="notif-view-all">
+                        Ver todas as notificações <i class="fa-solid fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -54,14 +59,18 @@
             <i class="fa-solid fa-download"></i> Exportar
         </button>
         
-        <div class="user-profile-trigger">
-            <div class="user-info-mini">
-                <span class="user-name">arthur</span>
-                <span class="user-role">Super_admin</span>
+        <div class="user-profile-container">
+            <div class="user-profile-trigger" id="profileTrigger">
+                <div class="user-info-mini">
+                    <span class="user-name"><?= $_SESSION['user_nome'] ?? 'arthur' ?></span>
+                    <span class="user-role"><?= $_SESSION['user_cargo'] ?? 'Super_admin' ?></span>
+                </div>
+                <div class="user-avatar">
+                    <?= strtoupper(substr($_SESSION['user_nome'] ?? 'AR', 0, 2)) ?>
+                </div>
             </div>
-            <div class="user-avatar">
-                AR
-            </div>
+
+<!-- Perfil do Usuário movido para main.php para garantir visibilidade global -->
         </div>
     </div>
 </header>

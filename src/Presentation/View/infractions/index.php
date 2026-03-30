@@ -39,9 +39,14 @@ ob_start();
 
         <!-- Hidden Fields for Filters -->
         <input type="hidden" name="periodo" id="hiddenPeriodo" value="<?= htmlspecialchars($filters['periodo']) ?>">
+        <input type="hidden" name="data_inicio" id="hiddenDataInicio" value="<?= htmlspecialchars($filters['data_inicio'] ?? '') ?>">
+        <input type="hidden" name="data_fim" id="hiddenDataFim" value="<?= htmlspecialchars($filters['data_fim'] ?? '') ?>">
         <input type="hidden" name="status" id="hiddenStatus" value="<?= htmlspecialchars($filters['status']) ?>">
         <input type="hidden" name="epi" id="hiddenEpi" value="<?= htmlspecialchars($filters['epi']) ?>">
-        <input type="hidden" name="visualizacao" id="hiddenVisualizacao" value="<?= htmlspecialchars($filters['visualizacao']) ?>">
+        <input type="hidden" name="visualizacao" id="hiddenVisualizacao"
+            value="<?= htmlspecialchars($filters['visualizacao']) ?>">
+        <input type="hidden" name="ordenacao" id="hiddenOrdenacao"
+            value="<?= htmlspecialchars($filters['ordenacao']) ?>">
 
         <!-- Modern Triggers -->
         <div class="filter-group">
@@ -50,13 +55,31 @@ ob_start();
                 <div class="trigger-info">
                     <span class="trigger-label">Período</span>
                     <span class="trigger-value" id="label-periodo">
-                        <?php 
-                        $periodLabels = ['todos' => 'Todos os períodos', 'hoje' => 'Hoje', 'semana' => 'Esta Semana', 'mes' => 'Este Mês'];
+                        <?php
+                        $periodLabels = [
+                            'todos' => 'Todos os períodos',
+                            'hoje' => 'Hoje',
+                            'semana' => 'Esta Semana',
+                            'mes' => 'Este Mês',
+                            'personalizado' => 'Personalizado'
+                        ];
                         echo $periodLabels[$filters['periodo']] ?? 'Todos';
                         ?>
                     </span>
                 </div>
                 <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+
+        <!-- Custom Date Range Inputs (Only visible if periodo is personalizado) -->
+        <div id="customDateRangeBox" class="filter-group custom-date-box" style="<?= $filters['periodo'] === 'personalizado' ? 'display: flex;' : 'display: none;' ?>">
+            <div class="date-input-wrapper">
+                <input type="date" id="uiDateInicio" value="<?= htmlspecialchars($filters['data_inicio'] ?? '') ?>" title="Data Início">
+                <span>até</span>
+                <input type="date" id="uiDateFim" value="<?= htmlspecialchars($filters['data_fim'] ?? '') ?>" title="Data Fim">
+                <button type="button" class="btn-mini-apply" onclick="applyCustomDateRange()">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
         </div>
 
@@ -66,7 +89,7 @@ ob_start();
                 <div class="trigger-info">
                     <span class="trigger-label">Status</span>
                     <span class="trigger-value" id="label-status">
-                        <?php 
+                        <?php
                         $statusLabels = ['todos' => 'Todos os Status', 'pendente' => 'Pendente', 'resolvido' => 'Resolvido'];
                         echo $statusLabels[$filters['status']] ?? 'Todos';
                         ?>
@@ -83,6 +106,26 @@ ob_start();
                     <span class="trigger-label">EPI</span>
                     <span class="trigger-value" id="label-epi">
                         <?= $filters['epi'] === 'todos' ? 'Todos os EPIs' : htmlspecialchars($filters['epi']) ?>
+                    </span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <div class="modern-picker-trigger" onclick="openModernPicker('ordenacao')">
+                <i class="fa-solid fa-arrow-down-wide-short"></i>
+                <div class="trigger-info">
+                    <span class="trigger-label">Ordenar por</span>
+                    <span class="trigger-value" id="label-ordenacao">
+                        <?php
+                        $orderLabels = [
+                            'tempo' => 'Mais Recentes',
+                            'alfabetica' => 'Ordem Alfabética',
+                            'frequente' => 'Mais Frequentes'
+                        ];
+                        echo $orderLabels[$filters['ordenacao']] ?? 'Mais Recentes';
+                        ?>
                     </span>
                 </div>
                 <i class="fa-solid fa-chevron-down"></i>
@@ -116,7 +159,8 @@ ob_start();
         <?php if ($filters['visualizacao'] === 'cards'): ?>
             <div class="cards-grid" id="infractionsCardsGrid">
                 <?php foreach ($infractions as $infraction): ?>
-                    <div class="infraction-card<?= !empty($infraction['favorito']) ? ' is-bookmarked' : '' ?>" id="card-infraction-<?= $infraction['id'] ?>">
+                    <div class="infraction-card<?= !empty($infraction['favorito']) ? ' is-bookmarked' : '' ?>"
+                        id="card-infraction-<?= $infraction['id'] ?>">
                         <div class="card-image-box">
                             <?php
                             $photoPath = !empty($infraction['funcionario_foto']) ? BASE_PATH . '/' . $infraction['funcionario_foto'] : BASE_PATH . '/assets/img/default-avatar.png';
@@ -156,8 +200,11 @@ ob_start();
                                     $infraction['epi_id'] ?: null
                                 ]);
                                 ?>
-                                <button class="btn-card-action" title="Ver detalhes" onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($args, ENT_QUOTES, 'UTF-8') ?>)"><i class="fa-solid fa-eye"></i></button>
-                                <button class="btn-card-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>" title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
+                                <button class="btn-card-action" title="Ver detalhes"
+                                    onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($args, ENT_QUOTES, 'UTF-8') ?>)"><i
+                                        class="fa-solid fa-eye"></i></button>
+                                <button class="btn-card-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
+                                    title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
                                         class="fa-solid fa-bookmark"></i></button>
                                 <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
                                     <button class="btn-card-action success" title="Resolver"><i
@@ -190,7 +237,8 @@ ob_start();
                         </tr>
                     <?php else: ?>
                         <?php foreach ($infractions as $infraction): ?>
-                            <tr id="row-infraction-<?= $infraction['id'] ?>" class="<?= !empty($infraction['favorito']) ? 'is-bookmarked' : '' ?>">
+                            <tr id="row-infraction-<?= $infraction['id'] ?>"
+                                class="<?= !empty($infraction['favorito']) ? 'is-bookmarked' : '' ?>">
                                 <td><?= date('d/m/Y', strtotime($infraction['data_hora'])) ?></td>
                                 <td class="employee-cell">
                                     <?php if ($filters['visualizacao'] === 'foto'): ?>
@@ -231,8 +279,11 @@ ob_start();
                                             $infraction['epi_id'] ?: null
                                         ]);
                                         ?>
-                                        <button class="btn-action" title="Ver detalhes" onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($argsTable, ENT_QUOTES, 'UTF-8') ?>)"><i class="fa-solid fa-eye"></i></button>
-                                        <button class="btn-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>" title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
+                                        <button class="btn-action" title="Ver detalhes"
+                                            onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($argsTable, ENT_QUOTES, 'UTF-8') ?>)"><i
+                                                class="fa-solid fa-eye"></i></button>
+                                        <button class="btn-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
+                                            title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
                                                 class="fa-solid fa-bookmark"></i></button>
                                         <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
                                             <button class="btn-action success" title="Resolver"><i
@@ -345,12 +396,17 @@ ob_start();
                 <i class="fa-solid fa-circle-exclamation"></i>
             </div>
             <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">
-                O registro de <strong><span id="hideTargetName"></span></strong> deixará de aparecer na listagem, mas continuará salvo no histórico do banco de dados.
+                O registro de <strong><span id="hideTargetName"></span></strong> deixará de aparecer na listagem, mas
+                continuará salvo no histórico do banco de dados.
             </p>
         </div>
-        <div class="modal-premium-footer" style="padding: 16px 24px; display: flex; gap: 12px; justify-content: center; background: #fafafa; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;">
-            <button class="btn-cancel-premium" onclick="closeConfirmHideModal()" style="padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; font-weight: 600;">Cancelar</button>
-            <button class="btn-confirm-hide" id="btnDoHide" style="padding: 10px 24px; border-radius: 10px; border: none; background: #E30613; color: #fff; cursor: pointer; font-weight: 700; box-shadow: 0 4px 12px rgba(227, 6, 19, 0.2);">Ocultar Registro</button>
+        <div class="modal-premium-footer"
+            style="padding: 16px 24px; display: flex; gap: 12px; justify-content: center; background: #fafafa; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;">
+            <button class="btn-cancel-premium" onclick="closeConfirmHideModal()"
+                style="padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; font-weight: 600;">Cancelar</button>
+            <button class="btn-confirm-hide" id="btnDoHide"
+                style="padding: 10px 24px; border-radius: 10px; border: none; background: #E30613; color: #fff; cursor: pointer; font-weight: 700; box-shadow: 0 4px 12px rgba(227, 6, 19, 0.2);">Ocultar
+                Registro</button>
         </div>
     </div>
 </div>
@@ -361,7 +417,7 @@ ob_start();
         const confirmModal = document.getElementById('confirmHideModal');
         const evidenceModal = document.getElementById('evidenceModal');
         const exportModal = document.getElementById('exportModal');
-        
+
         if (e.target === confirmModal) closeConfirmHideModal();
         if (e.target === evidenceModal) closeEvidenceModal();
         if (e.target === exportModal) closeExportModal();
@@ -411,7 +467,10 @@ ob_start();
     /* ===== MODAL DE EVIDÊNCIA ===== */
     .evidence-modal-overlay {
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         background: rgba(15, 23, 42, 0.7);
         backdrop-filter: blur(8px);
         display: none;
@@ -420,32 +479,53 @@ ob_start();
         z-index: 99999;
         animation: fadeInOverlay 0.3s ease;
     }
-    .evidence-modal-overlay.active { display: flex; }
-    @keyframes fadeInOverlay {
-        from { opacity: 0; }
-        to { opacity: 1; }
+
+    .evidence-modal-overlay.active {
+        display: flex;
     }
+
+    @keyframes fadeInOverlay {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
     .evidence-modal-card {
         background: #fff;
         border-radius: 24px;
         width: 90%;
         max-width: 560px;
-        box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
         overflow: hidden;
         position: relative;
         animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
+
     @keyframes scaleIn {
-        from { transform: scale(0.85); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
+        from {
+            transform: scale(0.85);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
+
     .evidence-modal-close {
         position: absolute;
-        top: 16px; right: 16px;
-        width: 38px; height: 38px;
+        top: 16px;
+        right: 16px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         border: none;
-        background: rgba(255,255,255,0.9);
+        background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(4px);
         font-size: 22px;
         color: #64748b;
@@ -455,13 +535,15 @@ ob_start();
         align-items: center;
         justify-content: center;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+
     .evidence-modal-close:hover {
         background: #fee2e2;
         color: #E30613;
         transform: rotate(90deg);
     }
+
     .evidence-modal-image-box {
         width: 100%;
         aspect-ratio: 16/10;
@@ -471,10 +553,13 @@ ob_start();
         justify-content: center;
         overflow: hidden;
     }
+
     .evidence-modal-image-box img {
-        width: 100%; height: 100%;
+        width: 100%;
+        height: 100%;
         object-fit: contain;
     }
+
     .evidence-no-photo {
         display: flex;
         flex-direction: column;
@@ -486,21 +571,25 @@ ob_start();
         text-align: center;
         padding: 20px;
     }
+
     .evidence-modal-info {
         padding: 24px 28px;
     }
+
     .evidence-modal-info h3 {
         font-size: 18px;
         font-weight: 800;
         color: #1F2937;
         margin: 0 0 16px 0;
     }
+
     .evidence-info-grid {
         display: flex;
         gap: 20px;
         margin-bottom: 20px;
         flex-wrap: wrap;
     }
+
     .evidence-info-item {
         display: flex;
         align-items: center;
@@ -509,14 +598,17 @@ ob_start();
         font-weight: 600;
         color: #64748b;
     }
+
     .evidence-info-item i {
         color: #E30613;
         font-size: 14px;
     }
+
     .evidence-modal-actions {
         display: flex;
         gap: 12px;
     }
+
     .evidence-btn {
         flex: 1;
         padding: 12px 16px;
@@ -533,20 +625,24 @@ ob_start();
         border: none;
         font-family: 'Inter', sans-serif;
     }
+
     .evidence-btn.download {
         background: #f1f5f9;
         color: #475569;
         border: 1px solid #e2e8f0;
     }
+
     .evidence-btn.download:hover {
         background: #e2e8f0;
         color: #1e293b;
     }
+
     .evidence-btn.sign {
         background: #E30613;
         color: #fff;
         box-shadow: 0 4px 14px rgba(227, 6, 19, 0.25);
     }
+
     .evidence-btn.sign:hover {
         background: #c40510;
         transform: translateY(-1px);
@@ -601,7 +697,7 @@ ob_start();
 
     function signOccurrence() {
         if (!currentEmployeeId) return;
-        
+
         // Formatar data para o input datetime-local (YYYY-MM-DDTHH:MM)
         // A data vem no formato dd/mm/yyyy hh:ii
         const parts = currentDateTime.split(' ');
@@ -649,7 +745,8 @@ ob_start();
             { value: 'todos', label: 'Todos os períodos' },
             { value: 'hoje', label: 'Hoje' },
             { value: 'semana', label: 'Esta Semana' },
-            { value: 'mes', label: 'Este Mês' }
+            { value: 'mes', label: 'Este Mês' },
+            { value: 'personalizado', label: 'Personalizado' }
         ],
         status: [
             { value: 'todos', label: 'Todos os Status' },
@@ -659,12 +756,17 @@ ob_start();
         epi: [
             { value: 'todos', label: 'Todos os EPIs' },
             <?php foreach ($episList as $epiItem): ?>
-            { value: '<?= htmlspecialchars($epiItem->getName()) ?>', label: '<?= htmlspecialchars($epiItem->getName()) ?>' },
+                { value: '<?= htmlspecialchars($epiItem->getName()) ?>', label: '<?= htmlspecialchars($epiItem->getName()) ?>' },
             <?php endforeach; ?>
         ],
         visualizacao: [
             { value: 'nome', label: 'Exibir Nome' },
             { value: 'cards', label: 'Exibir Cards' }
+        ],
+        ordenacao: [
+            { value: 'tempo', label: 'Mais Recentes' },
+            { value: 'alfabetica', label: 'Ordem Alfabética' },
+            { value: 'frequente', label: 'Mais Frequentes' }
         ]
     };
 </script>

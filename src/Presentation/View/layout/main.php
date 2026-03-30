@@ -45,6 +45,38 @@
         }
     </script>
     <script src="<?= BASE_PATH ?>/assets/js/notifications.js"></script>
+    
+    <!-- Modal de Perfil (Global) -->
+    <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-dropdown-header">
+            <div class="profile-avatar-large">
+                <?= strtoupper(substr($_SESSION['user_nome'] ?? 'AR', 0, 2)) ?>
+            </div>
+        </div>
+        
+        <div class="profile-info-content">
+            <div class="profile-field">
+                <label>ID do Usuário</label>
+                <span>#<?= $_SESSION['user_id'] ?? '1' ?></span>
+            </div>
+            <div class="profile-field">
+                <label>Nome Completo</label>
+                <span><?= $_SESSION['user_nome'] ?? 'Arthur Carvalho' ?></span>
+            </div>
+            <div class="profile-field">
+                <label>Email / Usuário</label>
+                <span><?= $_SESSION['user_email'] ?? 'arthur@gmail.com' ?></span>
+            </div>
+        </div>
+
+        <div class="profile-dropdown-actions">
+            <button class="btn-profile-cancel" id="btnProfileCancel">Cancelar</button>
+            <a href="<?= BASE_PATH ?>/logout" class="btn-profile-logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair
+            </a>
+        </div>
+    </div>
+
     <?= $extraScripts ?? '' ?>
 </body>
 

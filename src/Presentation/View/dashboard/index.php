@@ -5,12 +5,13 @@ $extraHead = '
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/dashboard.css">
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/modal/modalDashboard.css">
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/modal/modalGestaoSetor.css">
-    <!-- Dependencies -->
+';
+$extraScripts = '
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="' . BASE_PATH . '/assets/js/dashboard.js"></script>
 ';
-$extraScripts = '<script src="' . BASE_PATH . '/assets/js/dashboard.js"></script>';
 $extraHead .= '<style>.main-content { overflow-y: hidden !important; }</style>';
 
 ob_start();
@@ -350,7 +351,8 @@ ob_start();
         </div>
         <div class="modal-premium-body" style="padding-top: 24px;">
             <div class="modal-selection-list" style="display: flex; flex-direction: column; gap: 8px;">
-                <div class="selection-row" onclick="selectConformityPeriod('diaria')" style="cursor: pointer; padding: 16px;">
+                <div class="selection-row" onclick="selectConformityPeriod('diaria')"
+                    style="cursor: pointer; padding: 16px;">
                     <div class="selection-main">
                         <div class="sector-cell" style="display:flex; align-items:center;">
                             <i data-lucide="calendar" style="color:var(--primary);"></i>
@@ -359,7 +361,8 @@ ob_start();
                     </div>
                     <span class="status-tag">Selecionar</span>
                 </div>
-                <div class="selection-row" onclick="selectConformityPeriod('semanal')" style="cursor: pointer; padding: 16px;">
+                <div class="selection-row" onclick="selectConformityPeriod('semanal')"
+                    style="cursor: pointer; padding: 16px;">
                     <div class="selection-main">
                         <div class="sector-cell" style="display:flex; align-items:center;">
                             <i data-lucide="calendar-days" style="color:var(--primary);"></i>
@@ -368,7 +371,8 @@ ob_start();
                     </div>
                     <span class="status-tag">Selecionar</span>
                 </div>
-                <div class="selection-row" onclick="selectConformityPeriod('mensal')" style="cursor: pointer; padding: 16px;">
+                <div class="selection-row" onclick="selectConformityPeriod('mensal')"
+                    style="cursor: pointer; padding: 16px;">
                     <div class="selection-main">
                         <div class="sector-cell" style="display:flex; align-items:center;">
                             <i data-lucide="calendar-range" style="color:var(--primary);"></i>
@@ -377,7 +381,8 @@ ob_start();
                     </div>
                     <span class="status-tag">Selecionar</span>
                 </div>
-                <div class="selection-row" onclick="selectConformityPeriod('anual')" style="cursor: pointer; padding: 16px;">
+                <div class="selection-row" onclick="selectConformityPeriod('anual')"
+                    style="cursor: pointer; padding: 16px;">
                     <div class="selection-main">
                         <div class="sector-cell" style="display:flex; align-items:center;">
                             <i data-lucide="calendar-clock" style="color:var(--primary);"></i>

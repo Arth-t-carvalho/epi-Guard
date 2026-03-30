@@ -455,10 +455,28 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 $sql .= " AND YEARWEEK(o.data_hora, 1) = YEARWEEK(CURDATE(), 1)";
             } elseif ($filters['periodo'] === 'mes') {
                 $sql .= " AND MONTH(o.data_hora) = MONTH(CURDATE()) AND YEAR(o.data_hora) = YEAR(CURDATE())";
+            } elseif ($filters['periodo'] === 'personalizado' && !empty($filters['data_inicio']) && !empty($filters['data_fim'])) {
+                $sql .= " AND DATE(o.data_hora) BETWEEN ? AND ?";
+                $params[] = $filters['data_inicio'];
+                $params[] = $filters['data_fim'];
+                $types .= "ss";
             }
         }
 
-        $sql .= " ORDER BY o.favorito DESC, o.data_hora DESC";
+        // Ordenação Dinâmica
+        $orderBy = "o.favorito DESC, o.data_hora DESC";
+        if (!empty($filters['ordenacao'])) {
+            if ($filters['ordenacao'] === 'alfabetica') {
+                $orderBy = "o.favorito DESC, f.nome ASC";
+            } elseif ($filters['ordenacao'] === 'tempo') {
+                $orderBy = "o.favorito DESC, o.data_hora DESC";
+            } elseif ($filters['ordenacao'] === 'frequente') {
+                // Ordena pelos funcionários que têm o maior número total de infrações registradas
+                $orderBy = "o.favorito DESC, (SELECT COUNT(*) FROM ocorrencias o2 WHERE o2.funcionario_id = f.id AND o2.tipo = 'INFRACAO') DESC, o.data_hora DESC";
+            }
+        }
+
+        $sql .= " ORDER BY " . $orderBy;
 
         $stmt = $this->db->prepare($sql);
         if (!empty($params)) {

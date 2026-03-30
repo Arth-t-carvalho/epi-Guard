@@ -1,0 +1,47 @@
+# EPI Guard - Git Ignore Settings
+
+# ---------------------------------------------------------
+# SENSITIVE / CONFIG (DO NOT TRACK)
+# ---------------------------------------------------------
+config/.env
+config/app_secrets.php
+*.key
+*.cert
+*.pem
+
+# ---------------------------------------------------------
+# DEPENDENCIES
+# ---------------------------------------------------------
+/vendor/
+/node_modules/
+composer.phar
+
+# ---------------------------------------------------------
+# TEST & TEMP SCRIPTS (ROOT)
+# ---------------------------------------------------------
+out.txt
+test_mysqli.php
+test_db.php
+init_db.php
+refactor.php
+*.tmp
+*.log
+
+# ---------------------------------------------------------
+# IDE / OS SPECIFIC
+# ---------------------------------------------------------
+.vscode/
+.idea/
+.project
+.settings/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------
+# APP SPECIFIC
+# ---------------------------------------------------------
+/public/uploads/*
+!/public/uploads/.gitkeep
+/tmp/
+/cache/

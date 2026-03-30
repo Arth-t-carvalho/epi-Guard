@@ -124,8 +124,10 @@ async function navigateViaSPA(destino) {
         });
 
         // D. Injeta Scripts Isolados (e re-executa JS de tela)
-        const newScripts = doc.querySelectorAll('body script');
-        newScripts.forEach(script => {
+        const newScripts = Array.from(doc.querySelectorAll('body script'));
+        const scriptPromises = [];
+
+        for (const script of newScripts) {
             const src = script.getAttribute('src');
             
             // Evitar duplicação ou travamento de bibliotecas do sidebar/globais
@@ -133,25 +135,30 @@ async function navigateViaSPA(destino) {
                 src.includes('lucide') || 
                 src.includes('navigation.js') || 
                 src.includes('notifications.js')
-            )) return;
+            )) continue;
 
             // Remove a versão antiga do JS da página para não acavalar
             if (src && document.querySelector(`script[src="${src}"]`)) {
                 document.querySelector(`script[src="${src}"]`).remove();
             }
 
-            // Cria o nodo real do Script para forçar a avaliação (o innerHTML bruto no DOM não executa)
             const newScript = document.createElement('script');
             if (src) {
                 newScript.src = src;
+                // Mapeia promise para aguardar o carregamento do script externo
+                scriptPromises.push(new Promise(resolve => {
+                    newScript.onload = resolve;
+                    newScript.onerror = resolve;
+                }));
             } else {
-                // Evita redeclarar variáveis globais usando const
-                if (script.innerHTML.includes('window.BASE_PATH')) return; 
+                if (script.innerHTML.includes('window.BASE_PATH')) continue; 
                 newScript.innerHTML = script.innerHTML;
             }
-            
             document.body.appendChild(newScript);
-        });
+        }
+
+        // Aguarda todos os scripts externos carregarem antes de disparar o evento de inicialização
+        await Promise.all(scriptPromises);
         
         // E. Dispara evento DOMContentLoaded Fake para Inicializar a view
         window.document.dispatchEvent(new Event("DOMContentLoaded", {

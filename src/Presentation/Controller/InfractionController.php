@@ -27,9 +27,12 @@ class InfractionController
         $filters = [
             'search' => $_GET['search'] ?? '',
             'periodo' => $_GET['periodo'] ?? 'todos',
+            'data_inicio' => $_GET['data_inicio'] ?? null,
+            'data_fim' => $_GET['data_fim'] ?? null,
             'status' => $_GET['status'] ?? 'todos',
             'epi' => $_GET['epi'] ?? 'todos',
-            'visualizacao' => $_GET['visualizacao'] ?? 'nome'
+            'visualizacao' => $_GET['visualizacao'] ?? 'nome',
+            'ordenacao' => $_GET['ordenacao'] ?? 'tempo'
         ];
 
         $infractions = $this->occurrenceRepository->findInfractions($filters);
