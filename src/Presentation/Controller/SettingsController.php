@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace epiGuard\Presentation\Controller;
 
 use epiGuard\Infrastructure\Persistence\MySQLUserRepository;
+use epiGuard\Infrastructure\Persistence\MySQLEpiRepository;
 
 class SettingsController
 {
@@ -23,7 +24,11 @@ class SettingsController
             }
         }
 
-        // 3. Inject de Metadados da Página (Estilos, Títulos e Scripts)
+        // 3. Busca de todos os EPIs para gestão de cores
+        $epiRepo = new MySQLEpiRepository();
+        $epis = $epiRepo->findAll();
+
+        // 4. Inject de Metadados da Página (Estilos, Títulos e Scripts)
         $pageTitle = 'Configurações - EPI Guard';
         
         $extraScripts = '<script>

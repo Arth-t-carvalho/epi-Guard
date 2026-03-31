@@ -34,6 +34,9 @@ if (file_exists(__DIR__ . '/config/.env')) {
 // Carregar configurações
 $config = require_once __DIR__ . '/config/app.php';
 
+// Carregar Helpers Globais
+require_once __DIR__ . '/src/Application/Helpers/I18n.php';
+
 // Roteamento
 $routes = require_once __DIR__ . '/config/routes.php';
 

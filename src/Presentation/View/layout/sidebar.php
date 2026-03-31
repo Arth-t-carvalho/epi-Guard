@@ -13,39 +13,39 @@ $currentRoute = str_replace($basePath, '', $currentPath);
     <nav class="nav-menu">
         <a href="<?= BASE_PATH ?>/dashboard" class="nav-item <?= ($currentRoute === '/dashboard') ? 'active' : '' ?>">
             <i data-lucide="layout-dashboard"></i>
-            <span>Dashboard</span>
+            <span><?= __('Dashboard') ?></span>
         </a>
         <a href="<?= BASE_PATH ?>/monitoring" class="nav-item <?= ($currentRoute === '/monitoring') ? 'active' : '' ?>">
             <i data-lucide="monitor"></i>
-            <span>Monitoramento</span>
+            <span><?= __('Monitoramento') ?></span>
         </a>
         <a href="<?= BASE_PATH ?>/infractions" class="nav-item <?= ($currentRoute === '/infractions') ? 'active' : '' ?>">
             <i data-lucide="alert-triangle"></i>
-            <span>Infrações</span>
+            <span><?= __('Infrações') ?></span>
         </a>
         <a href="<?= BASE_PATH ?>/management/departments" class="nav-item <?= (strpos($currentRoute, '/management') === 0) ? 'active' : '' ?>">
             <i data-lucide="building-2"></i>
-            <span>Gestão de Setor</span>
+            <span><?= __('Gestão de Setor') ?></span>
         </a>
         <a href="<?= BASE_PATH ?>/occurrences" class="nav-item <?= ($currentRoute === '/occurrences') ? 'active' : '' ?>">
             <i data-lucide="file-text"></i>
-            <span>Ocorrências</span>
+            <span><?= __('Ocorrências') ?></span>
         </a>
         <a href="<?= BASE_PATH ?>/settings" class="nav-item <?= ($currentRoute === '/settings') ? 'active' : '' ?>">
             <i data-lucide="settings"></i>
-            <span>Configurações</span>
+            <span><?= __('Configurações') ?></span>
         </a>
     </nav>
 
     <div class="ai-assistant-container">
         <button class="ai-toggle-btn" onclick="toggleAiChat()">
             <i data-lucide="sparkles"></i>
-            <span>Assistente IA</span>
+            <span><?= __('Assistente IA') ?></span>
         </button>
 
         <div class="ai-chat-window" id="aiChatWindow">
             <div class="ai-chat-header">
-                <span>🤖 Assistente IA</span>
+                <span>🤖 <?= __('Assistente IA') ?></span>
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <button onclick="toggleExpandAiChat()" id="expandAiBtn" title="Expandir/Reduzir">
                         <i data-lucide="maximize-2"></i>
@@ -54,10 +54,10 @@ $currentRoute = str_replace($basePath, '', $currentPath);
                 </div>
             </div>
             <div class="ai-chat-messages" id="aiChatMessages">
-                <div class="ai-message bot">Olá! Como posso ajudar você com o EPI Guard hoje?</div>
+                <div class="ai-message bot"><?= __('Olá! Como posso ajudar você com o EPI Guard hoje?') ?></div>
             </div>
             <div class="ai-chat-input">
-                <input type="text" id="aiChatInput" placeholder="Digite sua pergunta..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+                <input type="text" id="aiChatInput" placeholder="<?= __('Digite sua pergunta...') ?>" onkeypress="if(event.key==='Enter') sendAiMessage()">
                 <button onclick="sendAiMessage()">
                     <i data-lucide="send"></i>
                 </button>

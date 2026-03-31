@@ -1027,13 +1027,26 @@ function loadCharts() {
                 let config = null;
                 let dataKey = null;
 
-                if (lowerName.includes('capacete')) { config = epiColors['capacete']; dataKey = 'capacete'; }
-                else if (lowerName.includes('oculos') || lowerName.includes('óculos')) { config = epiColors['oculos']; dataKey = 'oculos'; }
-                else if (lowerName.includes('jaqueta')) { config = epiColors['jaqueta']; dataKey = 'jaqueta'; }
-                else if (lowerName.includes('avental')) { config = epiColors['avental']; dataKey = 'avental'; }
-                else if (lowerName.includes('luva')) { config = epiColors['luvas']; dataKey = 'luvas'; }
-                else if (lowerName.includes('mascara') || lowerName.includes('máscara')) { config = epiColors['mascara']; dataKey = 'mascara'; }
-                else if (lowerName.includes('protetor')) { config = epiColors['protetor']; dataKey = 'protetor'; }
+                // Priority 1: Direct ID or Exact Name mapping from DB
+                if (window.epiColorMappings) {
+                    const epiId = response.epi_ids ? response.epi_ids[fullName] : null;
+                    const dbColor = window.epiColorMappings[epiId] || window.epiColorMappings[lowerName];
+                    if (dbColor) {
+                        config = { bg: dbColor, label: fullName };
+                        dataKey = fullName.toLowerCase().replace(/\s+/g, '_');
+                    }
+                }
+
+                // Priority 2: Fallback to hardcoded defaults
+                if (!config) {
+                    if (lowerName.includes('capacete')) { config = epiColors['capacete']; dataKey = 'capacete'; }
+                    else if (lowerName.includes('oculos') || lowerName.includes('óculos')) { config = epiColors['oculos']; dataKey = 'oculos'; }
+                    else if (lowerName.includes('jaqueta')) { config = epiColors['jaqueta']; dataKey = 'jaqueta'; }
+                    else if (lowerName.includes('avental')) { config = epiColors['avental']; dataKey = 'avental'; }
+                    else if (lowerName.includes('luva')) { config = epiColors['luvas']; dataKey = 'luvas'; }
+                    else if (lowerName.includes('mascara') || lowerName.includes('máscara')) { config = epiColors['mascara']; dataKey = 'mascara'; }
+                    else if (lowerName.includes('protetor')) { config = epiColors['protetor']; dataKey = 'protetor'; }
+                }
                 
                 if (config && response.bar[dataKey]) {
                     datasets.push({

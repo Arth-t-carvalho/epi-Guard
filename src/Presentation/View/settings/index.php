@@ -1,50 +1,4 @@
 <?php
-// Função Helper de Tradução Funcional
-if (!function_exists('__')) {
-    function __($str) {
-        $lang = $_COOKIE['epiguard-lang'] ?? 'pt-br';
-        
-        // Dicionário ultra-rápido para a tela de configurações
-        $dict = [
-            'en' => [
-                'Configurações do Sistema' => 'System Settings',
-                'Gerencie suas preferências, aparência e alertas do EPI Guard.' => 'Manage your preferences, appearance, and EPI Guard alerts.',
-                'Aparência' => 'Appearance',
-                'Modo Escuro (Dark Mode)' => 'Dark Mode',
-                'Alterne entre cores claras e escuras para preservar a visão.' => 'Switch between light and dark colors to preserve vision.',
-                'Mudar Tema' => 'Change Theme',
-                'Tema Claro' => 'Light Theme',
-                'Tema Escuro' => 'Dark Theme',
-                'Idioma do Sistema' => 'System Language',
-                'Preferência regional para alertas e datas.' => 'Regional preference for alerts and dates.',
-                'Português (Brasil)' => 'Portuguese (Brazil)',
-                'English (US)' => 'English (US)',
-                'Paleta de Cores dos Gráficos' => 'Chart Color Palette',
-                'Personalize as cores utilizadas nos gráficos da Dashboard.' => 'Customize the colors used in the Dashboard charts.',
-                'Padrão (Senai)' => 'Default (Senai)',
-                'Azul Corporativo' => 'Corporate Blue',
-                'Verde Sustentável' => 'Sustainable Green',
-                'Roxo Vibrante' => 'Vibrant Purple',
-                'Notificações' => 'Notifications',
-                'Alertas de Infração por E-mail' => 'Email Infraction Alerts',
-                'Receba um e-mail imediato sempre que uma infração Grave for registrada.' => 'Receive an immediate email whenever a Severe infraction is registered.',
-                'Resumo Semanal' => 'Weekly Summary',
-                'Relatório de conformidade enviado toda sexta-feira.' => 'Compliance report sent every Friday.',
-                'Sua Conta' => 'Your Account',
-                'Regras de Ocorrência' => 'Occurrence Rules',
-                'Exigir Foto (Evidência)' => 'Require Photo (Evidence)',
-                'Obriga o preenchimento de imagem fotográfica no registro de qualquer nova Infração.' => 'Forces photographic evidence input when registering any new Infraction.'
-            ]
-        ];
-
-        if ($lang === 'en' && isset($dict['en'][$str])) {
-            return $dict['en'][$str];
-        }
-
-        return $str; // Retorna PT-BR padrão
-    }
-}
-
 // Garantir que a sessão ou variáveis necessárias existem
 $userName = $_SESSION['user_nome'] ?? 'Administrador';
 $userRole = $_SESSION['user_cargo'] ?? 'Gestor de Segurança';
@@ -59,8 +13,8 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
     </div>
 
     <div class="settings-grid">
-        <!-- CARD 1: Aparência e Interface -->
-        <div class="settings-card">
+        <!-- CARD 1: Aparência e Interface (FULL WIDTH) -->
+        <div class="settings-card full-width">
             <div class="settings-card-header">
                 <div class="icon-wrapper">
                     <i data-lucide="palette"></i>
@@ -91,22 +45,46 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                             <option value="pt-br" <?= ($_COOKIE['epiguard-lang'] ?? 'pt-br') === 'pt-br' ? 'selected' : '' ?>><?= __('Português (Brasil)') ?></option>
                             <option value="en" <?= ($_COOKIE['epiguard-lang'] ?? '') === 'en' ? 'selected' : '' ?>><?= __('English (US)') ?></option>
                         </select>
-                    </div>
+                <div class="section-divider-mini"></div>
+
+                <div class="setting-group-title">
+                    <h3><?= __('Cores dos Gráficos') ?></h3>
+                    <p><?= __('Personalize as cores utilizadas nos gráficos da Dashboard.') ?></p>
+                </div>
+                
+                <div class="epi-color-grid">
+                    <?php foreach ($epis as $epi): ?>
+                        <div class="epi-color-item">
+                            <div class="epi-info">
+                                <?php
+                                $iconClass = 'fa-shield';
+                                $nameLower = strtolower($epi->getName());
+                                if (strpos($nameLower, 'capacete') !== false) $iconClass = 'fa-hard-hat';
+                                elseif (strpos($nameLower, 'oculos') !== false || strpos($nameLower, 'óculos') !== false) $iconClass = 'fa-glasses';
+                                elseif (strpos($nameLower, 'luva') !== false) $iconClass = 'fa-mitten';
+                                elseif (strpos($nameLower, 'avental') !== false) $iconClass = 'fa-shirt';
+                                elseif (strpos($nameLower, 'mascara') !== false || strpos($nameLower, 'máscara') !== false) $iconClass = 'fa-mask-face';
+                                elseif (strpos($nameLower, 'bota') !== false) $iconClass = 'fa-boot';
+                                ?>
+                                <div class="epi-icon-preview" style="background-color: <?= $epi->getColor() ?>">
+                                    <i class="fa-solid <?= $iconClass ?>"></i>
+                                </div>
+                                <span class="epi-name"><?= htmlspecialchars($epi->getName()) ?></span>
+                            </div>
+                            <div class="epi-color-action">
+                                <input type="color" class="epi-color-input" 
+                                       id="epi-color-<?= $epi->getId() ?>"
+                                       value="<?= $epi->getColor() ?>"
+                                       onchange="updateEpiColorPreview(<?= $epi->getId() ?>, this.value)">
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
 
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <h3><?= __('Paleta de Cores dos Gráficos') ?></h3>
-                        <p><?= __('Personalize as cores utilizadas nos gráficos da Dashboard.') ?></p>
-                    </div>
-                    <div class="setting-action">
-                        <select class="settings-select" id="chartColorSelect" onchange="changeChartColor(this.value)">
-                            <option value="default"><?= __('Padrão (Senai)') ?></option>
-                            <option value="blue"><?= __('Azul Corporativo') ?></option>
-                            <option value="emerald"><?= __('Verde Sustentável') ?></option>
-                            <option value="purple"><?= __('Roxo Vibrante') ?></option>
-                        </select>
-                    </div>
+                <div class="settings-actions">
+                    <button class="btn-save-colors" onclick="saveEpiColors()">
+                        <i data-lucide="save"></i> <?= __('Salvar Cores') ?>
+                    </button>
                 </div>
             </div>
         </div>
@@ -193,21 +171,208 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
+<style>
+/* Estilos para a nova seção de cores de EPI */
+.settings-grid .settings-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.section-divider-mini {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 24px 0;
+}
+
+html.dark-theme .section-divider-mini {
+    background: #334155;
+}
+
+.setting-group-title {
+    margin-bottom: 16px;
+}
+
+.setting-group-title h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.setting-group-title p {
+    font-size: 12px;
+    color: #64748b;
+}
+
+html.dark-theme .setting-group-title p {
+    color: #94a3b8;
+}
+
+.epi-color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.epi-color-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.2s;
+}
+
+html.dark-theme .epi-color-item {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.epi-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.epi-icon-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.epi-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.epi-color-input {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+}
+
+.epi-color-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.epi-color-input::-webkit-color-swatch {
+    border: 2px solid white;
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px #e2e8f0;
+}
+
+.settings-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-save-colors {
+    padding: 10px 24px;
+    background: #E30613;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-save-colors:hover {
+    background: #c40510;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(227, 6, 19, 0.3);
+}
+</style>
+
 <script>
 function changeLanguage(lang) {
-    // Altera o cookie para que o PHP possa entender a nova linguagem
     document.cookie = "epiguard-lang=" + lang + ";path=/;max-age=31536000;SameSite=Lax";
-    // Guarda também no localStorage por consistência lateral do front
     localStorage.setItem('epiguard-lang', lang);
-    // Recarrega a página para aplicar
     window.location.reload();
 }
 
-function changeChartColor(palette) {
-    localStorage.setItem('epiguard-chart-palette', palette);
+function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle("dark-theme");
+    localStorage.setItem("epiguard-theme", isDark ? "dark" : "light");
+    
+    const themeIcon = document.getElementById("theme-icon-display");
+    if (themeIcon) {
+        themeIcon.setAttribute("data-lucide", isDark ? "sun" : "moon");
+    }
+    const themeLabel = document.getElementById("theme-text-display");
+    if (themeLabel) {
+        themeLabel.textContent = isDark ? "<?= __('Tema Claro') ?>" : "<?= __('Tema Escuro') ?>";
+    }
+    
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+function updateEpiColorPreview(id, color) {
+    const input = document.querySelector(`#epi-color-${id}`);
+    const preview = input.closest('.epi-color-item').querySelector('.epi-icon-preview');
+    if (preview) {
+        preview.style.backgroundColor = color;
+    }
+}
+
+async function saveEpiColors() {
+    const inputs = document.querySelectorAll('.epi-color-input');
+    const colors = [];
+    
+    inputs.forEach(input => {
+        colors.push({
+            id: input.id.replace('epi-color-', ''),
+            color: input.value
+        });
+    });
+
+    const btn = document.querySelector('.btn-save-colors');
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <?= __('Salvando...') ?>';
+
+    try {
+        const response = await fetch('<?= BASE_PATH ?>/api/epis/update-colors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ colors })
+        });
+        
+        if (response.ok) {
+            alert('<?= __('Cores dos EPIs atualizadas com sucesso!') ?>');
+        } else {
+            throw new Error('Falha ao salvar cores');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('<?= __('Não foi possível salvar as cores.') ?>');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+        if (window.lucide) lucide.createIcons();
+    }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -215,7 +380,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const themeIcon = document.getElementById("theme-icon-display");
     const themeLabel = document.getElementById("theme-text-display");
     
-    // Atualiza botão de tema logo no carregamento com base na class tag HTML
     if (themeIcon) {
         themeIcon.setAttribute("data-lucide", isDark ? "sun" : "moon");
     }
@@ -223,11 +387,6 @@ document.addEventListener("DOMContentLoaded", function() {
         themeLabel.textContent = isDark ? "<?= __('Tema Claro') ?>" : "<?= __('Tema Escuro') ?>";
     }
 
-    const savedPalette = localStorage.getItem('epiguard-chart-palette') || 'default';
-    const chartSelect = document.getElementById('chartColorSelect');
-    if (chartSelect) chartSelect.value = savedPalette;
-    
-    // Inicia a renderização de ícones para o modo respectivo
     if (window.lucide) {
         lucide.createIcons();
     }

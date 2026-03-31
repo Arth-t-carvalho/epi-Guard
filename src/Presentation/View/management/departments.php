@@ -1,5 +1,6 @@
 <?php
-$pageTitle = 'epiGuard - Gestão de Setor';
+ob_start();
+$pageTitle = 'epiGuard - ' . __('Gestão de Setor');
 $extraHead = '
     <!-- Page CSS -->
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/management.css">
@@ -755,11 +756,11 @@ ob_start();
     <div class="modern-picker-trigger" onclick="openModernPicker('status')">
         <i class="fa-solid fa-circle-check"></i>
         <div class="trigger-info">
-            <span class="trigger-label">Status</span>
+            <span class="trigger-label"><?= __('Status') ?></span>
             <span class="trigger-value" id="label-status">
                 <?php 
-                $statusLabels = ['todos' => 'Todos os Status', 'ativo' => 'Ativos', 'inativo' => 'Inativos'];
-                echo $statusLabels[$filters['status'] ?? 'todos'] ?? 'Todos';
+                $statusLabels = ['todos' => __('Todos os Status'), 'ativo' => __('Ativos'), 'inativo' => __('Inativos')];
+                echo $statusLabels[$filters['status'] ?? 'todos'] ?? __('Todos');
                 ?>
             </span>
         </div>
@@ -769,11 +770,11 @@ ob_start();
     <div class="modern-picker-trigger" onclick="openModernPicker('risk')">
         <i class="fa-solid fa-triangle-exclamation"></i>
         <div class="trigger-info">
-            <span class="trigger-label">Risco</span>
+            <span class="trigger-label"><?= __('Risco') ?></span>
             <span class="trigger-value" id="label-risk">
                 <?php 
-                $riskLabels = ['todos' => 'Todos os Riscos', 'baixo' => 'Baixo (< 5%)', 'medio' => 'Médio (5% - 10%)', 'alto' => 'Alto (>= 10%)'];
-                echo $riskLabels[$filters['risk'] ?? 'todos'] ?? 'Todos';
+                $riskLabels = ['todos' => __('Todos os Riscos'), 'baixo' => __('Baixo') . ' (< 5%)', 'medio' => __('Médio') . ' (5% - 10%)', 'alto' => __('Alto') . ' (>= 10%)'];
+                echo $riskLabels[$filters['risk'] ?? 'todos'] ?? __('Todos');
                 ?>
             </span>
         </div>
@@ -782,7 +783,7 @@ ob_start();
     
     <!-- Botão Adicionar Ajustado para a mesma linha -->
     <button type="button" class="btn-add-setor" onclick="openModal()">
-        <i class="fa-solid fa-plus"></i> Adicionar Setor
+        <i class="fa-solid fa-plus"></i> <?= __('Adicionar Setor') ?>
     </button>
 
     <button type="submit" style="display: none;"></button>
@@ -793,11 +794,11 @@ ob_start();
     <table class="setor-table">
         <thead>
             <tr>
-                <th>Nome do Setor</th>
-                <th>Funcionários Ativos</th>
-                <th>EPIs Obrigatórios</th>
-                <th>Risco</th>
-                <th style="text-align: right;">Ações</th>
+                <th><?= __('Nome do Setor') ?></th>
+                <th><?= __('Funcionários') ?></th>
+                <th><?= __('EPIs Obrigatórios') ?></th>
+                <th><?= __('Risco') ?></th>
+                <th style="text-align: right;"><?= __('Ações') ?></th>
             </tr>
         </thead>
         <tbody id="setoresTableBody">
@@ -805,7 +806,7 @@ ob_start();
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
                         <i class="fa-solid fa-folder-open" style="font-size: 24px; display: block; margin-bottom: 10px; opacity: 0.5;"></i>
-                        Nenhum setor encontrado no banco de dados.
+                        <?= __('Nenhum setor encontrado no banco de dados.') ?>
                     </td>
                 </tr>
             <?php else: ?>
@@ -884,19 +885,19 @@ ob_start();
 <div class="modal-setor-overlay" id="modalSetor">
     <div class="modal-setor">
         <div class="modal-setor-header">
-            <h2>Adicionar Setor</h2>
+            <h2><?= __('Adicionar Setor') ?></h2>
             <button class="modal-close-btn" onclick="closeModal()">&times;</button>
         </div>
 
         <!-- Nome do Setor -->
         <div class="form-group">
-            <label class="form-label">Nome do Setor</label>
+            <label class="form-label"><?= __('Nome do Setor') ?></label>
             <input class="form-input" type="text" id="inputNomeSetor" placeholder="Ex: Soldagem TIG">
         </div>
 
         <!-- Funcionários -->
         <div class="form-group">
-            <label class="form-label">Funcionários</label>
+            <label class="form-label"><?= __('Funcionários') ?></label>
             <div class="upload-area" onclick="document.getElementById('fileUpload').click()">
                 <i class="fa-solid fa-file-arrow-up"></i>
                 Adicionar funcionários via Excel / PDF
@@ -914,50 +915,43 @@ ob_start();
 
         <!-- EPIs Obrigatórios -->
         <div class="form-group">
-            <label class="form-label">EPIs Obrigatórios (Marcas Permitidas)</label>
+            <label class="form-label"><?= __('EPIs Obrigatórios (Marcas Permitidas)') ?></label>
             <div class="epi-grid" id="epiGrid">
-                <div class="epi-card" onclick="toggleEpi(this)" data-epi="capacete">
-                    <div class="epi-card-icon"><i class="fa-solid fa-hard-hat"></i></div>
-                    <div class="epi-card-info">
-                        <div class="epi-card-name">Capacete de Proteção</div>
-                        <div class="epi-card-brands">3M, MSA</div>
-                    </div>
-                </div>
-                <div class="epi-card" onclick="toggleEpi(this)" data-epi="avental">
-                    <div class="epi-card-icon"><i class="fa-solid fa-shirt"></i></div>
-                    <div class="epi-card-info">
-                        <div class="epi-card-name">Avental</div>
-                        <div class="epi-card-brands">Vivel, PVC</div>
-                    </div>
-                </div>
-                <div class="epi-card" onclick="toggleEpi(this)" data-epi="jaqueta">
-                    <div class="epi-card-icon"><i class="fa-solid fa-vest-patches"></i></div>
-                    <div class="epi-card-info">
-                        <div class="epi-card-name">Jaqueta</div>
-                        <div class="epi-card-brands">Térmica, Impermeável</div>
-                    </div>
-                </div>
-                <div class="epi-card" onclick="toggleEpi(this)" data-epi="oculos">
-                    <div class="epi-card-icon"><i class="fa-solid fa-glasses"></i></div>
-                    <div class="epi-card-info">
-                        <div class="epi-card-name">Óculos de Proteção</div>
-                        <div class="epi-card-brands">3M, Danny</div>
-                    </div>
-                </div>
-                <div class="epi-card" onclick="toggleEpi(this)" data-epi="luvas">
-                    <div class="epi-card-icon"><i class="fa-solid fa-mitten"></i></div>
-                    <div class="epi-card-info">
-                        <div class="epi-card-name">Luvas de Raspa</div>
-                        <div class="epi-card-brands">Marluvas, Volk</div>
-                    </div>
-                </div>
+                <?php if (empty($epis)): ?>
+                    <p style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 20px;">
+                        <?= __('Nenhum EPI ativo encontrado no sistema. Cadastre EPIs primeiro.') ?>
+                    </p>
+                <?php else: ?>
+                    <?php foreach ($epis as $epiItem): 
+                        $epiSlug = strtolower(str_replace(' ', '_', $epiItem->getName()));
+                        // Mapeamento básico de ícones baseado no nome (como feito na list.php de ocorrências)
+                        $iconClass = 'fa-shield';
+                        $nameLower = strtolower($epiItem->getName());
+                        if (strpos($nameLower, 'capacete') !== false) $iconClass = 'fa-hard-hat';
+                        elseif (strpos($nameLower, 'oculos') !== false || strpos($nameLower, 'óculos') !== false) $iconClass = 'fa-glasses';
+                        elseif (strpos($nameLower, 'luva') !== false) $iconClass = 'fa-mitten';
+                        elseif (strpos($nameLower, 'avental') !== false) $iconClass = 'fa-shirt';
+                        elseif (strpos($nameLower, 'mascara') !== false || strpos($nameLower, 'máscara') !== false) $iconClass = 'fa-mask-face';
+                        elseif (strpos($nameLower, 'bota') !== false) $iconClass = 'fa-boot';
+                    ?>
+                        <div class="epi-card" onclick="toggleEpi(this)" data-epi="<?= $epiSlug ?>">
+                            <div class="epi-card-icon">
+                                <i class="fa-solid <?= $iconClass ?>"></i>
+                            </div>
+                            <div class="epi-card-info">
+                                <div class="epi-card-name"><?= htmlspecialchars($epiItem->getName()) ?></div>
+                                <div class="epi-card-brands"><?= htmlspecialchars($epiItem->getDescription() ?: __('EPI Geral')) ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="modal-setor-footer">
-            <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-            <button class="btn-create" id="btnCriarSetor" onclick="criarSetor()">Criar Setor</button>
+            <button class="btn-cancel" onclick="closeModal()"><?= __('Cancelar') ?></button>
+            <button class="btn-create" id="btnCriarSetor" onclick="criarSetor()"><?= __('Confirmar') ?></button>
         </div>
     </div>
 </div>

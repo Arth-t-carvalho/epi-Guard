@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'epiGuard - Painel Geral';
+$pageTitle = 'epiGuard - ' . __('Painel Geral');
 $extraHead = '
     <!-- Page CSS -->
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/dashboard.css">
@@ -83,12 +83,20 @@ ob_start();
     window.BASE_PATH = '<?= BASE_PATH ?>';
     window.userRole = '<?= $_SESSION['user_cargo'] ?? 'instrutor' ?>';
     window.totalStudents = 100; // Mock total students
+    
+    // EPI Color Mappings from Database
+    window.epiColorMappings = {
+        <?php foreach ($epis as $epi): ?>
+            '<?= $epi->getId() ?>': '<?= $epi->getColor() ?>',
+            '<?= strtolower($epi->getName()) ?>': '<?= $epi->getColor() ?>',
+        <?php endforeach; ?>
+    };
 </script>
 
 <!-- KPI CARDS -->
 <div class="kpi-grid">
     <div class="kpi-card card" id="cardKpiHoje">
-        <span class="kpi-header">INFRAÇÕES HOJE</span>
+        <span class="kpi-header"><?= __('INFRAÇÕES HOJE') ?></span>
         <div class="kpi-value">
             <span id="kpiDia">0</span>
             <span class="badge" id="badgeDia" style="display:none;">0%</span>
@@ -96,7 +104,7 @@ ob_start();
     </div>
 
     <div class="kpi-card card" id="cardKpiSemana">
-        <span class="kpi-header">INFRAÇÕES SEMANA</span>
+        <span class="kpi-header"><?= __('INFRAÇÕES SEMANA') ?></span>
         <div class="kpi-value">
             <span id="kpiSemana">0</span>
             <span class="badge" id="badgeSemana" style="display:none;">0%</span>
@@ -104,14 +112,14 @@ ob_start();
     </div>
 
     <div class="kpi-card card" id="cardKpiMes">
-        <span class="kpi-header">INFRAÇÕES MÊS</span>
+        <span class="kpi-header"><?= __('INFRAÇÕES MÊS') ?></span>
         <div class="kpi-value">
             <span id="kpiMes">0</span>
         </div>
     </div>
 
     <div class="kpi-card card" id="cardKpiMedia" onclick="openConformityModal()" style="cursor: pointer;">
-        <span class="kpi-header" id="kpiMediaHeader">CONFORMIDADE (DIÁRIA)</span>
+        <span class="kpi-header" id="kpiMediaHeader"><?= __('CONFORMIDADE (DIÁRIA)') ?></span>
         <div class="kpi-value">
             <span id="kpiMedia">0%</span>
         </div>
@@ -121,15 +129,15 @@ ob_start();
 <!-- MAIN CHART -->
 <div class="chart-card card">
     <div class="chart-header-actions">
-        <h3 class="chart-title">Visão Geral Mensal</h3>
+        <h3 class="chart-title"><?= __('Visão Geral Mensal') ?></h3>
 
         <div class="header-controls">
             <div class="active-filters-info" id="activeFiltersContainer" style="display: none;">
-                <span class="active-count" id="selectedSectorsCount">0</span> setores selecionados
+                <span class="active-count" id="selectedSectorsCount">0</span> <?= __('setores selecionados') ?>
             </div>
             <button class="btn-premium-filter" onclick="openCourseModal()">
                 <i data-lucide="layers"></i>
-                <span>Filtrar por Setor</span>
+                <span><?= __('Filtrar por Setor') ?></span>
             </button>
         </div>
     </div>
@@ -143,7 +151,7 @@ ob_start();
     <!-- Registro Diário -->
     <div class="card">
         <div class="section-header">
-            <h3 class="section-title">Registro Diário</h3>
+            <h3 class="section-title"><?= __('Registro Diário') ?></h3>
         </div>
         <div class="calendar-nav" onclick="toggleCalendar()" onmouseover="this.style.transform='scale(1.01)'"
             onmouseout="this.style.transform='scale(1)'">
@@ -161,7 +169,7 @@ ob_start();
 
                 <div
                     style="font-size: 10px; color: #E30613; font-weight: 700; margin-top: 6px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                    <span style="font-size: 8px;"></span> Clique para expandir
+                    <span style="font-size: 8px;"></span> <?= __('Clique para expandir') ?>
                 </div>
             </div>
 
@@ -175,7 +183,7 @@ ob_start();
     <!-- Donut Chart -->
     <div class="card">
         <div class="section-header">
-            <h3 class="section-title">Distribuição de EPIs</h3>
+            <h3 class="section-title"><?= __('Distribuição de EPIs') ?></h3>
         </div>
         <div class="chart-container" style="height: 200px;">
             <canvas id="doughnutChart"></canvas>
@@ -185,7 +193,7 @@ ob_start();
     <!-- Top Infrações (Placeholder) -->
     <div class="card">
         <div class="section-header">
-            <h3 class="section-title">Top Ocorrências</h3>
+            <h3 class="section-title"><?= __('Top Ocorrências') ?></h3>
         </div>
         <div class="infraction-list" id="topInfractions">
             <div class="list-item">
@@ -254,8 +262,8 @@ ob_start();
     <div class="modal-premium-content">
         <div class="modal-premium-header">
             <div>
-                <h2>Selecione o Setor</h2>
-                <p>Filtre os dados do dashboard por área específica</p>
+                <h2><?= __('Selecione o Setor') ?></h2>
+                <p><?= __('Filtre os dados do dashboard por área específica') ?></p>
             </div>
             <button class="close-premium" onclick="closeCourseModal()">&times;</button>
         </div>
@@ -310,7 +318,7 @@ ob_start();
         </div>
         <div class="modal-premium-footer">
             <button class="btn-apply-filter" onclick="applySectorsFilter()">
-                <span>Aplicar Filtros</span>
+                <span><?= __('Aplicar Filtros') ?></span>
                 <i data-lucide="check"></i>
             </button>
         </div>
@@ -321,19 +329,19 @@ ob_start();
 <div id="confirmInfractionsModal" class="modal-premium">
     <div class="modal-confirmation-content">
         <i data-lucide="help-circle" class="main-icon"></i>
-        <h2>Deseja ir para Infrações?</h2>
-        <p>Você será redirecionado para a página de detalhes com o filtro de período selecionado.</p>
+        <h2><?= __('Deseja ir para Infrações?') ?></h2>
+        <p><?= __('Você será redirecionado para a página de detalhes com o filtro de período selecionado.') ?></p>
 
         <div class="confirmation-actions">
             <button class="btn-liquid" onclick="goToInfractions()">
                 <span class="btn-text">
                     <i data-lucide="check-circle"></i>
-                    Confirmar
+                    <?= __('Confirmar') ?>
                 </span>
                 <div class="liquid"></div>
             </button>
             <button class="btn-light-shadow" onclick="closeConfirmModal()">
-                Cancelar
+                <?= __('Cancelar') ?>
             </button>
         </div>
     </div>
@@ -344,8 +352,8 @@ ob_start();
     <div class="modal-premium-content" style="max-width: 400px;">
         <div class="modal-premium-header">
             <div>
-                <h2>Período de Conformidade</h2>
-                <p>Você deseja ver a conformidade de qual período?</p>
+                <h2><?= __('Período de Conformidade') ?></h2>
+                <p><?= __('Você deseja ver a conformidade de qual período?') ?></p>
             </div>
             <button class="close-premium" onclick="closeConformityModal()">&times;</button>
         </div>
@@ -359,7 +367,7 @@ ob_start();
                             <span style="margin-left:12px; font-weight: 600;">Diária</span>
                         </div>
                     </div>
-                    <span class="status-tag">Selecionar</span>
+                    <span class="status-tag"><?= __('Selecionar') ?></span>
                 </div>
                 <div class="selection-row" onclick="selectConformityPeriod('semanal')"
                     style="cursor: pointer; padding: 16px;">
@@ -369,7 +377,7 @@ ob_start();
                             <span style="margin-left:12px; font-weight: 600;">Semanal</span>
                         </div>
                     </div>
-                    <span class="status-tag">Selecionar</span>
+                    <span class="status-tag"><?= __('Selecionar') ?></span>
                 </div>
                 <div class="selection-row" onclick="selectConformityPeriod('mensal')"
                     style="cursor: pointer; padding: 16px;">
@@ -379,7 +387,7 @@ ob_start();
                             <span style="margin-left:12px; font-weight: 600;">Mensal</span>
                         </div>
                     </div>
-                    <span class="status-tag">Selecionar</span>
+                    <span class="status-tag"><?= __('Selecionar') ?></span>
                 </div>
                 <div class="selection-row" onclick="selectConformityPeriod('anual')"
                     style="cursor: pointer; padding: 16px;">
@@ -389,7 +397,7 @@ ob_start();
                             <span style="margin-left:12px; font-weight: 600;">Anual</span>
                         </div>
                     </div>
-                    <span class="status-tag">Selecionar</span>
+                    <span class="status-tag"><?= __('Selecionar') ?></span>
                 </div>
             </div>
         </div>

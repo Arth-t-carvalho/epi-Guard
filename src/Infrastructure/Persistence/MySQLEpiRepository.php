@@ -19,7 +19,7 @@ class MySQLEpiRepository implements EpiRepositoryInterface
 
     public function findById(int $id): ?EpiItem
     {
-        $stmt = $this->db->prepare("SELECT id, nome, descricao, status FROM epis WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, descricao, cor, status FROM epis WHERE id = ?");
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -34,7 +34,7 @@ class MySQLEpiRepository implements EpiRepositoryInterface
     /** @return EpiItem[] */
     public function findAll(): array
     {
-        $result = $this->db->query("SELECT id, nome, descricao, status FROM epis WHERE status = 'ATIVO' ORDER BY nome ASC");
+        $result = $this->db->query("SELECT id, nome, descricao, cor, status FROM epis WHERE status = 'ATIVO' ORDER BY nome ASC");
         $epis = [];
 
         while ($row = $result->fetch_assoc()) {
@@ -46,10 +46,11 @@ class MySQLEpiRepository implements EpiRepositoryInterface
 
     public function save(EpiItem $epiItem): void
     {
-        $stmt = $this->db->prepare("INSERT INTO epis (nome, descricao, status) VALUES (?, ?, 'ATIVO')");
+        $stmt = $this->db->prepare("INSERT INTO epis (nome, descricao, cor, status) VALUES (?, ?, ?, 'ATIVO')");
         $nome = $epiItem->getName();
         $descricao = $epiItem->getDescription();
-        $stmt->bind_param('ss', $nome, $descricao);
+        $color = $epiItem->getColor();
+        $stmt->bind_param('sss', $nome, $descricao, $color);
         $stmt->execute();
 
         $epiItem->setId((int) $this->db->insert_id);
@@ -57,11 +58,12 @@ class MySQLEpiRepository implements EpiRepositoryInterface
 
     public function update(EpiItem $epiItem): void
     {
-        $stmt = $this->db->prepare("UPDATE epis SET nome = ?, descricao = ? WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE epis SET nome = ?, descricao = ?, cor = ? WHERE id = ?");
         $nome = $epiItem->getName();
         $descricao = $epiItem->getDescription();
+        $color = $epiItem->getColor();
         $id = $epiItem->getId();
-        $stmt->bind_param('ssi', $nome, $descricao, $id);
+        $stmt->bind_param('sssi', $nome, $descricao, $color, $id);
         $stmt->execute();
     }
 
@@ -79,6 +81,7 @@ class MySQLEpiRepository implements EpiRepositoryInterface
             name: $row['nome'],
             isRequired: true, // Padrão
             description: $row['descricao'],
+            color: $row['cor'] ?? '#E30613',
             id: (int) $row['id']
         );
     }

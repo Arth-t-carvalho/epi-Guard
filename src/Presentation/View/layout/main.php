@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="<?= $_COOKIE['epiguard-lang'] ?? 'pt-br' ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,7 @@
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark-theme');
             }
+            window.BASE_PATH = '<?= BASE_PATH ?>';
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,23 +57,23 @@
         
         <div class="profile-info-content">
             <div class="profile-field">
-                <label>ID do Usuário</label>
+                <label><?= __('ID do Usuário') ?></label>
                 <span>#<?= $_SESSION['user_id'] ?? '1' ?></span>
             </div>
             <div class="profile-field">
-                <label>Nome Completo</label>
+                <label><?= __('Nome Completo') ?></label>
                 <span><?= $_SESSION['user_nome'] ?? 'Arthur Carvalho' ?></span>
             </div>
             <div class="profile-field">
-                <label>Email / Usuário</label>
+                <label><?= __('Email / Usuário') ?></label>
                 <span><?= $_SESSION['user_email'] ?? 'arthur@gmail.com' ?></span>
             </div>
         </div>
 
         <div class="profile-dropdown-actions">
-            <button class="btn-profile-cancel" id="btnProfileCancel">Cancelar</button>
+            <button class="btn-profile-cancel" id="btnProfileCancel"><?= __('Cancelar') ?></button>
             <a href="<?= BASE_PATH ?>/logout" class="btn-profile-logout">
-                <i class="fa-solid fa-right-from-bracket"></i> Sair
+                <i class="fa-solid fa-right-from-bracket"></i> <?= __('Sair') ?>
             </a>
         </div>
     </div>

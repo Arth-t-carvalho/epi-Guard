@@ -13,6 +13,10 @@ class ManagementController
         
         $repo = new \epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository();
         $setores = $repo->findAllWithStats($filters);
+        
+        $epiRepo = new \epiGuard\Infrastructure\Persistence\MySQLEpiRepository();
+        $epis = $epiRepo->findAll();
+
         require_once __DIR__ . '/../View/management/departments.php';
     }
 

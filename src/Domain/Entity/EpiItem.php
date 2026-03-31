@@ -11,6 +11,7 @@ class EpiItem
     private ?int $id;
     private string $name;
     private ?string $description;
+    private string $color;
     private bool $isRequired;
     private DateTimeImmutable $createdAt;
 
@@ -18,6 +19,7 @@ class EpiItem
         string $name,
         bool $isRequired = true,
         ?string $description = null,
+        string $color = '#E30613',
         ?int $id = null,
         ?DateTimeImmutable $createdAt = null
         )
@@ -25,6 +27,7 @@ class EpiItem
         $this->name = $name;
         $this->isRequired = $isRequired;
         $this->description = $description;
+        $this->color = $color;
         $this->id = $id;
         $this->createdAt = $createdAt ?? new DateTimeImmutable();
     }
@@ -47,6 +50,16 @@ class EpiItem
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    public function getColor(): string
+    {
+        return $this->color;
+    }
+
+    public function setColor(string $color): void
+    {
+        $this->color = $color;
     }
 
     public function isRequired(): bool

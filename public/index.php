@@ -9,6 +9,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Carregar configurações
 $config = require_once __DIR__ . '/../config/app.php';
 
+// Carregar Helpers Globais
+require_once __DIR__ . '/../src/Application/Helpers/I18n.php';
+
 // Roteamento simples para demonstração (Clean Architecture)
 $routes = require_once __DIR__ . '/../config/routes.php';
 

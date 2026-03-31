@@ -32,6 +32,7 @@ return [
     '/api/occurrence/toggle-favorite' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'toggleFavorite'],
     '/api/simulate-occurrence' => [\epiGuard\Presentation\Controller\Api\SimulationApiController::class, 'simulate'],
     '/api/export-insights' => [\epiGuard\Presentation\Controller\Api\ExportApiController::class, 'insights'],
+    '/api/epis/update-colors' => [\epiGuard\Presentation\Controller\Api\EpiApiController::class, 'updateColors'],
     '/settings' => [\epiGuard\Presentation\Controller\SettingsController::class, 'index'],
     '/logout' => [\epiGuard\Presentation\Controller\AuthController::class, 'logout'],
 ];

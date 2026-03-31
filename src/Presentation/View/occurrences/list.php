@@ -1,4 +1,5 @@
 <?php
+ob_start();
 $pageTitle = 'epiGuard - Registrar Ocorrência';
 
 // Função auxiliar para mapear ícones baseados no nome do EPI
@@ -71,7 +72,7 @@ $extraHead = '
         display: flex;
         justify-content: flex-end;
         gap: 12px;
-        background: #fafafa;
+        background: var(--bg-card, #fafafa); /* Alterado para var(--bg-card) para consistência */
     }
 
     /* Form Styles */
@@ -92,29 +93,68 @@ $extraHead = '
     .occurrence-form .form-label {
         font-size: 13px;
         font-weight: 700;
-        color: #1F2937;
+        color: var(--text-main, #1F2937);
         margin-bottom: 8px;
     }
     .occurrence-form .form-input {
         width: 100%;
         padding: 12px 16px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
+        border: 1px solid var(--border, #e5e7eb);
+        border-radius: 12px;
         font-size: 14px;
         font-family: "Inter", sans-serif;
-        color: #1F2937;
+        color: var(--text-main, #1F2937);
         outline: none;
         transition: 0.2s;
-        background: #fff;
+        background: var(--bg-card, #fff);
     }
     .occurrence-form .form-input::placeholder { color: #94a3b8; }
     .occurrence-form .form-input:focus {
-        border-color: #E30613;
+        border-color: var(--primary, #E30613);
         box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
     }
     .occurrence-form textarea.form-input {
         resize: vertical;
-        min-height: 100px;
+        min-height: 120px;
+        line-height: 1.6;
+    }
+    
+    /* Dark Mode specific overrides for Occurrences */
+    html.dark-theme .card-header-premium {
+        background: #99040d; /* Vermelho mais fechado no escuro */
+    }
+    html.dark-theme .registration-card {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    html.dark-theme .employee-details-container {
+        background: #0f172a;
+        border-color: #334155;
+    }
+    html.dark-theme .employee-details-table th {
+        background: #1e293b;
+        color: #94a3b8;
+    }
+    html.dark-theme .employee-details-table td {
+        color: #e2e8f0;
+        border-bottom-color: #334155;
+    }
+    html.dark-theme .section-divider {
+        border-bottom-color: #334155;
+    }
+    html.dark-theme .section-divider h5 {
+        color: #94a3b8;
+    }
+    html.dark-theme .picker-item-btn {
+        background: #0f172a;
+        border-color: #334155;
+    }
+    html.dark-theme .picker-item-btn:hover {
+        background: #1e293b;
+        border-color: var(--primary);
+    }
+    html.dark-theme .picker-name {
+        color: #f8fafc;
     }
     .section-divider {
         margin: 24px 0 16px 0;
@@ -161,7 +201,7 @@ $extraHead = '
     .btn-cancel-occ {
         padding: 10px 22px;
         border: 1px solid var(--border, #e5e7eb);
-        background: white;
+        background: var(--bg-card, white);
         color: var(--text-muted, #94a3b8);
         border-radius: 10px;
         font-weight: 600;
@@ -471,6 +511,31 @@ $extraHead = '
     html.dark-theme .picker-icon-box { background: #0f172a; border: 1px solid var(--border); }
     html.dark-theme .picker-item-btn:hover { background: rgba(227, 6, 19, 0.1); }
     html.dark-theme .grid-modal-list::-webkit-scrollbar-thumb { background: var(--border); }
+    
+    /* Dark Mode Form Inputs */
+    html.dark-theme .occurrence-form .form-input {
+        background: #0f172a;
+        color: #fff;
+        border-color: var(--border);
+    }
+    html.dark-theme .occurrence-form .form-label {
+        color: #e2e8f0;
+    }
+
+    /* Dark Mode Card Footer & Buttons */
+    html.dark-theme .card-footer-premium {
+        background: #1e293b;
+        border-color: var(--border);
+    }
+    html.dark-theme .btn-cancel-occ {
+        background: #0f172a;
+        color: #94a3b8;
+        border-color: var(--border);
+    }
+    html.dark-theme .btn-cancel-occ:hover {
+        background: rgba(227, 6, 19, 0.1);
+        border-color: var(--primary);
+    }
 </style>
 ';
 ob_start();
@@ -485,8 +550,8 @@ ob_start();
     <div class="registration-card">
         <div class="card-header-premium">
             <div>
-                <h2>Registrar Ocorrência</h2>
-                <p>Preencha os dados abaixo para registrar uma nova ocorrência de segurança.</p>
+                <h2><?= __('Registrar Ocorrência') ?></h2>
+                <p><?= __('Preencha os dados abaixo para registrar uma nova ocorrência de segurança.') ?></p>
             </div>
         </div>
 
@@ -494,12 +559,12 @@ ob_start();
             <form class="occurrence-form" id="occurrence-form">
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Setor</label>
+                        <label class="form-label"><?= __('Setor') ?></label>
                         <div class="modern-picker-trigger" id="sector-trigger-btn" onclick="openSectorModal()">
                             <i class="fa-solid fa-building-circle-check"></i>
                             <div class="trigger-info">
-                                <span class="trigger-label">Selecione o Local</span>
-                                <span class="trigger-value" id="sector-display-value">Escolha um setor...</span>
+                                <span class="trigger-label"><?= __('Selecione o Local') ?></span>
+                                <span class="trigger-value" id="sector-display-value"><?= __('Escolha um setor...') ?></span>
                             </div>
                             <i class="fa-solid fa-chevron-right"></i>
                         </div>
@@ -509,12 +574,12 @@ ob_start();
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Funcionário</label>
+                        <label class="form-label"><?= __('Funcionário') ?></label>
                         <div class="modern-picker-trigger disabled" id="employee-trigger-btn" onclick="openEmployeeModal()">
                             <i class="fa-solid fa-user-tag"></i>
                             <div class="trigger-info">
-                                <span class="trigger-label">Responsável pela Ocorrência</span>
-                                <span class="trigger-value" id="employee-display-value">Selecione um setor primeiro.</span>
+                                <span class="trigger-label"><?= __('Responsável pela Ocorrência') ?></span>
+                                <span class="trigger-value" id="employee-display-value"><?= __('Selecione um setor primeiro.') ?></span>
                             </div>
                             <i class="fa-solid fa-chevron-right"></i>
                         </div>
@@ -526,7 +591,7 @@ ob_start();
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Nome Completo</th>
+                                        <th><?= __('Nome Completo') ?></th>
                                         <th>CPF</th>
                                     </tr>
                                 </thead>
@@ -544,35 +609,35 @@ ob_start();
 
                 <div class="form-row three-cols">
                     <div class="form-group">
-                        <label class="form-label">Motivo Principal</label>
+                        <label class="form-label"><?= __('Motivo Principal') ?></label>
                         <div class="modern-picker-trigger" id="motivo-trigger-btn" onclick="openMotivoModal()">
                             <i class="fa-solid fa-clipboard-question"></i>
                             <div class="trigger-info">
-                                <span class="trigger-label">Selecione a Causa</span>
-                                <span class="trigger-value" id="motivo-display-value">Falta de EPI</span>
+                                <span class="trigger-label"><?= __('Selecione a Causa') ?></span>
+                                <span class="trigger-value" id="motivo-display-value"><?= __('Falta de EPI') ?></span>
                             </div>
                             <i class="fa-solid fa-chevron-right"></i>
                         </div>
-                        <input type="hidden" id="occ-motivo" name="motivo_principal" value="Falta de EPI">
+                        <input type="hidden" id="occ-motivo" name="motivo_principal" value="<?= __('Falta de EPI') ?>">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">EPI Envolvido</label>
+                        <label class="form-label"><?= __('EPI Envolvido') ?></label>
                         <div class="modern-picker-trigger" id="epi-trigger-btn" onclick="openEpiModal()">
                             <i class="fa-solid fa-headset"></i>
                             <div class="trigger-info">
-                                <span class="trigger-label">Selecione o EPI</span>
-                                <span class="trigger-value" id="epi-display-value">Nenhum</span>
+                                <span class="trigger-label"><?= __('Selecione o EPI') ?></span>
+                                <span class="trigger-value" id="epi-display-value"><?= __('Nenhum') ?></span>
                             </div>
                             <i class="fa-solid fa-chevron-right"></i>
                         </div>
                         <input type="hidden" id="occ-epi" name="epi_id" value="none">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Data e Hora</label>
+                        <label class="form-label"><?= __('Data e Hora') ?></label>
                         <div class="modern-picker-trigger" id="date-trigger-btn" onclick="openDateModal()">
                             <i class="fa-solid fa-calendar-alt"></i>
                             <div class="trigger-info">
-                                <span class="trigger-label">Horário do Registro</span>
+                                <span class="trigger-label"><?= __('Horário do Registro') ?></span>
                                 <span class="trigger-value" id="date-display-value"><?= date('d/m/Y H:i') ?></span>
                             </div>
                             <i class="fa-solid fa-chevron-right"></i>
@@ -582,39 +647,39 @@ ob_start();
                 </div>
 
                 <div class="section-divider">
-                    <h5>Ação Tomada</h5>
+                    <h5><?= __('Ação Tomada') ?></h5>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Tipo de Registro / Advertência</label>
+                        <label class="form-label"><?= __('Tipo de Registro / Advertência') ?></label>
                         <div class="modern-picker-trigger" id="action-trigger-btn" onclick="openActionModal()">
                             <i class="fa-solid fa-gavel"></i>
                             <div class="trigger-info">
-                                <span class="trigger-label">Ação Corretiva</span>
-                                <span class="trigger-value" id="action-display-value">Orientação Técnica</span>
+                                <span class="trigger-label"><?= __('Ação Corretiva') ?></span>
+                                <span class="trigger-value" id="action-display-value"><?= __('Orientação Técnica') ?></span>
                             </div>
                             <i class="fa-solid fa-chevron-right"></i>
                         </div>
-                        <input type="hidden" id="occ-tipo" name="tipo_acao" value="Orientação Técnica">
+                        <input type="hidden" id="occ-tipo" name="tipo_acao" value="<?= __('Orientação Técnica') ?>">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Observações Adicionais</label>
+                        <label class="form-label"><?= __('Observações Adicionais') ?></label>
                         <textarea class="form-input" rows="4" id="occ-obs"
-                            placeholder="Descreva detalhes sobre a ocorrência..."></textarea>
+                            placeholder="<?= __('Descreva detalhes sobre a ocorrência...') ?>"></textarea>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Evidências</label>
+                        <label class="form-label"><?= __('Evidências') ?></label>
                         <div class="upload-grid" id="upload-grid">
                             <div class="upload-btn" id="btn-add-evidence">
                                 <i data-lucide="plus"></i>
-                                <span>Adicionar</span>
+                                <span><?= __('Adicionar') ?></span>
                             </div>
                             <input type="file" id="evidence-input" multiple accept="image/*" style="display: none;">
                         </div>
@@ -625,8 +690,8 @@ ob_start();
 
         <div class="card-footer-premium">
             <button type="button" class="btn-cancel-occ"
-                onclick="location.href='<?= BASE_PATH ?>/dashboard'">Cancelar</button>
-            <button type="button" class="btn-confirm" id="btnConfirmOcc">Confirmar Ocorrência</button>
+                onclick="location.href='<?= BASE_PATH ?>/dashboard'"><?= __('Cancelar') ?></button>
+            <button type="button" class="btn-confirm" id="btnConfirmOcc"><?= __('Confirmar Ocorrência') ?></button>
         </div>
     </div>
 </div>
@@ -636,8 +701,8 @@ ob_start();
     <div class="modal-premium-content">
         <div class="card-header-premium" style="padding: 20px 24px;">
             <div>
-                <h2 style="font-size: 16px;">Selecionar Setor</h2>
-                <p style="font-size: 11px;">Escolha o local onde a ocorrência foi detectada</p>
+                <h2 style="font-size: 16px;"><?= __('Selecionar Setor') ?></h2>
+                <p style="font-size: 11px;"><?= __('Escolha o local onde a ocorrência foi detectada') ?></p>
             </div>
             <button class="close-premium" onclick="closeSectorModal()" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
@@ -664,8 +729,8 @@ ob_start();
     <div class="modal-premium-content">
         <div class="card-header-premium" style="padding: 20px 24px;">
             <div>
-                <h2 style="font-size: 16px;">Selecionar Funcionário</h2>
-                <p style="font-size: 11px;" id="employeeModalSectorSubtitle">Escolha o funcionário do setor</p>
+                <h2 style="font-size: 16px;"><?= __('Selecionar Funcionário') ?></h2>
+                <p style="font-size: 11px;" id="employeeModalSectorSubtitle"><?= __('Escolha o funcionário do setor') ?></p>
             </div>
             <button class="close-premium" onclick="closeEmployeeModal()" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
@@ -674,13 +739,13 @@ ob_start();
             <input type="text" 
                    id="employeeSearchInput" 
                    class="modal-search-input" 
-                   placeholder="Pesquisar por nome ou CPF..."
+                   placeholder="<?= __('Pesquisar por nome ou CPF...') ?>"
                    oninput="filterEmployees(this.value)">
         </div>
 
         <div class="modal-premium-body" style="padding: 0;">
             <div class="grid-modal-list" id="employeeModalList">
-                 <div class="empty-search-state">Selecione o setor para carregar os funcionários.</div>
+                 <div class="empty-search-state"><?= __('Selecione o setor para carregar os funcionários.') ?></div>
             </div>
         </div>
     </div>
@@ -691,8 +756,8 @@ ob_start();
     <div class="modal-premium-content" style="max-width: 400px;">
         <div class="card-header-premium" style="padding: 20px 24px;">
             <div>
-                <h2 style="font-size: 16px;">Motivo Principal</h2>
-                <p style="font-size: 11px;">Qual a causa principal desta ocorrência?</p>
+                <h2 style="font-size: 16px;"><?= __('Motivo Principal') ?></h2>
+                <p style="font-size: 11px;"><?= __('Qual a causa principal desta ocorrência?') ?></p>
             </div>
             <button class="close-premium" onclick="closeMotivoModal()" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
@@ -723,8 +788,8 @@ ob_start();
     <div class="modal-premium-content">
         <div class="card-header-premium" style="padding: 20px 24px;">
             <div>
-                <h2 style="font-size: 16px;">Selecionar EPI</h2>
-                <p style="font-size: 11px;">Qual equipamento está envolvido?</p>
+                <h2 style="font-size: 16px;"><?= __('Selecionar EPI') ?></h2>
+                <p style="font-size: 11px;"><?= __('Qual equipamento está envolvido?') ?></p>
             </div>
             <button class="close-premium" onclick="closeEpiModal()" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
@@ -732,7 +797,7 @@ ob_start();
             <div class="grid-modal-list">
                 <div class="picker-item-btn" onclick="selectEpiModal('none', 'Nenhum')">
                     <div class="picker-icon-box"><i class="fa-solid fa-ban"></i></div>
-                    <div class="picker-info"><span class="picker-name">Nenhum</span></div>
+                    <div class="picker-info"><span class="picker-name"><?= __('Nenhum') ?></span></div>
                 </div>
                 <?php foreach ($epis as $epi): ?>
                     <div class="picker-item-btn" onclick="selectEpiModal('<?= $epi->getId() ?>', '<?= htmlspecialchars($epi->getName()) ?>')">
@@ -755,8 +820,8 @@ ob_start();
     <div class="modal-premium-content" style="max-width: 360px;">
         <div class="card-header-premium" style="padding: 20px 24px;">
             <div>
-                <h2 style="font-size: 16px;">Data e Hora</h2>
-                <p style="font-size: 11px;">Quando ocorreu a infração?</p>
+                <h2 style="font-size: 16px;"><?= __('Data e Hora') ?></h2>
+                <p style="font-size: 11px;"><?= __('Quando ocorreu a infração?') ?></p>
             </div>
             <button class="close-premium" onclick="closeDateModal()" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
@@ -769,7 +834,7 @@ ob_start();
                 <label class="form-label">Hora</label>
                 <input type="time" id="modal-time-input" class="form-input" value="<?= date('H:i') ?>">
             </div>
-            <button class="btn-confirm" style="width: 100%; padding: 12px;" onclick="confirmDateModal()">Confirmar Horário</button>
+            <button class="btn-confirm" style="width: 100%; padding: 12px;" onclick="confirmDateModal()"><?= __('Confirmar') ?></button>
         </div>
     </div>
 </div>
@@ -779,8 +844,8 @@ ob_start();
     <div class="modal-premium-content">
         <div class="card-header-premium" style="padding: 20px 24px;">
             <div>
-                <h2 style="font-size: 16px;">Ação / Registro</h2>
-                <p style="font-size: 11px;">Como esta ocorrência será registrada?</p>
+                <h2 style="font-size: 16px;"><?= __('Ação / Registro') ?></h2>
+                <p style="font-size: 11px;"><?= __('Como esta ocorrência será registrada?') ?></p>
             </div>
             <button class="close-premium" onclick="closeActionModal()" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;">&times;</button>
         </div>

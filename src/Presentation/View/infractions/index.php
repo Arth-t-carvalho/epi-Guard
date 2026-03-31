@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'epiGuard - Infrações';
+$pageTitle = 'epiGuard - ' . __('Infrações');
 $extraHead = '
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/infractions.css">
     <link rel="stylesheet" href="' . BASE_PATH . '/assets/css/picker.css">
@@ -17,12 +17,12 @@ ob_start();
 <!-- Header -->
 <header class="header">
     <div class="page-title">
-        <h1>Infrações</h1>
-        <p>Gestão de ocorrências e infrações de EPI</p>
+        <h1><?= __('Infrações') ?></h1>
+        <p><?= __('Gestão de ocorrências e infrações de EPI') ?></p>
     </div>
     <div class="header-actions">
         <button class="btn-primary" onclick="openExportModal()">
-            <i class="fa-solid fa-file-export"></i> Exportar
+            <i class="fa-solid fa-file-export"></i> <?= __('Exportar') ?>
         </button>
     </div>
 </header>
@@ -33,7 +33,7 @@ ob_start();
     <!-- Filters -->
     <form action="<?= BASE_PATH ?>/infractions" method="GET" class="filter-bar" id="filterForm">
         <div class="filter-group select-search">
-            <input type="text" name="search" id="searchInput" placeholder="🔍 Buscar funcionário ou setor..."
+            <input type="text" name="search" id="searchInput" placeholder="<?= __('Buscar funcionário ou setor...') ?>"
                 value="<?= htmlspecialchars($filters['search']) ?>">
         </div>
 
@@ -53,15 +53,15 @@ ob_start();
             <div class="modern-picker-trigger" onclick="openModernPicker('periodo')">
                 <i class="fa-solid fa-calendar-days"></i>
                 <div class="trigger-info">
-                    <span class="trigger-label">Período</span>
+                    <span class="trigger-label"><?= __('Período') ?></span>
                     <span class="trigger-value" id="label-periodo">
                         <?php
                         $periodLabels = [
-                            'todos' => 'Todos os períodos',
-                            'hoje' => 'Hoje',
-                            'semana' => 'Esta Semana',
-                            'mes' => 'Este Mês',
-                            'personalizado' => 'Personalizado'
+                            'todos' => __('Todos os períodos'),
+                            'hoje' => __('Hoje'),
+                            'semana' => __('Esta Semana'),
+                            'mes' => __('Este Mês'),
+                            'personalizado' => __('Personalizado')
                         ];
                         echo $periodLabels[$filters['periodo']] ?? 'Todos';
                         ?>
@@ -75,7 +75,7 @@ ob_start();
         <div id="customDateRangeBox" class="filter-group custom-date-box" style="<?= $filters['periodo'] === 'personalizado' ? 'display: flex;' : 'display: none;' ?>">
             <div class="date-input-wrapper">
                 <input type="date" id="uiDateInicio" value="<?= htmlspecialchars($filters['data_inicio'] ?? '') ?>" title="Data Início">
-                <span>até</span>
+                <span><?= __('até') ?></span>
                 <input type="date" id="uiDateFim" value="<?= htmlspecialchars($filters['data_fim'] ?? '') ?>" title="Data Fim">
                 <button type="button" class="btn-mini-apply" onclick="applyCustomDateRange()">
                     <i class="fa-solid fa-arrow-right"></i>
@@ -87,10 +87,10 @@ ob_start();
             <div class="modern-picker-trigger" onclick="openModernPicker('status')">
                 <i class="fa-solid fa-list-check"></i>
                 <div class="trigger-info">
-                    <span class="trigger-label">Status</span>
+                    <span class="trigger-label"><?= __('Status') ?></span>
                     <span class="trigger-value" id="label-status">
                         <?php
-                        $statusLabels = ['todos' => 'Todos os Status', 'pendente' => 'Pendente', 'resolvido' => 'Resolvido'];
+                        $statusLabels = ['todos' => __('Todos os Status'), 'pendente' => __('Pendente'), 'resolvido' => __('Resolvido')];
                         echo $statusLabels[$filters['status']] ?? 'Todos';
                         ?>
                     </span>
@@ -105,7 +105,7 @@ ob_start();
                 <div class="trigger-info">
                     <span class="trigger-label">EPI</span>
                     <span class="trigger-value" id="label-epi">
-                        <?= $filters['epi'] === 'todos' ? 'Todos os EPIs' : htmlspecialchars($filters['epi']) ?>
+                        <?= $filters['epi'] === 'todos' ? __('Todos os EPIs') : htmlspecialchars($filters['epi']) ?>
                     </span>
                 </div>
                 <i class="fa-solid fa-chevron-down"></i>
@@ -116,13 +116,13 @@ ob_start();
             <div class="modern-picker-trigger" onclick="openModernPicker('ordenacao')">
                 <i class="fa-solid fa-arrow-down-wide-short"></i>
                 <div class="trigger-info">
-                    <span class="trigger-label">Ordenar por</span>
+                    <span class="trigger-label"><?= __('Ordenar por') ?></span>
                     <span class="trigger-value" id="label-ordenacao">
                         <?php
                         $orderLabels = [
-                            'tempo' => 'Mais Recentes',
-                            'alfabetica' => 'Ordem Alfabética',
-                            'frequente' => 'Mais Frequentes'
+                            'tempo' => __('Mais Recentes'),
+                            'alfabetica' => __('Ordem Alfabética'),
+                            'frequente' => __('Mais Frequentes')
                         ];
                         echo $orderLabels[$filters['ordenacao']] ?? 'Mais Recentes';
                         ?>
@@ -136,7 +136,7 @@ ob_start();
             <div class="modern-picker-trigger" onclick="openModernPicker('visualizacao')">
                 <i class="fa-solid fa-table-columns"></i>
                 <div class="trigger-info">
-                    <span class="trigger-label">Visualização</span>
+                    <span class="trigger-label"><?= __('Visualização') ?></span>
                     <span class="trigger-value" id="label-visualizacao">
                         <?= $filters['visualizacao'] === 'nome' ? 'Exibir Nome' : 'Exibir Cards' ?>
                     </span>
@@ -151,9 +151,9 @@ ob_start();
     <!-- Table -->
     <div class="table-card">
         <div class="card-header">
-            <h3>Registro de Infrações</h3>
-            <span style="font-size: 12px; color: var(--text-muted);" id="tableCount">Mostrando
-                <?= count($infractions) ?> registros</span>
+            <h3><?= __('Registro de Infrações') ?></h3>
+            <span style="font-size: 12px; color: var(--text-muted);" id="tableCount"><?= __('Mostrando') ?>
+                <?= count($infractions) ?> <?= __('registros') ?></span>
         </div>
 
         <?php if ($filters['visualizacao'] === 'cards'): ?>
@@ -169,14 +169,14 @@ ob_start();
                                 class="card-employee-photo" onerror="this.src='<?= BASE_PATH ?>/assets/img/default-avatar.png'">
                             <span
                                 class="status-badge-premium <?= ($infraction['status'] ?? 'pendente') === 'resolvido' ? 'resolved' : 'pending' ?>">
-                                <?= ucfirst($infraction['status'] ?? 'Pendente') ?>
+                                <?= __($infraction['status'] === 'resolvido' ? 'Resolvido' : 'Pendente') ?>
                             </span>
                         </div>
                         <div class="card-content-premium">
                             <h4 class="employee-name"><?= htmlspecialchars($infraction['funcionario_nome']) ?></h4>
                             <div class="info-row-premium">
                                 <i class="fa-solid fa-briefcase"></i>
-                                <span>Setor: <?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?></span>
+                                <span><?= __('Setor') ?>: <?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?></span>
                             </div>
                             <div class="info-row-premium">
                                 <i class="fa-solid fa-shield-halved"></i>
@@ -200,14 +200,14 @@ ob_start();
                                     $infraction['epi_id'] ?: null
                                 ]);
                                 ?>
-                                <button class="btn-card-action" title="Ver detalhes"
+                                <button class="btn-card-action" title="<?= __('Ver detalhes') ?>"
                                     onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($args, ENT_QUOTES, 'UTF-8') ?>)"><i
                                         class="fa-solid fa-eye"></i></button>
                                 <button class="btn-card-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
-                                    title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
+                                    title="<?= __('Salvar para revisão') ?>" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
                                         class="fa-solid fa-bookmark"></i></button>
                                 <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                    <button class="btn-card-action success" title="Resolver"><i
+                                    <button class="btn-card-action success" title="<?= __('Resolver') ?>"><i
                                             class="fa-solid fa-check"></i></button>
                                 <?php endif; ?>
                             </div>
@@ -219,20 +219,20 @@ ob_start();
             <table class="data-table" id="infractionsTable">
                 <thead>
                     <tr>
-                        <th>Data</th>
-                        <th>Funcionário</th>
-                        <th>Setor</th>
+                        <th><?= __('Data') ?></th>
+                        <th><?= __('Funcionário') ?></th>
+                        <th><?= __('Setor') ?></th>
                         <th>EPI</th>
-                        <th>Horário</th>
+                        <th><?= __('Horário') ?></th>
                         <th>Status</th>
-                        <th>Ações</th>
+                        <th><?= __('Ações') ?></th>
                     </tr>
                 </thead>
                 <tbody id="infractionsTableBody">
                     <?php if (empty($infractions)): ?>
                         <tr>
                             <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">
-                                Nenhuma infração encontrada com os filtros selecionados.
+                                <?= __('Nenhuma infração encontrada com os filtros selecionados.') ?>
                             </td>
                         </tr>
                     <?php else: ?>
@@ -262,7 +262,7 @@ ob_start();
                                 <td data-status="<?= htmlspecialchars($infraction['status'] ?? 'pendente') ?>">
                                     <span
                                         class="status-dot <?= ($infraction['status'] ?? 'pendente') === 'resolvido' ? 'resolved' : 'pending' ?>"></span>
-                                    <?= ucfirst($infraction['status'] ?? 'Pendente') ?>
+                                    <?= __($infraction['status'] === 'resolvido' ? 'Resolvido' : 'Pendente') ?>
                                 </td>
                                 <td>
                                     <div class="table-actions">
@@ -279,17 +279,17 @@ ob_start();
                                             $infraction['epi_id'] ?: null
                                         ]);
                                         ?>
-                                        <button class="btn-action" title="Ver detalhes"
+                                        <button class="btn-action" title="<?= __('Ver detalhes') ?>"
                                             onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($argsTable, ENT_QUOTES, 'UTF-8') ?>)"><i
                                                 class="fa-solid fa-eye"></i></button>
                                         <button class="btn-action secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
-                                            title="Salvar para revisão" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
+                                            title="<?= __('Salvar para revisão') ?>" onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
                                                 class="fa-solid fa-bookmark"></i></button>
                                         <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                            <button class="btn-action success" title="Resolver"><i
+                                            <button class="btn-action success" title="<?= __('Resolver') ?>"><i
                                                     class="fa-solid fa-check"></i></button>
                                         <?php endif; ?>
-                                        <button class="btn-action danger" title="Excluir"
+                                        <button class="btn-action danger" title="<?= __('Excluir') ?>"
                                             onclick="confirmHideInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
                                                 class="fa-solid fa-trash"></i></button>
                                     </div>
