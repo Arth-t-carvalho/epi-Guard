@@ -24,3 +24,4 @@ class DepartmentService
         return $this->departmentRepository->findAll();
     }
 }
+

@@ -11,10 +11,10 @@ class ManagementController
             'risk' => $_GET['risk'] ?? 'todos'
         ];
         
-        $repo = new \epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository();
+        $repo = new \epiGuard\Infrastructure\Persistence\PostgreSQLDepartmentRepository();
         $setores = $repo->findAllWithStats($filters);
         
-        $epiRepo = new \epiGuard\Infrastructure\Persistence\MySQLEpiRepository();
+        $epiRepo = new \epiGuard\Infrastructure\Persistence\PostgreSQLEpiRepository();
         $epis = $epiRepo->findAll();
 
         require_once __DIR__ . '/../View/management/departments.php';
@@ -30,3 +30,4 @@ class ManagementController
         require_once __DIR__ . '/../View/management/instructors.php';
     }
 }
+

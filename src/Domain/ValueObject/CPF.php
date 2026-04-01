@@ -74,3 +74,4 @@ final class CPF
         return $this->getValue();
     }
 }
+

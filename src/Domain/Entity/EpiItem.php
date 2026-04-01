@@ -72,3 +72,4 @@ class EpiItem
         return $this->createdAt;
     }
 }
+

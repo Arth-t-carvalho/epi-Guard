@@ -37,3 +37,4 @@ class CreateEmployeeRequest
         $this->email = $email;
     }
 }
+

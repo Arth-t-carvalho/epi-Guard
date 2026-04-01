@@ -52,3 +52,4 @@ interface OccurrenceRepositoryInterface
 
     public function delete(Occurrence $occurrence): void;
 }
+

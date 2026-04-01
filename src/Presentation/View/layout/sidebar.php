@@ -134,3 +134,4 @@ $currentRoute = str_replace($basePath, '', $currentPath);
         }, 800);
     }
 </script>
+

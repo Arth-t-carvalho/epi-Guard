@@ -27,3 +27,4 @@ class EmployeeListItem
         $this->occurrencesCount = $occurrencesCount;
     }
 }
+

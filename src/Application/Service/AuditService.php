@@ -39,3 +39,4 @@ class AuditService
         $this->auditLogRepository->save($log);
     }
 }
+

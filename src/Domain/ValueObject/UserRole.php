@@ -55,3 +55,4 @@ final class UserRole
         return $this->getValue();
     }
 }
+

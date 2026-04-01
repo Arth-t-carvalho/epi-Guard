@@ -55,3 +55,4 @@ final class OccurrenceStatus
         return $this->getValue();
     }
 }
+

@@ -35,3 +35,4 @@ final class Email
         return $this->getValue();
     }
 }
+

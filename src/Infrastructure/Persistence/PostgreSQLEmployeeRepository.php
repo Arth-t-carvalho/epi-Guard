@@ -10,9 +10,9 @@ use epiGuard\Domain\Repository\DepartmentRepositoryInterface;
 use epiGuard\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 
-class MySQLEmployeeRepository implements EmployeeRepositoryInterface
+class PostgreSQLEmployeeRepository implements EmployeeRepositoryInterface
 {
-    private \mysqli $db;
+    private \PDO $db;
     private DepartmentRepositoryInterface $departmentRepository;
 
     public function __construct(DepartmentRepositoryInterface $departmentRepository)
@@ -24,11 +24,9 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
     public function findById(int $id): ?Employee
     {
         $stmt = $this->db->prepare("SELECT id, nome, setor_id, criado_em, atualizado_em FROM funcionarios WHERE id = ?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$id]);
 
-        if ($row = $result->fetch_assoc()) {
+        if ($row = $stmt->fetch()) {
             return $this->hydrate($row);
         }
 
@@ -48,10 +46,10 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
     /** @return Employee[] */
     public function findAll(): array
     {
-        $result = $this->db->query("SELECT id, nome, setor_id, criado_em, atualizado_em FROM funcionarios ORDER BY nome ASC");
+        $stmt = $this->db->query("SELECT id, nome, setor_id, criado_em, atualizado_em FROM funcionarios ORDER BY nome ASC");
         $employees = [];
 
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $employees[] = $this->hydrate($row);
         }
 
@@ -61,12 +59,10 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
     public function findByDepartment(int $departmentId): array
     {
         $stmt = $this->db->prepare("SELECT id, nome, setor_id, criado_em, atualizado_em FROM funcionarios WHERE setor_id = ?");
-        $stmt->bind_param('i', $departmentId);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$departmentId]);
         
         $employees = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $employees[] = $this->hydrate($row);
         }
 
@@ -76,30 +72,30 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
     public function save(Employee $employee): void
     {
         $stmt = $this->db->prepare("INSERT INTO funcionarios (nome, setor_id) VALUES (?, ?)");
-        $nome = $employee->getName();
-        $setor_id = $employee->getDepartment()->getId();
-        $stmt->bind_param('si', $nome, $setor_id);
-        $stmt->execute();
+        $params = [
+            $employee->getName(),
+            $employee->getDepartment()->getId()
+        ];
+        $stmt->execute($params);
 
-        $employee->setId((int) $this->db->insert_id);
+        $employee->setId((int) $this->db->lastInsertId());
     }
 
     public function update(Employee $employee): void
     {
         $stmt = $this->db->prepare("UPDATE funcionarios SET nome = ?, setor_id = ? WHERE id = ?");
-        $nome = $employee->getName();
-        $setor_id = $employee->getDepartment()->getId();
-        $id = $employee->getId();
-        $stmt->bind_param('sii', $nome, $setor_id, $id);
-        $stmt->execute();
+        $params = [
+            $employee->getName(),
+            $employee->getDepartment()->getId(),
+            $employee->getId()
+        ];
+        $stmt->execute($params);
     }
 
     public function delete(Employee $employee): void
     {
         $stmt = $this->db->prepare("DELETE FROM funcionarios WHERE id = ?");
-        $id = $employee->getId();
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
+        $stmt->execute([$employee->getId()]);
     }
 
     private function hydrate(array $row): Employee
@@ -126,3 +122,4 @@ class MySQLEmployeeRepository implements EmployeeRepositoryInterface
         );
     }
 }
+

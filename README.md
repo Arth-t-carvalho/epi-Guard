@@ -86,12 +86,12 @@ Desenvolvido com **Clean Architecture** em PHP puro (sem framework), o epiGuard 
 ## 🛠 Tecnologias
 
 ### Backend
-| Tecnologia | Versão | Propósito |
-|---|---|---|
-| **PHP** | 8.1+ | Linguagem principal (Clean Architecture) |
-| **MySQL** | 8.0+ | Banco de dados relacional |
-| **mysqli** | Nativo | Driver de conexão ao banco |
-| **Apache** | 2.4+ | Servidor web (mod_rewrite) |
+| Requisito | Versão | Descrição |
+| :--- | :--- | :--- |
+| **PHP** | 8.1+ | Versão mínima recomendada para segurança e performance |
+| **PostgreSQL** | 14+ | Banco de dados relacional para persistência |
+| **PDO (pgsql)** | Nativo | Driver de conexão ao banco |
+| **Apache/Nginx** | Recente | Servidor web para hospedar a aplicação |
 
 ### Frontend
 | Tecnologia | Versão | Propósito |

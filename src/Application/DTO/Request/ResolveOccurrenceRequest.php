@@ -24,3 +24,4 @@ class ResolveOccurrenceRequest
         $this->actionDescription = $actionDescription;
     }
 }
+

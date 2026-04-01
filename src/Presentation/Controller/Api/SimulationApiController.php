@@ -2,27 +2,27 @@
 
 namespace epiGuard\Presentation\Controller\Api;
 
-use epiGuard\Infrastructure\Persistence\MySQLOccurrenceRepository;
-use epiGuard\Infrastructure\Persistence\MySQLEmployeeRepository;
-use epiGuard\Infrastructure\Persistence\MySQLEpiRepository;
-use epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository;
-use epiGuard\Infrastructure\Persistence\MySQLUserRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLOccurrenceRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLEpiRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLUserRepository;
 use epiGuard\Infrastructure\Database\Connection;
 
 class SimulationApiController
 {
-    private MySQLOccurrenceRepository $occurrenceRepository;
-    private MySQLEmployeeRepository $employeeRepository;
-    private MySQLEpiRepository $epiRepository;
+    private PostgreSQLOccurrenceRepository $occurrenceRepository;
+    private PostgreSQLEmployeeRepository $employeeRepository;
+    private PostgreSQLEpiRepository $epiRepository;
 
     public function __construct()
     {
         $db = Connection::getInstance();
-        $deptRepo = new MySQLDepartmentRepository();
-        $this->employeeRepository = new MySQLEmployeeRepository($deptRepo);
-        $userRepo = new MySQLUserRepository();
-        $this->epiRepository = new MySQLEpiRepository();
-        $this->occurrenceRepository = new MySQLOccurrenceRepository($this->employeeRepository, $userRepo, $this->epiRepository);
+        $deptRepo = new PostgreSQLDepartmentRepository();
+        $this->employeeRepository = new PostgreSQLEmployeeRepository($deptRepo);
+        $userRepo = new PostgreSQLUserRepository();
+        $this->epiRepository = new PostgreSQLEpiRepository();
+        $this->occurrenceRepository = new PostgreSQLOccurrenceRepository($this->employeeRepository, $userRepo, $this->epiRepository);
     }
 
     public function simulate()
@@ -51,15 +51,13 @@ class SimulationApiController
             // 3. Inserir na tabela ocorrencias
             $stmt = $db->prepare("INSERT INTO ocorrencias (funcionario_id, tipo, data_hora) VALUES (?, 'INFRACAO', NOW())");
             $empId = $employee->getId();
-            $stmt->bind_param('i', $empId);
-            $stmt->execute();
-            $occurrenceId = $db->insert_id;
+            $stmt->execute([$empId]);
+            $occurrenceId = (int) $db->lastInsertId();
 
             // 4. Inserir na tabela ocorrencia_epis
             $stmtEpi = $db->prepare("INSERT INTO ocorrencia_epis (ocorrencia_id, epi_id) VALUES (?, ?)");
             $epiId = $epi->getId();
-            $stmtEpi->bind_param('ii', $occurrenceId, $epiId);
-            $stmtEpi->execute();
+            $stmtEpi->execute([$occurrenceId, $epiId]);
 
             echo json_encode([
                 'success' => true,
@@ -75,3 +73,4 @@ class SimulationApiController
         }
     }
 }
+

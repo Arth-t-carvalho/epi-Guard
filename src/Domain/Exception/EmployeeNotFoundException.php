@@ -16,3 +16,4 @@ class EmployeeNotFoundException extends DomainException
         return new self("Employee with CPF {$cpf} not found.");
     }
 }
+

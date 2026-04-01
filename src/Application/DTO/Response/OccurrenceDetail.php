@@ -45,3 +45,4 @@ class OccurrenceDetail
         $this->actions = $actions;
     }
 }
+

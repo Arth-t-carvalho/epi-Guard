@@ -8,9 +8,9 @@ use epiGuard\Domain\Repository\EpiRepositoryInterface;
 use epiGuard\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 
-class MySQLEpiRepository implements EpiRepositoryInterface
+class PostgreSQLEpiRepository implements EpiRepositoryInterface
 {
-    private \mysqli $db;
+    private \PDO $db;
 
     public function __construct()
     {
@@ -20,11 +20,9 @@ class MySQLEpiRepository implements EpiRepositoryInterface
     public function findById(int $id): ?EpiItem
     {
         $stmt = $this->db->prepare("SELECT id, nome, descricao, cor, status FROM epis WHERE id = ?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$id]);
 
-        if ($row = $result->fetch_assoc()) {
+        if ($row = $stmt->fetch()) {
             return $this->hydrate($row);
         }
 
@@ -34,10 +32,10 @@ class MySQLEpiRepository implements EpiRepositoryInterface
     /** @return EpiItem[] */
     public function findAll(): array
     {
-        $result = $this->db->query("SELECT id, nome, descricao, cor, status FROM epis WHERE status = 'ATIVO' ORDER BY nome ASC");
+        $stmt = $this->db->query("SELECT id, nome, descricao, cor, status FROM epis WHERE status = 'ATIVO' ORDER BY nome ASC");
         $epis = [];
 
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $epis[] = $this->hydrate($row);
         }
 
@@ -47,32 +45,32 @@ class MySQLEpiRepository implements EpiRepositoryInterface
     public function save(EpiItem $epiItem): void
     {
         $stmt = $this->db->prepare("INSERT INTO epis (nome, descricao, cor, status) VALUES (?, ?, ?, 'ATIVO')");
-        $nome = $epiItem->getName();
-        $descricao = $epiItem->getDescription();
-        $color = $epiItem->getColor();
-        $stmt->bind_param('sss', $nome, $descricao, $color);
-        $stmt->execute();
+        $params = [
+            $epiItem->getName(),
+            $epiItem->getDescription(),
+            $epiItem->getColor()
+        ];
+        $stmt->execute($params);
 
-        $epiItem->setId((int) $this->db->insert_id);
+        $epiItem->setId((int) $this->db->lastInsertId());
     }
 
     public function update(EpiItem $epiItem): void
     {
         $stmt = $this->db->prepare("UPDATE epis SET nome = ?, descricao = ?, cor = ? WHERE id = ?");
-        $nome = $epiItem->getName();
-        $descricao = $epiItem->getDescription();
-        $color = $epiItem->getColor();
-        $id = $epiItem->getId();
-        $stmt->bind_param('sssi', $nome, $descricao, $color, $id);
-        $stmt->execute();
+        $params = [
+            $epiItem->getName(),
+            $epiItem->getDescription(),
+            $epiItem->getColor(),
+            $epiItem->getId()
+        ];
+        $stmt->execute($params);
     }
 
     public function delete(EpiItem $epiItem): void
     {
         $stmt = $this->db->prepare("UPDATE epis SET status = 'INATIVO' WHERE id = ?");
-        $id = $epiItem->getId();
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
+        $stmt->execute([$epiItem->getId()]);
     }
 
     private function hydrate(array $row): EpiItem
@@ -86,3 +84,4 @@ class MySQLEpiRepository implements EpiRepositoryInterface
         );
     }
 }
+

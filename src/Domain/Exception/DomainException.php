@@ -9,3 +9,4 @@ use Exception;
 class DomainException extends Exception
 {
 }
+

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace epiGuard\Presentation\Controller\Api;
 
-use epiGuard\Infrastructure\Persistence\MySQLEpiRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLEpiRepository;
 
 class EpiApiController
 {
@@ -19,7 +19,7 @@ class EpiApiController
             return;
         }
 
-        $repo = new MySQLEpiRepository();
+        $repo = new PostgreSQLEpiRepository();
         
         try {
             foreach ($colors as $item) {
@@ -39,3 +39,4 @@ class EpiApiController
         }
     }
 }
+

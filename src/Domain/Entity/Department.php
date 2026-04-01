@@ -67,3 +67,4 @@ class Department
         return $this->updatedAt;
     }
 }
+

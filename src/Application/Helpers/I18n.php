@@ -176,3 +176,4 @@ if (!function_exists('__')) {
         return $str;
     }
 }
+

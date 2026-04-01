@@ -3,7 +3,7 @@
 return [
     'host' => '127.0.0.1',
     'database' => 'epi_guard',
-    'username' => 'root',
+    'username' => 'postgres',
     'password' => '',
-    'port' => '3306',
+    'port' => '5432',
 ];

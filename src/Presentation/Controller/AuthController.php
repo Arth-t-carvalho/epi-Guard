@@ -3,18 +3,18 @@
 namespace epiGuard\Presentation\Controller;
 
 use epiGuard\Infrastructure\Database\Connection;
-use epiGuard\Infrastructure\Persistence\MySQLUserRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLUserRepository;
 use epiGuard\Domain\Entity\User;
 use epiGuard\Domain\ValueObject\Email;
 use epiGuard\Domain\ValueObject\UserRole;
 
 class AuthController
 {
-    private MySQLUserRepository $userRepository;
+    private PostgreSQLUserRepository $userRepository;
 
     public function __construct()
     {
-        $this->userRepository = new MySQLUserRepository();
+        $this->userRepository = new PostgreSQLUserRepository();
     }
 
     public function index()
@@ -153,3 +153,4 @@ class AuthController
         exit;
     }
 }
+

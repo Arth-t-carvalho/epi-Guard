@@ -10,18 +10,13 @@ class NotificationApiController
     {
         header('Content-Type: application/json');
         
-        // O JS envia o último ID que ele conhece
         $last_id = isset($_GET['last_id']) ? (int)$_GET['last_id'] : 0;
         $db = Connection::getInstance();
         
         try {
             if ($last_id === 0) {
-                // ═══ PRIMEIRA CARGA ═══
-                // Quando a página abre, o JS manda last_id=0
-                // Retornamos as últimas 20 infrações para popular o modal
-                
                 $resMax = $db->query("SELECT MAX(id) as max_id FROM ocorrencias");
-                $maxRow = $resMax->fetch_assoc();
+                $maxRow = $resMax->fetch();
                 $latestId = (int)($maxRow['max_id'] ?? 0);
 
                 $sql = "SELECT o.id, f.nome as funcionario_nome, 
@@ -35,13 +30,8 @@ class NotificationApiController
                         WHERE o.tipo = 'INFRACAO' AND o.oculto = FALSE
                         ORDER BY o.id DESC LIMIT 20";
 
-                $res = $db->query($sql);
-                $dados = [];
-                if ($res) {
-                    while ($row = $res->fetch_assoc()) {
-                        $dados[] = $row;
-                    }
-                }
+                $stmt = $db->query($sql);
+                $dados = $stmt->fetchAll();
 
                 echo json_encode([
                     'status' => 'init',        
@@ -51,10 +41,6 @@ class NotificationApiController
                 return;
             }
 
-            // ═══ POLLING (chamadas subsequentes) ═══
-            // O JS manda o último ID que conhece
-            // Buscamos só o que é NOVO (id > last_id)
-            
             $stmt = $db->prepare(
                 "SELECT o.id, f.nome as funcionario_nome, 
                         s.sigla as setor_sigla, 
@@ -67,18 +53,13 @@ class NotificationApiController
                  WHERE o.id > ? AND o.tipo = 'INFRACAO' AND o.oculto = FALSE
                  ORDER BY o.id ASC"
             );
-            $stmt->bind_param('i', $last_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            $dados = [];
-            while ($row = $result->fetch_assoc()) {
-                $dados[] = $row;
-            }
+            $stmt->execute([$last_id]);
+            $dados = $stmt->fetchAll();
 
             $newLastId = $last_id;
             if (!empty($dados)) {
-                $newLastId = (int)end($dados)['id'];
+                $lastItem = end($dados);
+                $newLastId = (int)$lastItem['id'];
             }
 
             echo json_encode([
@@ -96,3 +77,4 @@ class NotificationApiController
         }
     }
 }
+

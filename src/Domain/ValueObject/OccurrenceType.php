@@ -62,3 +62,4 @@ final class OccurrenceType
         return $this->getValue();
     }
 }
+

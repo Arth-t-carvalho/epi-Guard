@@ -28,3 +28,4 @@ class NotificationService
     // Implementation for resolution notification
     }
 }
+

@@ -126,3 +126,4 @@ class OccurrenceService
         return $occurrence;
     }
 }
+

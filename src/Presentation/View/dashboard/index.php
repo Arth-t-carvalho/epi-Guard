@@ -294,7 +294,7 @@ ob_start();
                 </div>
 
                 <?php
-                $deptRepo = new \epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository();
+                $deptRepo = new \epiGuard\Infrastructure\Persistence\PostgreSQLDepartmentRepository();
                 $sectors = $deptRepo->findAll();
                 foreach ($sectors as $sector):
                     ?>

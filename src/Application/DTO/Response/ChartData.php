@@ -15,3 +15,4 @@ class ChartData
         $this->datasets = $datasets;
     }
 }
+

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace epiGuard\Presentation\Controller;
 
-use epiGuard\Infrastructure\Persistence\MySQLUserRepository;
-use epiGuard\Infrastructure\Persistence\MySQLEpiRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLUserRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLEpiRepository;
 
 class SettingsController
 {
@@ -17,7 +17,7 @@ class SettingsController
 
         // 2. Busca do email do usuário caso não exista na sessão
         if (isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
-            $repo = new MySQLUserRepository();
+            $repo = new PostgreSQLUserRepository();
             $user = $repo->findById((int)$_SESSION['user_id']);
             if ($user) {
                 $_SESSION['user_email'] = $user->getEmail()->getValue();
@@ -25,7 +25,7 @@ class SettingsController
         }
 
         // 3. Busca de todos os EPIs para gestão de cores
-        $epiRepo = new MySQLEpiRepository();
+        $epiRepo = new PostgreSQLEpiRepository();
         $epis = $epiRepo->findAll();
 
         // 4. Inject de Metadados da Página (Estilos, Títulos e Scripts)
@@ -62,3 +62,4 @@ class SettingsController
         include __DIR__ . '/../View/layout/main.php';
     }
 }
+

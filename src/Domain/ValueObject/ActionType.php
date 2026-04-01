@@ -52,3 +52,4 @@ final class ActionType
         return $this->getValue();
     }
 }
+

@@ -24,3 +24,4 @@ interface UserRepositoryInterface
 
     public function delete(User $user): void;
 }
+

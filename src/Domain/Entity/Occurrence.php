@@ -133,3 +133,4 @@ class Occurrence
         $this->actions[] = $action;
     }
 }
+

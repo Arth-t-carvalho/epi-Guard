@@ -10,9 +10,9 @@ use epiGuard\Domain\Repository\UserRepositoryInterface;
 use epiGuard\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 
-class MySQLUserRepository implements UserRepositoryInterface
+class PostgreSQLUserRepository implements UserRepositoryInterface
 {
-    private \mysqli $db;
+    private \PDO $db;
 
     public function __construct()
     {
@@ -22,11 +22,9 @@ class MySQLUserRepository implements UserRepositoryInterface
     public function findById(int $id): ?User
     {
         $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE id = ?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$id]);
 
-        if ($row = $result->fetch_assoc()) {
+        if ($row = $stmt->fetch()) {
             return $this->hydrate($row);
         }
 
@@ -36,12 +34,9 @@ class MySQLUserRepository implements UserRepositoryInterface
     public function findByEmail(Email $email): ?User
     {
         $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO'");
-        $emailStr = $email->getValue();
-        $stmt->bind_param('s', $emailStr);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$email->getValue()]);
 
-        if ($row = $result->fetch_assoc()) {
+        if ($row = $stmt->fetch()) {
             return $this->hydrate($row);
         }
 
@@ -51,11 +46,9 @@ class MySQLUserRepository implements UserRepositoryInterface
     public function findByUsername(string $username): ?User
     {
         $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO'");
-        $stmt->bind_param('s', $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$username]);
 
-        if ($row = $result->fetch_assoc()) {
+        if ($row = $stmt->fetch()) {
             return $this->hydrate($row);
         }
 
@@ -65,9 +58,9 @@ class MySQLUserRepository implements UserRepositoryInterface
     /** @return User[] */
     public function findAll(): array
     {
-        $result = $this->db->query("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios ORDER BY nome ASC");
+        $stmt = $this->db->query("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios ORDER BY nome ASC");
         $users = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $users[] = $this->hydrate($row);
         }
         return $users;
@@ -77,11 +70,6 @@ class MySQLUserRepository implements UserRepositoryInterface
     {
         $stmt = $this->db->prepare("INSERT INTO usuarios (nome, usuario, senha, cargo, criado_em) VALUES (?, ?, ?, ?, ?)");
         
-        $name = $user->getName();
-        $username = $user->getEmail()->getValue();
-        $password = $user->getPasswordHash();
-        
-        // Mapeamento reverso: UserRole -> DB ENUM
         $roleVal = $user->getRole()->getValue();
         $dbRole = 'SUPERVISOR';
         if ($roleVal === UserRole::ADMIN) {
@@ -92,15 +80,19 @@ class MySQLUserRepository implements UserRepositoryInterface
             $dbRole = 'GERENTE_SEGURANCA';
         }
 
-        $createdAt = $user->getCreatedAt()->format('Y-m-d H:i:s');
-
-        $stmt->bind_param('sssss', $name, $username, $password, $dbRole, $createdAt);
+        $params = [
+            $user->getName(),
+            $user->getEmail()->getValue(),
+            $user->getPasswordHash(),
+            $dbRole,
+            $user->getCreatedAt()->format('Y-m-d H:i:s')
+        ];
         
-        if ($stmt->execute()) {
-            $user->setId($this->db->insert_id);
+        if ($stmt->execute($params)) {
+            $user->setId((int)$this->db->lastInsertId());
         } else {
-            error_log("DB Error on save: " . $stmt->error);
-            throw new \Exception($stmt->error);
+            $error = $stmt->errorInfo();
+            throw new \Exception("DB Error on save: " . $error[2]);
         }
     }
 
@@ -108,11 +100,6 @@ class MySQLUserRepository implements UserRepositoryInterface
     {
         $stmt = $this->db->prepare("UPDATE usuarios SET nome = ?, usuario = ?, senha = ?, cargo = ?, atualizado_em = ? WHERE id = ?");
         
-        $name = $user->getName();
-        $username = $user->getEmail()->getValue();
-        $password = $user->getPasswordHash();
-        
-        // Mapeamento reverso: UserRole -> DB ENUM
         $roleVal = $user->getRole()->getValue();
         $dbRole = 'SUPERVISOR';
         if ($roleVal === UserRole::ADMIN) {
@@ -123,23 +110,25 @@ class MySQLUserRepository implements UserRepositoryInterface
             $dbRole = 'GERENTE_SEGURANCA';
         }
 
-        $updatedAt = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
-        $id = $user->getId();
-
-        $stmt->bind_param('sssssi', $name, $username, $password, $dbRole, $updatedAt, $id);
+        $params = [
+            $user->getName(),
+            $user->getEmail()->getValue(),
+            $user->getPasswordHash(),
+            $dbRole,
+            (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            $user->getId()
+        ];
         
-        if (!$stmt->execute()) {
-            error_log("DB Error on update: " . $stmt->error);
-            throw new \Exception($stmt->error);
+        if (!$stmt->execute($params)) {
+            $error = $stmt->errorInfo();
+            throw new \Exception("DB Error on update: " . $error[2]);
         }
     }
 
     public function delete(User $user): void
     {
         $stmt = $this->db->prepare("DELETE FROM usuarios WHERE id = ?");
-        $id = $user->getId();
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
+        $stmt->execute([$user->getId()]);
     }
 
     private function hydrate(array $row): User
@@ -167,3 +156,4 @@ class MySQLUserRepository implements UserRepositoryInterface
         );
     }
 }
+

@@ -33,3 +33,4 @@ class CreateOccurrenceRequest
         $this->evidences = $evidences;
     }
 }
+

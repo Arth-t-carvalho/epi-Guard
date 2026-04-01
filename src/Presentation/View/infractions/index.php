@@ -322,7 +322,7 @@ ob_start();
                     <select id="exportSectorSelect" onchange="onSectorSelectChange(this)">
                         <option value="" disabled selected>Escolha um setor...</option>
                         <?php
-                        $deptRepo = new \epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository();
+                        $deptRepo = new \epiGuard\Infrastructure\Persistence\PostgreSQLDepartmentRepository();
                         $sectors = $deptRepo->findAll();
                         foreach ($sectors as $sector):
                             ?>

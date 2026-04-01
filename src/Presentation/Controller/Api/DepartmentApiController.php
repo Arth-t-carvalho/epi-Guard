@@ -2,7 +2,7 @@
 
 namespace epiGuard\Presentation\Controller\Api;
 
-use epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
 use epiGuard\Domain\Entity\Department;
 
 class DepartmentApiController
@@ -15,7 +15,7 @@ class DepartmentApiController
         header('Content-Type: application/json; charset=utf-8');
 
         try {
-            $repo = new MySQLDepartmentRepository();
+            $repo = new PostgreSQLDepartmentRepository();
             $departments = $repo->findAll();
 
             $data = array_map(function (Department $dept) {
@@ -54,7 +54,7 @@ class DepartmentApiController
             $sigla = trim($input['sigla'] ?? '');
             $epis = $input['epis'] ?? [];
 
-            $repo = new MySQLDepartmentRepository();
+            $repo = new PostgreSQLDepartmentRepository();
 
             // Verificar duplicata por nome
             if ($repo->findByName($nome)) {
@@ -80,7 +80,7 @@ class DepartmentApiController
 
             // Salvar funcionários importados (se houver)
             if (!empty($input['funcionarios']) && is_array($input['funcionarios'])) {
-                $employeeRepo = new \epiGuard\Infrastructure\Persistence\MySQLEmployeeRepository($repo);
+                $employeeRepo = new \epiGuard\Infrastructure\Persistence\PostgreSQLEmployeeRepository($repo);
                 foreach ($input['funcionarios'] as $nomeFunc) {
                     if (empty($nomeFunc) || strlen($nomeFunc) < 2) continue;
                     
@@ -129,7 +129,7 @@ class DepartmentApiController
             $sigla = trim($input['sigla'] ?? '');
             $epis = $input['epis'] ?? [];
 
-            $repo = new MySQLDepartmentRepository();
+            $repo = new PostgreSQLDepartmentRepository();
             $department = $repo->findById($id);
 
             if (!$department) {
@@ -157,7 +157,7 @@ class DepartmentApiController
 
             // Salvar novos funcionários importados (se houver)
             if (!empty($input['funcionarios']) && is_array($input['funcionarios'])) {
-                $employeeRepo = new \epiGuard\Infrastructure\Persistence\MySQLEmployeeRepository($repo);
+                $employeeRepo = new \epiGuard\Infrastructure\Persistence\PostgreSQLEmployeeRepository($repo);
                 foreach ($input['funcionarios'] as $nomeFunc) {
                     if (empty($nomeFunc) || strlen($nomeFunc) < 2) continue;
                     
@@ -195,7 +195,7 @@ class DepartmentApiController
             }
 
             $id = (int)$input['id'];
-            $repo = new MySQLDepartmentRepository();
+            $repo = new PostgreSQLDepartmentRepository();
             
             $department = $repo->findById($id);
             if (!$department) {
@@ -227,8 +227,8 @@ class DepartmentApiController
                 return;
             }
 
-            $deptRepo = new MySQLDepartmentRepository();
-            $employeeRepo = new \epiGuard\Infrastructure\Persistence\MySQLEmployeeRepository($deptRepo);
+            $deptRepo = new PostgreSQLDepartmentRepository();
+            $employeeRepo = new \epiGuard\Infrastructure\Persistence\PostgreSQLEmployeeRepository($deptRepo);
             
             $employees = $employeeRepo->findByDepartment($id);
             $names = array_map(fn($e) => $e->getName(), $employees);
@@ -240,3 +240,4 @@ class DepartmentApiController
         }
     }
 }
+

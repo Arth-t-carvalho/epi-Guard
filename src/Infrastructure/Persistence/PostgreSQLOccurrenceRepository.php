@@ -14,9 +14,9 @@ use epiGuard\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 use DateTimeInterface;
 
-class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
+class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
 {
-    private \mysqli $db;
+    private \PDO $db;
     private EmployeeRepositoryInterface $employeeRepository;
     private UserRepositoryInterface $userRepository;
     private EpiRepositoryInterface $epiRepository;
@@ -35,11 +35,9 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     public function findById(int $id): ?Occurrence
     {
         $stmt = $this->db->prepare("SELECT * FROM ocorrencias WHERE id = ?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$id]);
 
-        if ($row = $result->fetch_assoc()) {
+        if ($row = $stmt->fetch()) {
             return $this->hydrate($row);
         }
 
@@ -49,9 +47,9 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     /** @return Occurrence[] */
     public function findAll(): array
     {
-        $result = $this->db->query("SELECT * FROM ocorrencias ORDER BY data_hora DESC");
+        $stmt = $this->db->query("SELECT * FROM ocorrencias ORDER BY data_hora DESC");
         $occurrences = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $occurrences[] = $this->hydrate($row);
         }
         return $occurrences;
@@ -60,12 +58,10 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     public function findByEmployeeId(int $employeeId): array
     {
         $stmt = $this->db->prepare("SELECT * FROM ocorrencias WHERE funcionario_id = ? ORDER BY data_hora DESC");
-        $stmt->bind_param('i', $employeeId);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$employeeId]);
         
         $occurrences = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $occurrences[] = $this->hydrate($row);
         }
         return $occurrences;
@@ -73,9 +69,6 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
     public function findByStatus(string $status): array
     {
-        // Nota: A tabela ocorrencias no schema.sql não tem campo 'status' explicitamente,
-        // mas o Domain sugere. No schema simplificado, o 'tipo' filtra os dados.
-        // Implementação simplificada para evitar erros de SQL se o campo não existir.
         return [];
     }
 
@@ -83,7 +76,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE DATE(o.data_hora) = ? AND o.tipo = 'INFRACAO'";
+                  WHERE o.data_hora::date = ? AND o.tipo = 'INFRACAO'";
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -93,16 +86,13 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $stmt = $this->db->prepare($query);
         $dateStr = $date->format('Y-m-d');
         
+        $params = [$dateStr];
         if (!empty($sectorIds)) {
-            $types = 's' . str_repeat('i', count($sectorIds));
-            $params = array_merge([$dateStr], $sectorIds);
-            $stmt->bind_param($types, ...$params);
-        } else {
-            $stmt->bind_param('s', $dateStr);
+            $params = array_merge($params, $sectorIds);
         }
         
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->execute($params);
+        $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
@@ -110,7 +100,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE YEARWEEK(o.data_hora, 1) = YEARWEEK(?, 1) AND o.tipo = 'INFRACAO'";
+                  WHERE to_char(o.data_hora, 'IYYYIW') = to_char(?::date, 'IYYYIW') AND o.tipo = 'INFRACAO'";
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -120,16 +110,13 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $stmt = $this->db->prepare($query);
         $dateStr = $date->format('Y-m-d');
         
+        $params = [$dateStr];
         if (!empty($sectorIds)) {
-            $types = 's' . str_repeat('i', count($sectorIds));
-            $params = array_merge([$dateStr], $sectorIds);
-            $stmt->bind_param($types, ...$params);
-        } else {
-            $stmt->bind_param('s', $dateStr);
+            $params = array_merge($params, $sectorIds);
         }
         
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->execute($params);
+        $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
@@ -137,7 +124,8 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE MONTH(o.data_hora) = MONTH(?) AND YEAR(o.data_hora) = YEAR(?) AND o.tipo = 'INFRACAO'";
+                  WHERE EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM ?::date) 
+                  AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO'";
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -147,33 +135,26 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $stmt = $this->db->prepare($query);
         $dateStr = $date->format('Y-m-d');
         
+        $params = [$dateStr, $dateStr];
         if (!empty($sectorIds)) {
-            $types = 'ss' . str_repeat('i', count($sectorIds));
-            $params = array_merge([$dateStr, $dateStr], $sectorIds);
-            $stmt->bind_param($types, ...$params);
-        } else {
-            $stmt->bind_param('ss', $dateStr, $dateStr);
+            $params = array_merge($params, $sectorIds);
         }
         
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->execute($params);
+        $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
     public function getMonthlyInfractionStats(int $year, ?array $sectorIds = null): array
     {
-        $year = (int) $year;
         $allowedEpiNames = [];
 
         if (!empty($sectorIds)) {
             $allowedEpiNames = $this->resolveEpiSlugsToNames($sectorIds);
         } else {
-            // For Global view, include all active EPI names so legends appear
-            $res = $this->db->query("SELECT nome FROM epis WHERE status = 'ATIVO'");
-            if ($res) {
-                while ($row = $res->fetch_assoc()) {
-                    $allowedEpiNames[] = $row['nome'];
-                }
+            $stmt = $this->db->query("SELECT nome FROM epis WHERE status = 'ATIVO'");
+            while ($row = $stmt->fetch()) {
+                $allowedEpiNames[] = $row['nome'];
             }
         }
 
@@ -190,47 +171,41 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
         $sectorClause = "";
         $epiClause = "";
-        $types = "i";
         $params = [$year];
 
         if (!empty($sectorIds)) {
             $sPlaceholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $sectorClause = " AND f.setor_id IN ($sPlaceholders)";
-            $types .= str_repeat('i', count($sectorIds));
             $params = array_merge($params, $sectorIds);
         }
 
-        $epiTypes = $types;
         $epiParams = $params;
 
         if (!empty($allowedEpiNames)) {
             $ePlaceholders = implode(',', array_fill(0, count($allowedEpiNames), '?'));
             $epiClause = " AND e.nome IN ($ePlaceholders)";
-            $epiTypes .= str_repeat('s', count($allowedEpiNames));
             $epiParams = array_merge($epiParams, $allowedEpiNames);
         }
 
         $query = "
             SELECT 
-                MONTH(o.data_hora) as mes,
+                EXTRACT(MONTH FROM o.data_hora)::int as mes,
                 e.nome as epi_nome,
                 COUNT(*) as total
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
             JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
             JOIN epis e ON oe.epi_id = e.id
-            WHERE YEAR(o.data_hora) = ? AND o.tipo = 'INFRACAO'
+            WHERE EXTRACT(YEAR FROM o.data_hora) = ? AND o.tipo = 'INFRACAO'
             $sectorClause
             $epiClause
             GROUP BY mes, epi_nome
         ";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param($epiTypes, ...$epiParams);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute($epiParams);
 
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $mesIdx = (int) $row['mes'] - 1;
             if ($mesIdx < 0 || $mesIdx >= 12) continue;
             
@@ -253,27 +228,23 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         }
 
         $queryTotal = "
-            SELECT MONTH(o.data_hora) as mes, COUNT(*) as qtd
+            SELECT EXTRACT(MONTH FROM o.data_hora)::int as mes, COUNT(*) as qtd
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
-            WHERE YEAR(o.data_hora) = ? AND o.tipo = 'INFRACAO'
+            WHERE EXTRACT(YEAR FROM o.data_hora) = ? AND o.tipo = 'INFRACAO'
             $sectorClause
             GROUP BY mes
         ";
         
-        $totalTypes = "i";
         $totalParams = [$year];
         if (!empty($sectorIds)) {
-            $totalTypes .= str_repeat('i', count($sectorIds));
             $totalParams = array_merge($totalParams, $sectorIds);
         }
 
         $stmtTotal = $this->db->prepare($queryTotal);
-        $stmtTotal->bind_param($totalTypes, ...$totalParams);
-        $stmtTotal->execute();
-        $resTotal = $stmtTotal->get_result();
+        $stmtTotal->execute($totalParams);
         
-        while ($row = $resTotal->fetch_assoc()) {
+        while ($row = $stmtTotal->fetch()) {
             $mesIdx = (int) $row['mes'] - 1;
             if ($mesIdx >= 0 && $mesIdx < 12) {
                 $stats['total'][$mesIdx] = (int) $row['qtd'];
@@ -291,11 +262,9 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $year = (int) date('Y');
         $allowedEpiNames = [];
 
-        // Determine allowed EPIs based on selected sectors
         if (!empty($sectorIds)) {
             $allowedEpiNames = $this->resolveEpiSlugsToNames($sectorIds);
 
-            // If sectors are selected but none have EPIs registered, return empty with flag
             if (empty($allowedEpiNames)) {
                 return [
                     'labels' => [], 
@@ -308,20 +277,17 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
         $sectorClause = "";
         $epiClause = "";
-        $types = "i";
         $params = [$year];
 
         if (!empty($sectorIds)) {
             $sPlaceholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $sectorClause = " AND f.setor_id IN ($sPlaceholders)";
-            $types .= str_repeat('i', count($sectorIds));
             $params = array_merge($params, $sectorIds);
         }
 
         if (!empty($allowedEpiNames)) {
             $ePlaceholders = implode(',', array_fill(0, count($allowedEpiNames), '?'));
             $epiClause = " AND e.nome IN ($ePlaceholders)";
-            $types .= str_repeat('s', count($allowedEpiNames));
             $params = array_merge($params, $allowedEpiNames);
         }
 
@@ -333,22 +299,20 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
             JOIN funcionarios f ON o.funcionario_id = f.id
             JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
             JOIN epis e ON oe.epi_id = e.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
             $sectorClause
             $epiClause
             GROUP BY e.nome
         ";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param($types, ...$params);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute($params);
         
         $labels = [];
         $data = [];
         $totalSum = 0;
 
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $labels[] = $row['nome'];
             $data[] = (int) $row['total'];
             $totalSum += (int) $row['total'];
@@ -372,50 +336,47 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     public function save(Occurrence $occurrence): void
     {
         $stmt = $this->db->prepare("INSERT INTO ocorrencias (funcionario_id, tipo, data_hora) VALUES (?, ?, ?)");
-        $fid = $occurrence->getEmployee()->getId();
-        $tipo = $occurrence->getType()->getValue();
-        $data = $occurrence->getDate()->format('Y-m-d H:i:s');
-        $stmt->bind_param('iss', $fid, $tipo, $data);
-        $stmt->execute();
-        $occurrence->setId((int) $this->db->insert_id);
+        $params = [
+            $occurrence->getEmployee()->getId(),
+            $occurrence->getType()->getValue(),
+            $occurrence->getDate()->format('Y-m-d H:i:s')
+        ];
+        $stmt->execute($params);
+        $occurrence->setId((int) $this->db->lastInsertId());
     }
 
     public function update(Occurrence $occurrence): void
     {
         $stmt = $this->db->prepare("UPDATE ocorrencias SET funcionario_id = ?, tipo = ?, data_hora = ? WHERE id = ?");
-        $fid = $occurrence->getEmployee()->getId();
-        $tipo = $occurrence->getType()->getValue();
-        $data = $occurrence->getDate()->format('Y-m-d H:i:s');
-        $id = $occurrence->getId();
-        $stmt->bind_param('issi', $fid, $tipo, $data, $id);
-        $stmt->execute();
+        $params = [
+            $occurrence->getEmployee()->getId(),
+            $occurrence->getType()->getValue(),
+            $occurrence->getDate()->format('Y-m-d H:i:s'),
+            $occurrence->getId()
+        ];
+        $stmt->execute($params);
     }
 
     public function delete(Occurrence $occurrence): void
     {
         $stmt = $this->db->prepare("DELETE FROM ocorrencias WHERE id = ?");
-        $id = $occurrence->getId();
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
+        $stmt->execute([$occurrence->getId()]);
     }
 
     public function hide(int $id): bool
     {
         $stmt = $this->db->prepare("UPDATE ocorrencias SET oculto = TRUE WHERE id = ?");
-        $stmt->bind_param('i', $id);
-        return $stmt->execute();
+        return $stmt->execute([$id]);
     }
 
     public function toggleFavorite(int $id): array
     {
         $stmt = $this->db->prepare("UPDATE ocorrencias SET favorito = NOT favorito WHERE id = ?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
+        $stmt->execute([$id]);
 
         $stmt2 = $this->db->prepare("SELECT favorito FROM ocorrencias WHERE id = ?");
-        $stmt2->bind_param('i', $id);
-        $stmt2->execute();
-        $row = $stmt2->get_result()->fetch_assoc();
+        $stmt2->execute([$id]);
+        $row = $stmt2->fetch();
         return ['success' => true, 'favorito' => (bool) $row['favorito']];
     }
 
@@ -432,38 +393,34 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 WHERE o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         $params = [];
-        $types = "";
 
         if (!empty($filters['search'])) {
-            $sql .= " AND (f.nome LIKE ? OR s.sigla LIKE ?)";
+            $sql .= " AND (f.nome ILIKE ? OR s.sigla ILIKE ? OR s.nome ILIKE ?)";
             $searchTerm = "%" . $filters['search'] . "%";
             $params[] = $searchTerm;
             $params[] = $searchTerm;
-            $types .= "ss";
+            $params[] = $searchTerm;
         }
 
         if (!empty($filters['epi']) && $filters['epi'] !== 'todos') {
-            $sql .= " AND e.nome LIKE ?";
+            $sql .= " AND e.nome ILIKE ?";
             $params[] = "%" . $filters['epi'] . "%";
-            $types .= "s";
         }
 
         if (!empty($filters['periodo']) && $filters['periodo'] !== 'todos') {
             if ($filters['periodo'] === 'hoje') {
-                $sql .= " AND DATE(o.data_hora) = CURDATE()";
+                $sql .= " AND o.data_hora::date = CURRENT_DATE";
             } elseif ($filters['periodo'] === 'semana') {
-                $sql .= " AND YEARWEEK(o.data_hora, 1) = YEARWEEK(CURDATE(), 1)";
+                $sql .= " AND to_char(o.data_hora, 'IYYYIW') = to_char(CURRENT_DATE, 'IYYYIW')";
             } elseif ($filters['periodo'] === 'mes') {
-                $sql .= " AND MONTH(o.data_hora) = MONTH(CURDATE()) AND YEAR(o.data_hora) = YEAR(CURDATE())";
+                $sql .= " AND EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)";
             } elseif ($filters['periodo'] === 'personalizado' && !empty($filters['data_inicio']) && !empty($filters['data_fim'])) {
-                $sql .= " AND DATE(o.data_hora) BETWEEN ? AND ?";
+                $sql .= " AND o.data_hora::date BETWEEN ? AND ?";
                 $params[] = $filters['data_inicio'];
                 $params[] = $filters['data_fim'];
-                $types .= "ss";
             }
         }
 
-        // Ordenação Dinâmica
         $orderBy = "o.favorito DESC, o.data_hora DESC";
         if (!empty($filters['ordenacao'])) {
             if ($filters['ordenacao'] === 'alfabetica') {
@@ -471,7 +428,6 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
             } elseif ($filters['ordenacao'] === 'tempo') {
                 $orderBy = "o.favorito DESC, o.data_hora DESC";
             } elseif ($filters['ordenacao'] === 'frequente') {
-                // Ordena pelos funcionários que têm o maior número total de infrações registradas
                 $orderBy = "o.favorito DESC, (SELECT COUNT(*) FROM ocorrencias o2 WHERE o2.funcionario_id = f.id AND o2.tipo = 'INFRACAO') DESC, o.data_hora DESC";
             }
         }
@@ -479,25 +435,19 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $sql .= " ORDER BY " . $orderBy;
 
         $stmt = $this->db->prepare($sql);
-        if (!empty($params)) {
-            $stmt->bind_param($types, ...$params);
-        }
-
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $data = [];
-        while ($row = $result->fetch_assoc()) {
-            $data[] = $row;
-        }
-        return $data;
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 
     public function findNewInfractions(int $lastId): array
     {
-        $where = ($lastId === -1) 
-            ? "o.data_hora >= DATE_SUB(NOW(), INTERVAL 24 HOUR)" 
-            : "o.id > ?";
+        $params = [];
+        if ($lastId === -1) {
+            $where = "o.data_hora >= NOW() - INTERVAL '24 hours'";
+        } else {
+            $where = "o.id > ?";
+            $params[] = $lastId;
+        }
 
         $sql = "SELECT o.id, f.nome as funcionario_nome, s.sigla as setor_sigla, e.nome as epi_nome, o.data_hora
                 FROM ocorrencias o
@@ -509,34 +459,19 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 ORDER BY o.id ASC";
 
         $stmt = $this->db->prepare($sql);
-        
-        if ($lastId !== -1) {
-            $stmt->bind_param('i', $lastId);
-        }
-        
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $data = [];
-        while ($row = $result->fetch_assoc()) {
-            $data[] = $row;
-        }
-        return $data;
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 
 
     private function hydrate(array $row): Occurrence
     {
         $employee = $this->employeeRepository->findById((int) $row['funcionario_id']);
-        // Para simplificar, o sistema usa o primeiro usuário admin como registradoBy se não houver campo na tabela
         $user = $this->userRepository->findById(1); 
         
-        // No schema simplificado, uma ocorrência pode ter vários EPIs, mas a entidadeOccurrence sugere um.
-        // Pegamos o primeiro EPI relacionado.
         $stmt = $this->db->prepare("SELECT epi_id FROM ocorrencia_epis WHERE ocorrencia_id = ? LIMIT 1");
-        $stmt->bind_param('i', $row['id']);
-        $stmt->execute();
-        $epiRow = $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$row['id']]);
+        $epiRow = $stmt->fetch();
         $epi = $epiRow ? $this->epiRepository->findById((int) $epiRow['epi_id']) : null;
 
         return new Occurrence(
@@ -551,19 +486,14 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         );
     }
 
-    /**
-     * Resolve slugs from setores.epis_json into actual e.nome references
-     */
     private function resolveEpiSlugsToNames(array $sectorIds): array
     {
         $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
         $stmt = $this->db->prepare("SELECT epis_json FROM setores WHERE id IN ($placeholders)");
-        $stmt->bind_param(str_repeat('i', count($sectorIds)), ...$sectorIds);
-        $stmt->execute();
-        $res = $stmt->get_result();
+        $stmt->execute($sectorIds);
         
         $slugs = [];
-        while ($row = $res->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             if (!empty($row['epis_json'])) {
                 $json = json_decode($row['epis_json'], true) ?: [];
                 foreach ($json as $epi) {
@@ -575,17 +505,15 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $slugs = array_unique($slugs);
         if (empty($slugs)) return [];
 
-        // Fetch all active EPI names
-        $epiRes = $this->db->query("SELECT nome FROM epis WHERE status = 'ATIVO'");
+        $epiStmt = $this->db->query("SELECT nome FROM epis WHERE status = 'ATIVO'");
         $allEpiNames = [];
-        while($row = $epiRes->fetch_assoc()) {
+        while($row = $epiStmt->fetch()) {
             $allEpiNames[] = $row['nome'];
         }
 
         $resolved = [];
         foreach ($slugs as $slug) {
             $normalizedSlug = strtolower($slug);
-            // Replace common accent variations for matching
             $fuzzySlug = str_replace(['ó', 'ò', 'ô', 'õ', 'á', 'à', 'â', 'ã', 'é', 'ê', 'í', 'ú'], ['o', 'o', 'o', 'o', 'a', 'a', 'a', 'a', 'e', 'e', 'i', 'u'], $normalizedSlug);
             
             foreach ($allEpiNames as $fullName) {
@@ -601,3 +529,4 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         return array_unique($resolved);
     }
 }
+

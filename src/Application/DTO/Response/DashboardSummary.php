@@ -24,3 +24,4 @@ class DashboardSummary
         $this->resolvedOccurrences = $resolvedOccurrences;
     }
 }
+

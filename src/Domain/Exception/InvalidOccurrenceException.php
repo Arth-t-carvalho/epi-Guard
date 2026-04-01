@@ -11,3 +11,4 @@ class InvalidOccurrenceException extends DomainException
         return new self("Cannot change occurrence status from {$current} to {$new}.");
     }
 }
+

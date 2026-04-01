@@ -16,3 +16,4 @@ class AuthenticationException extends DomainException
         return new self('User account is inactive.');
     }
 }
+

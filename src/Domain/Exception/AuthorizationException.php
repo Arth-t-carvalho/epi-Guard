@@ -11,3 +11,4 @@ class AuthorizationException extends DomainException
         return new self('You do not have permission to access this resource.');
     }
 }
+

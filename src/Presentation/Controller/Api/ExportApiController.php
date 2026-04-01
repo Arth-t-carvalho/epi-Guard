@@ -6,7 +6,7 @@ use epiGuard\Infrastructure\Database\Connection;
 
 class ExportApiController
 {
-    private \mysqli $db;
+    private \PDO $db;
 
     public function __construct()
     {
@@ -42,15 +42,14 @@ class ExportApiController
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
             JOIN setores s ON f.setor_id = s.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
             GROUP BY s.id, s.nome
             ORDER BY total_infracoes DESC
             LIMIT 1
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('i', $year);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$year]);
+        $result = $stmt->fetch();
 
         return $result ? [
             'nome' => $result['nome'],
@@ -65,18 +64,16 @@ class ExportApiController
             FROM ocorrencias o
             JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
             JOIN epis e ON oe.epi_id = e.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
             GROUP BY e.id, e.nome
             ORDER BY total_infracoes DESC
             LIMIT 5
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('i', $year);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$year]);
 
         $epis = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $epis[] = [
                 'nome' => $row['nome'],
                 'total' => (int) $row['total_infracoes']
@@ -94,17 +91,16 @@ class ExportApiController
         ];
 
         $query = "
-            SELECT MONTH(o.data_hora) as mes, COUNT(o.id) as total_infracoes
+            SELECT EXTRACT(MONTH FROM o.data_hora)::int as mes, COUNT(o.id) as total_infracoes
             FROM ocorrencias o
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
             GROUP BY mes
             ORDER BY total_infracoes DESC
             LIMIT 1
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('i', $year);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$year]);
+        $result = $stmt->fetch();
 
         if ($result) {
             $mesNum = (int) $result['mes'];
@@ -124,18 +120,18 @@ class ExportApiController
             4 => 'Quarta-feira', 5 => 'Quinta-feira', 6 => 'Sexta-feira', 7 => 'Sábado'
         ];
 
+        // EXTRACT(DOW FROM ...) retorna 0 para Domingo em PG.
         $query = "
-            SELECT DAYOFWEEK(o.data_hora) as dia_semana, COUNT(o.id) as total_infracoes
+            SELECT (EXTRACT(DOW FROM o.data_hora)::int + 1) as dia_semana, COUNT(o.id) as total_infracoes
             FROM ocorrencias o
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
             GROUP BY dia_semana
             ORDER BY total_infracoes DESC
             LIMIT 1
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('i', $year);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$year]);
+        $result = $stmt->fetch();
 
         if ($result) {
             $diaNum = (int) $result['dia_semana'];
@@ -154,17 +150,15 @@ class ExportApiController
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
             JOIN setores s ON f.setor_id = s.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
             GROUP BY s.id, s.nome
             ORDER BY total_infracoes DESC
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('i', $year);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$year]);
 
         $sectors = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $sectors[] = [
                 'nome' => $row['nome'],
                 'total' => (int) $row['total_infracoes']
@@ -180,17 +174,15 @@ class ExportApiController
             FROM ocorrencias o
             JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
             JOIN epis e ON oe.epi_id = e.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
             GROUP BY e.id, e.nome
             ORDER BY total_infracoes DESC
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('i', $year);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$year]);
 
         $epis = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $epis[] = [
                 'nome' => $row['nome'],
                 'total' => (int) $row['total_infracoes']
@@ -202,21 +194,20 @@ class ExportApiController
     private function getMonthlyTotals(int $year): array
     {
         $query = "
-            SELECT MONTH(o.data_hora) as mes, COUNT(o.id) as total
+            SELECT EXTRACT(MONTH FROM o.data_hora)::int as mes, COUNT(o.id) as total
             FROM ocorrencias o
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
             GROUP BY mes
             ORDER BY mes
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('i', $year);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$year]);
 
         $totals = array_fill(1, 12, 0);
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $totals[(int)$row['mes']] = (int)$row['total'];
         }
         return $totals;
     }
 }
+

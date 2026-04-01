@@ -86,3 +86,4 @@ class AuditLog
         return $this->createdAt;
     }
 }
+

@@ -2,24 +2,24 @@
 
 namespace epiGuard\Presentation\Controller;
 
-use epiGuard\Infrastructure\Persistence\MySQLOccurrenceRepository;
-use epiGuard\Infrastructure\Persistence\MySQLEmployeeRepository;
-use epiGuard\Infrastructure\Persistence\MySQLUserRepository;
-use epiGuard\Infrastructure\Persistence\MySQLEpiRepository;
-use epiGuard\Infrastructure\Persistence\MySQLDepartmentRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLOccurrenceRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLUserRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLEpiRepository;
+use epiGuard\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
 
 class InfractionController
 {
-    private MySQLOccurrenceRepository $occurrenceRepository;
-    private MySQLEpiRepository $epiRepository;
+    private PostgreSQLOccurrenceRepository $occurrenceRepository;
+    private PostgreSQLEpiRepository $epiRepository;
 
     public function __construct()
     {
-        $deptRepo = new MySQLDepartmentRepository();
-        $employeeRepo = new MySQLEmployeeRepository($deptRepo);
-        $userRepo = new MySQLUserRepository();
-        $this->epiRepository = new MySQLEpiRepository();
-        $this->occurrenceRepository = new MySQLOccurrenceRepository($employeeRepo, $userRepo, $this->epiRepository);
+        $deptRepo = new PostgreSQLDepartmentRepository();
+        $employeeRepo = new PostgreSQLEmployeeRepository($deptRepo);
+        $userRepo = new PostgreSQLUserRepository();
+        $this->epiRepository = new PostgreSQLEpiRepository();
+        $this->occurrenceRepository = new PostgreSQLOccurrenceRepository($employeeRepo, $userRepo, $this->epiRepository);
     }
 
     public function index()
@@ -41,3 +41,4 @@ class InfractionController
         require_once __DIR__ . '/../View/infractions/index.php';
     }
 }
+

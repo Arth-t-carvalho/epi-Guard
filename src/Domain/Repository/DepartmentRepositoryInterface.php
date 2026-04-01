@@ -23,3 +23,4 @@ interface DepartmentRepositoryInterface
 
     public function delete(Department $department): void;
 }
+

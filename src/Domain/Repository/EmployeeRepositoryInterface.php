@@ -32,3 +32,4 @@ interface EmployeeRepositoryInterface
 
     public function delete(Employee $employee): void;
 }
+

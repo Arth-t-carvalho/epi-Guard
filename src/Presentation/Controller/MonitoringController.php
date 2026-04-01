@@ -9,3 +9,4 @@ class MonitoringController
         require_once __DIR__ . '/../View/monitoring/index.php';
     }
 }
+

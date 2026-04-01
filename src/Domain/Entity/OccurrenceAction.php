@@ -68,3 +68,4 @@ class OccurrenceAction
         return $this->createdAt;
     }
 }
+
