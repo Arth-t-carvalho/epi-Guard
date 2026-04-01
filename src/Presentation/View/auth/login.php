@@ -60,7 +60,7 @@
 
                     <div class="tag-group">
                         <div class="epi-tag">
-                            <i class="fa-solid fa-shield-halved"></i>
+                            <i class="epi-icon-badge"></i>
                             <span>EPI GUARD</span>
                         </div>
                     </div>

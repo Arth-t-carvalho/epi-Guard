@@ -32,6 +32,12 @@ interface OccurrenceRepositoryInterface
     public function countWeekly(\DateTimeInterface $date, ?array $sectorIds = null): int;
     
     public function countMonthly(\DateTimeInterface $date, ?array $sectorIds = null): int;
+    
+    public function countUniqueStudentsDaily(\DateTimeInterface $date, ?array $sectorIds = null): int;
+    
+    public function countUniqueStudentsWeekly(\DateTimeInterface $date, ?array $sectorIds = null): int;
+    
+    public function countUniqueStudentsMonthly(\DateTimeInterface $date, ?array $sectorIds = null): int;
 
     /**
      * Retorna array com contagens por mês para o gráfico de barras

@@ -34,7 +34,7 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="setting-item">
                     <div class="setting-info">
                         <h3><?= __('Idioma do Sistema') ?></h3>
@@ -43,7 +43,8 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                     <div class="setting-action">
                         <select class="settings-select" id="languageSelect" onchange="changeLanguage(this.value)">
                             <option value="pt-br" <?= ($_COOKIE['epiguard-lang'] ?? 'pt-br') === 'pt-br' ? 'selected' : '' ?>><?= __('Português (Brasil)') ?></option>
-                            <option value="en" <?= ($_COOKIE['epiguard-lang'] ?? '') === 'en' ? 'selected' : '' ?>><?= __('English (US)') ?></option>
+                            <option value="en" <?= ($_COOKIE['epiguard-lang'] ?? '') === 'en' ? 'selected' : '' ?>>
+                                <?= __('English (US)') ?></option>
                         </select>
                     </div>
                 </div>
@@ -59,15 +60,16 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                 <h2><?= __('Estilo Visual dos Gráficos') ?></h2>
             </div>
             <div class="settings-card-body">
-                <p class="section-description"><?= __('Escolha como você deseja visualizar os dados de tendência mensal no Dashboard.') ?></p>
-                
-                <?php 
-                $currentStyle = $currentUser ? $currentUser->getChartPreference() : 'bar'; 
+                <p class="section-description">
+                    <?= __('Escolha como você deseja visualizar os dados de tendência mensal no Dashboard.') ?></p>
+
+                <?php
+                $currentStyle = $currentUser ? $currentUser->getChartPreference() : 'bar';
                 ?>
-                
+
                 <div class="chart-style-picker">
-                    <div class="style-option <?= $currentStyle === 'bar' ? 'active' : '' ?>" 
-                         onclick="updateChartStyle('bar', this)">
+                    <div class="style-option <?= $currentStyle === 'bar' ? 'active' : '' ?>"
+                        onclick="updateChartStyle('bar', this)">
                         <div class="style-icon">
                             <i data-lucide="bar-chart-3"></i>
                         </div>
@@ -80,8 +82,8 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                         </div>
                     </div>
 
-                    <div class="style-option <?= $currentStyle === 'line' ? 'active' : '' ?>" 
-                         onclick="updateChartStyle('line', this)">
+                    <div class="style-option <?= $currentStyle === 'line' ? 'active' : '' ?>"
+                        onclick="updateChartStyle('line', this)">
                         <div class="style-icon">
                             <i data-lucide="trending-up"></i>
                         </div>
@@ -94,8 +96,8 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                         </div>
                     </div>
 
-                    <div class="style-option <?= $currentStyle === 'area' ? 'active' : '' ?>" 
-                         onclick="updateChartStyle('area', this)">
+                    <div class="style-option <?= $currentStyle === 'area' ? 'active' : '' ?>"
+                        onclick="updateChartStyle('area', this)">
                         <div class="style-icon">
                             <i data-lucide="area-chart"></i>
                         </div>
@@ -120,9 +122,10 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                 <h2><?= __('Cores dos Equipamentos (EPIs)') ?></h2>
             </div>
             <div class="settings-card-body">
-                <p class="section-description"><?= __('Personalize as cores que representam cada EPI nos gráficos do sistema.') ?></p>
+                <p class="section-description">
+                    <?= __('Personalize as cores que representam cada EPI nos gráficos do sistema.') ?></p>
                 <div class="epi-color-grid">
-                    <?php 
+                    <?php
                     $iconMap = [
                         'capacete' => 'hard-hat',
                         'oculos' => 'glasses',
@@ -136,8 +139,8 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                         'protetor' => 'ear',
                         'total' => 'sigma'
                     ];
-                    
-                    foreach ($episData as $epi): 
+
+                    foreach ($episData as $epi):
                         $lowerName = strtolower($epi->getName());
                         $icon = 'shield';
                         if ($lowerName === 'total') {
@@ -145,14 +148,14 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                             $icon = 'sigma';
                         } else {
                             $displayName = htmlspecialchars(__db($epi, 'name'));
-                            foreach($iconMap as $key => $val) {
+                            foreach ($iconMap as $key => $val) {
                                 if (strpos($lowerName, $key) !== false) {
                                     $icon = $val;
                                     break;
                                 }
                             }
                         }
-                    ?>
+                        ?>
                         <div class="epi-color-item">
                             <div class="epi-info">
                                 <div class="epi-mini-icon">
@@ -160,29 +163,19 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                                 </div>
                                 <span class="epi-name" style="font-weight: 600; font-size: 15px;"><?= $displayName ?></span>
                             </div>
-                            <div class="epi-extras">
-                                <input type="text" 
-                                       class="epi-name-en-input" 
-                                       placeholder="<?= __('Nome (EN)') ?>" 
-                                       value="<?= htmlspecialchars($epi->getNameEn() ?? '') ?>"
-                                       onblur="updateEpiSettings(<?= $epi->getId() ?>, null, this.value)">
-                            </div>
                             <div class="color-picker-wrapper">
-                                <div class="color-preview" 
-                                     id="preview-<?= $epi->getId() ?>" 
-                                     style="background-color: <?= $epi->getColor() ?>"
-                                     onclick="document.getElementById('picker-<?= $epi->getId() ?>').click()">
+                                <div class="color-preview" id="preview-<?= $epi->getId() ?>"
+                                    style="background-color: <?= $epi->getColor() ?>"
+                                    onclick="document.getElementById('picker-<?= $epi->getId() ?>').click()">
                                 </div>
-                                <input type="color" 
-                                       id="picker-<?= $epi->getId() ?>" 
-                                       value="<?= $epi->getColor() ?>" 
-                                       class="hidden-color-input"
-                                       onchange="updateEpiSettings(<?= $epi->getId() ?>, this.value, null)">
+                                <input type="color" id="picker-<?= $epi->getId() ?>" value="<?= $epi->getColor() ?>"
+                                    class="hidden-color-input"
+                                    onchange="updateEpiSettings(<?= $epi->getId() ?>, this.value, null)">
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
-                
+
                 <div class="settings-footer-actions">
                     <button class="btn-restore-defaults" onclick="resetEpiColors()">
                         <i data-lucide="rotate-ccw"></i>
@@ -213,7 +206,7 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
                         </label>
                     </div>
                 </div>
-                
+
                 <div class="setting-item">
                     <div class="setting-info">
                         <h3><?= __('Resumo Semanal') ?></h3>
@@ -254,339 +247,341 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@epiguard.com';
 </div>
 
 <style>
-.section-description {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--border);
-}
+    .section-description {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border);
+    }
 
-.epi-color-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 16px;
-}
+    .epi-color-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 16px;
+    }
 
-.epi-color-item {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    padding: 20px 24px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    gap: 20px;
-    min-height: 85px;
-}
+    .epi-color-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        padding: 20px 24px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        gap: 20px;
+        min-height: 85px;
+    }
 
-html.dark-theme .epi-color-item {
-    background: rgba(255,255,255,0.02);
-}
+    html.dark-theme .epi-color-item {
+        background: rgba(255, 255, 255, 0.02);
+    }
 
-.epi-color-item:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
+    .epi-color-item:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
 
-.epi-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+    .epi-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-.epi-mini-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--bg-body);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-}
+    .epi-mini-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--bg-body);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+    }
 
-.epi-mini-icon i {
-    width: 18px;
-    height: 18px;
-}
+    .epi-mini-icon i {
+        width: 18px;
+        height: 18px;
+    }
 
-.epi-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--secondary);
-    min-width: 120px;
-}
+    .epi-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--secondary);
+        min-width: 120px;
+    }
 
-.epi-name-en-input {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 14px;
-    font-size: 14px;
-    color: var(--text-primary);
-    width: 100%;
-    max-width: 160px;
-    transition: all 0.2s ease;
-}
+    .epi-name-en-input {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-size: 14px;
+        color: var(--text-primary);
+        width: 100%;
+        max-width: 160px;
+        transition: all 0.2s ease;
+    }
 
-.epi-name-en-input:focus {
-    border-color: var(--primary);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.05);
-}
+    .epi-name-en-input:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.05);
+    }
 
-.color-preview {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 3px solid white;
-    box-shadow: 0 0 0 1.5px var(--border), 0 6px 12px rgba(0,0,0,0.12);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+    .color-preview {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 0 0 1.5px var(--border), 0 6px 12px rgba(0, 0, 0, 0.12);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
 
-.color-preview:hover {
-    transform: scale(1.1);
-}
+    .color-preview:hover {
+        transform: scale(1.1);
+    }
 
-.hidden-color-input {
-    position: absolute;
-    width: 0;
-    height: 0;
-    opacity: 0;
-    pointer-events: none;
-}
+    .hidden-color-input {
+        position: absolute;
+        width: 0;
+        height: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
 
-.settings-footer-actions {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: center;
-}
+    .settings-footer-actions {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: center;
+    }
 
-.btn-restore-defaults {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    background: transparent;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
+    .btn-restore-defaults {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        background: transparent;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
 
-.btn-restore-defaults:hover {
-    background: rgba(227, 6, 19, 0.05);
-    border-color: var(--primary);
-    color: var(--primary);
-}
+    .btn-restore-defaults:hover {
+        background: rgba(227, 6, 19, 0.05);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
 
-.btn-restore-defaults i {
-    width: 16px;
-    height: 16px;
-}
+    .btn-restore-defaults i {
+        width: 16px;
+        height: 16px;
+    }
 
-.icon-wrapper.epi-icon {
-    background: rgba(227, 6, 19, 0.1);
-    color: var(--primary);
-}
+    .icon-wrapper.epi-icon {
+        background: rgba(227, 6, 19, 0.1);
+        color: var(--primary);
+    }
 
-/* Picker de Estilo de Gráfico */
-.chart-style-picker {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+    /* Picker de Estilo de Gráfico */
+    .chart-style-picker {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
-.style-option {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    background: rgba(0,0,0,0.01);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-}
+    .style-option {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.01);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
 
-html.dark-theme .style-option { background: rgba(255,255,255,0.01); }
+    html.dark-theme .style-option {
+        background: rgba(255, 255, 255, 0.01);
+    }
 
-.style-option:hover {
-    border-color: var(--primary-light);
-    background: rgba(227, 6, 19, 0.02);
-}
+    .style-option:hover {
+        border-color: var(--primary-light);
+        background: rgba(227, 6, 19, 0.02);
+    }
 
-.style-option.active {
-    border-color: var(--primary);
-    background: rgba(227, 6, 19, 0.05);
-    box-shadow: 0 4px 15px rgba(227, 6, 19, 0.08);
-}
+    .style-option.active {
+        border-color: var(--primary);
+        background: rgba(227, 6, 19, 0.05);
+        box-shadow: 0 4px 15px rgba(227, 6, 19, 0.08);
+    }
 
-.style-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    background: var(--bg-body);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    transition: all 0.3s ease;
-}
+    .style-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: var(--bg-body);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+    }
 
-.style-option.active .style-icon {
-    background: var(--primary);
-    color: white;
-}
+    .style-option.active .style-icon {
+        background: var(--primary);
+        color: white;
+    }
 
-.style-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
+    .style-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
 
-.style-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--secondary);
-}
+    .style-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--secondary);
+    }
 
-.style-desc {
-    font-size: 12px;
-    color: var(--text-muted);
-}
+    .style-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
 
-.style-check {
-    opacity: 0;
-    color: var(--primary);
-    transform: scale(0.5);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+    .style-check {
+        opacity: 0;
+        color: var(--primary);
+        transform: scale(0.5);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
 
-.style-option.active .style-check {
-    opacity: 1;
-    transform: scale(1);
-}
+    .style-option.active .style-check {
+        opacity: 1;
+        transform: scale(1);
+    }
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    var isDark = document.documentElement.classList.contains('dark-theme');
-    const themeIcon = document.getElementById("theme-icon-display");
-    const themeLabel = document.getElementById("theme-text-display");
-    
-    // Atualiza botão de tema logo no carregamento com base na class tag HTML
-    if (themeIcon) {
-        themeIcon.setAttribute("data-lucide", isDark ? "sun" : "moon");
-    }
-    if (themeLabel) {
-        themeLabel.textContent = isDark ? "<?= __('Tema Claro') ?>" : "<?= __('Tema Escuro') ?>";
-    }
-    
-    // Inicia a renderização de ícones para o modo respectivo
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-});
+    document.addEventListener("DOMContentLoaded", function () {
+        var isDark = document.documentElement.classList.contains('dark-theme');
+        const themeIcon = document.getElementById("theme-icon-display");
+        const themeLabel = document.getElementById("theme-text-display");
 
-async function updateEpiSettings(id, color, nomeEn) {
-    if (color) {
-        const preview = document.getElementById(`preview-${id}`);
-        if (preview) {
-            preview.style.backgroundColor = color;
+        // Atualiza botão de tema logo no carregamento com base na class tag HTML
+        if (themeIcon) {
+            themeIcon.setAttribute("data-lucide", isDark ? "sun" : "moon");
+        }
+        if (themeLabel) {
+            themeLabel.textContent = isDark ? "<?= __('Tema Claro') ?>" : "<?= __('Tema Escuro') ?>";
+        }
+
+        // Inicia a renderização de ícones para o modo respectivo
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    });
+
+    async function updateEpiSettings(id, color, nomeEn) {
+        if (color) {
+            const preview = document.getElementById(`preview-${id}`);
+            if (preview) {
+                preview.style.backgroundColor = color;
+            }
+        }
+
+        try {
+            const payload = { id };
+            if (color !== null) payload.color = color;
+            if (nomeEn !== null) payload.nome_en = nomeEn;
+
+            const response = await fetch(`${window.BASE_PATH}/api/settings/epi-color`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                showToast("<?= __('Configurações atualizadas!') ?>", "success");
+            } else {
+                showToast("<?= __('Erro ao atualizar.') ?>", "error");
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar configurações do EPI:', error);
+            showToast("<?= __('Erro de conexão.') ?>", "error");
         }
     }
 
-    try {
-        const payload = { id };
-        if (color !== null) payload.color = color;
-        if (nomeEn !== null) payload.nome_en = nomeEn;
-
-        const response = await fetch(`${window.BASE_PATH}/api/settings/epi-color`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            showToast("<?= __('Configurações atualizadas!') ?>", "success");
-        } else {
-            showToast("<?= __('Erro ao atualizar.') ?>", "error");
+    async function resetEpiColors() {
+        if (!confirm("<?= __('Tem certeza que deseja restaurar todas as cores para o padrão original?') ?>")) {
+            return;
         }
-    } catch (error) {
-        console.error('Erro ao atualizar configurações do EPI:', error);
-        showToast("<?= __('Erro de conexão.') ?>", "error");
-    }
-}
 
-async function resetEpiColors() {
-    if (!confirm("<?= __('Tem certeza que deseja restaurar todas as cores para o padrão original?') ?>")) {
-        return;
-    }
+        try {
+            const response = await fetch(`${window.BASE_PATH}/api/settings/reset-colors`, {
+                method: 'POST'
+            });
 
-    try {
-        const response = await fetch(`${window.BASE_PATH}/api/settings/reset-colors`, {
-            method: 'POST'
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            showToast("<?= __('Cores restauradas com sucesso!') ?>", "success");
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            showToast("<?= __('Erro ao restaurar cores.') ?>", "error");
+            const result = await response.json();
+            if (result.success) {
+                showToast("<?= __('Cores restauradas com sucesso!') ?>", "success");
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast("<?= __('Erro ao restaurar cores.') ?>", "error");
+            }
+        } catch (error) {
+            console.error('Erro ao restaurar cores:', error);
+            showToast("<?= __('Erro de conexão.') ?>", "error");
         }
-    } catch (error) {
-        console.error('Erro ao restaurar cores:', error);
-        showToast("<?= __('Erro de conexão.') ?>", "error");
     }
-}
 
-async function updateChartStyle(style, element) {
-    // UI Feedback imediato
-    document.querySelectorAll('.style-option').forEach(opt => opt.classList.remove('active'));
-    element.classList.add('active');
+    async function updateChartStyle(style, element) {
+        // UI Feedback imediato
+        document.querySelectorAll('.style-option').forEach(opt => opt.classList.remove('active'));
+        element.classList.add('active');
 
-    try {
-        const response = await fetch(`${window.BASE_PATH}/api/settings/chart-style`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ style })
-        });
+        try {
+            const response = await fetch(`${window.BASE_PATH}/api/settings/chart-style`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ style })
+            });
 
-        const result = await response.json();
-        if (result.success) {
-            showToast("<?= __('Estilo de gráfico atualizado!') ?>", "success");
-        } else {
-            showToast("<?= __('Erro ao salvar preferência.') ?>", "error");
+            const result = await response.json();
+            if (result.success) {
+                showToast("<?= __('Estilo de gráfico atualizado!') ?>", "success");
+            } else {
+                showToast("<?= __('Erro ao salvar preferência.') ?>", "error");
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar estilo de gráfico:', error);
+            showToast("<?= __('Erro de conexão.') ?>", "error");
         }
-    } catch (error) {
-        console.error('Erro ao atualizar estilo de gráfico:', error);
-        showToast("<?= __('Erro de conexão.') ?>", "error");
     }
-}
 
-function showToast(message, type) {
-    const container = document.getElementById('notification-container') || document.body;
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type} fade-in`;
-    toast.style.cssText = `
+    function showToast(message, type) {
+        const container = document.getElementById('notification-container') || document.body;
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type} fade-in`;
+        toast.style.cssText = `
         position: fixed;
         bottom: 20px;
         right: 20px;
@@ -598,12 +593,12 @@ function showToast(message, type) {
         z-index: 9999;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     `;
-    toast.innerText = message;
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 500);
-    }, 3000);
-}
+        toast.innerText = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
 </script>

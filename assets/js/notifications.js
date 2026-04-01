@@ -324,7 +324,7 @@ if (!window._notificationsGlobalsInitialized) {
      * Renderiza o card (Toast flutuante) animado
      */
     function showEpiNotification(data) {
-        const container = document.getElementById('notification-container');
+        const container = document.getElementById('notification-container');    
         if (!container) return;
 
         const toast = document.createElement('div');
@@ -332,7 +332,7 @@ if (!window._notificationsGlobalsInitialized) {
         toast.style.pointerEvents = 'all';
         
         toast.innerHTML = `
-            <div class="toast-icon-wrapper"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="toast-icon-wrapper"><i class="epi-icon-badge"></i></div>
             <div class="toast-content">
                 <span class="toast-title">${window.I18N?.labels?.epi_alert || 'Alerta de EPI'}</span>
                 <div class="toast-details">

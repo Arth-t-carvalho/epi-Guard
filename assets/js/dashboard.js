@@ -12,7 +12,7 @@ var mainChartInstance = null;
 var doughnutChartInstance = null;
 var selectedCourseId = 'all';
 var selectedSectorId = 'all';
-var selectedCompliancePeriod = 'hoje'; // 'hoje', 'semana', 'mes', 'anual'
+var selectedCompliancePeriod = localStorage.getItem('epiGuard_compliancePeriod') || 'hoje'; // 'hoje', 'semana', 'mes', 'anual'
 var pendingRedirectPeriod = 'todos';
 
 // Arrays auxiliares para internacionalização (i18n)
@@ -325,6 +325,18 @@ function initDashboard() {
         loadCharts();       // Carrega Gráficos
     }, 50);
 
+    // --- Atualização Automática (Polling de 30 segundos) ---
+    if (window._dashRefreshInterval) clearInterval(window._dashRefreshInterval);
+    window._dashRefreshInterval = setInterval(() => {
+        // Só atualiza se ainda estiver na página do dashboard
+        if (document.getElementById('kpiSemana')) {
+            loadCalendarData();
+            loadCharts();
+        } else {
+            clearInterval(window._dashRefreshInterval);
+        }
+    }, 30000);
+
     // Listeners do Modal de ESCOLHA DE DATA (Calendário Visual)
     const btnPrev = document.getElementById('prevMonth');
     const btnNext = document.getElementById('nextMonth');
@@ -415,13 +427,21 @@ if (document.readyState === 'loading') {
 // ===============================
 
 function loadCalendarData() {
-    const month = selectedDate.getMonth() + 1;
-    const year = selectedDate.getFullYear();
+    const month = currCalMonth + 1;
+    const year = currCalYear;
 
     fetch(`${window.BASE_PATH}/api/calendar?month=${month}&year=${year}&sector_id=${selectedSectorId}`)
         .then(res => res.json())
         .then(data => {
-            allOccurrences = Array.isArray(data) ? data : [];
+            // A API agora retorna { occurrences: [], summary: {} }
+            if (data && data.occurrences) {
+                allOccurrences = data.occurrences;
+                if (data.summary) {
+                    updateKPIElements(data.summary);
+                }
+            } else {
+                allOccurrences = Array.isArray(data) ? data : [];
+            }
             renderInterface(); // Atualiza tela
         })
         .catch(err => {
@@ -452,27 +472,25 @@ function renderInterface() {
         });
 
         if (dailyData.length > 0) {
-            const grouped = {};
-            dailyData.forEach(item => {
-                const key = item.name || 'Desconhecido';
-                if (!grouped[key]) grouped[key] = { count: 0, items: [] };
-                grouped[key].count++;
-                grouped[key].items.push(item);
-            });
-
             let htmlBuffer = '';
-            Object.keys(grouped).forEach(name => {
-                const data = grouped[name];
-                const initials = name.substring(0, 2).toUpperCase();
-                const foundText = data.count > 1 ? (window.I18N?.labels?.foundPlural || 'encontradas') : (window.I18N?.labels?.found || 'encontrada');
-                const occurrenceText = data.count > 1 ? (window.I18N?.labels?.occurrences || 'ocorrências') : (window.I18N?.labels?.occurrence || 'ocorrência');
+            dailyData.forEach(item => {
+                const name = item.name || 'Setor Desconhecido';
+                const employee = item.desc || 'Funcionário'; // 'desc' in api/calendar is the EPI, wait...
+                // Let's re-verify the API fields. 
+                // Repository findNewInfractions says: f.nome as funcionario_nome, e.nome as epi_nome, s.sigla as setor_sigla
+                // Calendar query in Controller says: s.nome AS name, e.nome AS `desc`, o.data_hora as full_date
+
+                const initials = (item.employee || '??').substring(0, 2).toUpperCase();
+                const empName = item.employee || 'Desconhecido';
+                const epiLabel = item.desc || 'EPI';
+                const timeStr = item.time || '';
 
                 htmlBuffer += `
-                    <div class="occurrence-item" onclick="applyCourseFilterByName('${name.replace(/'/g, "\\'")}')" style="cursor:pointer;" title="Clique para detalhes deste setor">
+                    <div class="occurrence-item">
                         <div class="occ-avatar">${initials}</div>
                         <div class="occ-info">
-                            <span class="occ-name" style="font-weight:700;">${name}</span>
-                            <span class="occ-desc" style="color:var(--primary); font-weight:600;">${data.count} ${occurrenceText} ${foundText}</span>
+                            <span class="occ-name" style="font-weight:700;">${empName}</span>
+                            <span class="occ-desc" style="color:var(--text-muted); font-size: 12px;">${epiLabel} • ${timeStr}</span>
                         </div>
                         <div class="occ-time">❯</div>
                     </div>`;
@@ -707,132 +725,31 @@ function isSameWeek(d1, d2) {
     return start1.getTime() === start2.getTime();
 }
 
-function updateKPICards() {
-    let countDay = 0, countWeek = 0, countMonth = 0;
-    const selMonth = selectedDate.getMonth();
-    const selYear = selectedDate.getFullYear();
+// ===============================
+// 2. HELPERS & KPI UPDATES
+// ===============================
 
-    // Sets para alunos únicos em cada período
-    const uniqueStudentsToday = new Set();
-    const uniqueStudentsWeek = new Set();
-    const uniqueStudentsMonth = new Set();
-    const uniqueStudentsYear = new Set();
-
-    allOccurrences.forEach(item => {
-        const dbDateString = item.full_date || item.data_hora || item.date;
-        if (!dbDateString) return;
-        const itemDate = new Date(dbDateString.replace(/-/g, '/'));
-        if (isNaN(itemDate.getTime())) return;
-
-        // Coleta dados para os KPIs tradicionais (contagem)
-        if (isSameDay(selectedDate, itemDate)) {
-            countDay++;
-            if (item.aluno_id || item.student_id) uniqueStudentsToday.add(item.aluno_id || item.student_id);
-        }
-        if (isSameWeek(selectedDate, itemDate)) {
-            countWeek++;
-            if (item.aluno_id || item.student_id) uniqueStudentsWeek.add(item.aluno_id || item.student_id);
-        }
-        if (itemDate.getMonth() === selMonth && itemDate.getFullYear() === selYear) {
-            countMonth++;
-            if (item.aluno_id || item.student_id) uniqueStudentsMonth.add(item.aluno_id || item.student_id);
-        }
-        if (itemDate.getFullYear() === selYear) {
-            if (item.aluno_id || item.student_id) uniqueStudentsYear.add(item.aluno_id || item.student_id);
-        }
-    });
-
-    // Atualiza elementos visuais básicaos
-    const elDia = document.getElementById('kpiDia');
-    const elSemana = document.getElementById('kpiSemana');
-    const elMes = document.getElementById('kpiMes');
-    const elMedia = document.getElementById('kpiMedia');
-
-    if (elDia) elDia.innerText = countDay;
-    if (elSemana) elSemana.innerText = countWeek;
-    if (elMes) elMes.innerText = countMonth;
-
-    const total = window.totalStudents || 20;
-
-    // --- Atualização do Modal de Conformidade ---
-    const periods = {
-        'hoje': uniqueStudentsToday.size,
-        'semana': uniqueStudentsWeek.size,
-        'mes': uniqueStudentsMonth.size,
-        'anual': uniqueStudentsYear.size
-    };
-
-    // --- Configuração do Card de Conformidade Dinâmico (Card 4) ---
-    if (elMedia) {
-        let infraCount = periods[selectedCompliancePeriod] || 0;
-        let periodLabel = '';
-
-        if (selectedCompliancePeriod === 'hoje') {
-            periodLabel = (window.I18N?.labels?.daily || 'DIÁRIA').toUpperCase();
-        } else if (selectedCompliancePeriod === 'semana') {
-            periodLabel = (window.I18N?.labels?.weekly || 'SEMANAL').toUpperCase();
-        } else if (selectedCompliancePeriod === 'mes') {
-            periodLabel = (window.I18N?.labels?.monthly || 'MENSAL').toUpperCase();
-        } else if (selectedCompliancePeriod === 'anual') {
-            periodLabel = (window.I18N?.labels?.annual || 'ANUAL').toUpperCase();
-        }
-
-        const conformidade = Math.max(0, Math.round(((total - infraCount) / total) * 100));
-        elMedia.innerText = `${conformidade}%`;
-
-        const header = document.getElementById('complianceHeader');
-        if (header) {
-            const conformityLabel = window.I18N?.labels?.conformity || 'CONFORMIDADE';
-            header.innerText = `${conformityLabel.toUpperCase()} (${periodLabel})`;
-        }
-
-        updateConformityStatus(conformidade);
-    }
-
-    // Tornar cards clicáveis (Infrações)
-    const cardHoje = document.getElementById('cardKpiHoje');
-    if (cardHoje) {
-        if (countDay > 0) {
-            cardHoje.onclick = () => confirmRedirect('hoje');
-            cardHoje.style.cursor = 'pointer';
-        } else {
-            cardHoje.onclick = null;
-            cardHoje.style.cursor = 'default';
-        }
-    }
-
-    const cardSemana = document.getElementById('cardKpiSemana');
-    if (cardSemana) {
-        if (countWeek > 0) {
-            cardSemana.onclick = () => confirmRedirect('semana');
-            cardSemana.style.cursor = 'pointer';
-        } else {
-            cardSemana.onclick = null;
-            cardSemana.style.cursor = 'default';
-        }
-    }
-
-    const cardMes = document.getElementById('cardKpiMes');
-    if (cardMes) {
-        if (countMonth > 0) {
-            cardMes.onclick = () => confirmRedirect('mes');
-            cardMes.style.cursor = 'pointer';
-        } else {
-            cardMes.onclick = null;
-            cardMes.style.cursor = 'default';
-        }
-    }
+function isSameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
 }
 
-function getStatusClass(valor) {
-    if (valor < 70) return 'status-critico';
-    if (valor < 85) return 'status-alto';
-    if (valor < 95) return 'status-moderado';
-    return 'status-controlado';
+function isSameWeek(d1, d2) {
+    const date1 = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+    const date2 = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate());
+    const start1 = new Date(date1);
+    start1.setDate(date1.getDate() - date1.getDay());
+    const start2 = new Date(date2);
+    start2.setDate(date2.getDate() - date2.getDay());
+    return start1.getTime() === start2.getTime();
 }
 
+/**
+ * Atualiza o status visual (badge) do card de conformidade.
+ */
 function updateConformityStatus(valor) {
-    const card = document.getElementById('kpiMedia')?.parentElement;
+    const card = document.getElementById('cardKpiMedia');
     if (!card) return;
 
     let badge = card.querySelector('.status-badge');
@@ -842,7 +759,14 @@ function updateConformityStatus(valor) {
         card.appendChild(badge);
     }
 
-    badge.className = 'status-badge ' + getStatusClass(valor);
+    const getClass = (v) => {
+        if (v < 70) return 'status-critico';
+        if (v < 85) return 'status-alto';
+        if (v < 95) return 'status-moderado';
+        return 'status-controlado';
+    };
+
+    badge.className = 'status-badge ' + getClass(valor);
 
     let label = '';
     if (valor < 70) label = window.I18N?.labels?.critical || 'CRÍTICO';
@@ -853,18 +777,16 @@ function updateConformityStatus(valor) {
     badge.innerHTML = `<span class="status-dot"></span> ${label}`;
 }
 
-// --- MODAL DE CONFORMIDADE ---
+// --- MODAIS DE NAVEGAÇÃO E SELEÇÃO ---
+
 function openComplianceModal() {
     const modal = document.getElementById('complianceModal');
     if (modal) {
         modal.classList.add('active');
         document.querySelector('.main-content').style.overflow = 'hidden';
-
-        // Marca a opção ativa
         document.querySelectorAll('.period-option').forEach(opt => opt.classList.remove('active'));
         const activeOpt = document.getElementById(`opt-period-${selectedCompliancePeriod}`);
         if (activeOpt) activeOpt.classList.add('active');
-
         if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
     }
 }
@@ -879,14 +801,10 @@ function closeComplianceModal() {
 
 function selectCompliancePeriod(period) {
     selectedCompliancePeriod = period;
-    updateKPICards();
+    localStorage.setItem('epiGuard_compliancePeriod', period);
     closeComplianceModal();
+    loadCharts();
 }
-
-
-// ===============================
-// 3. MODAL VISUAL (SELETOR DE DATA)
-// ===============================
 
 function toggleCalendar() {
     const modal = document.getElementById('calendarModal');
@@ -1208,14 +1126,14 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
 
     if (!modal) return;
     const realMonth = monthIndex + 1;
-    const currentYear = new Date().getFullYear();
+    const currentYear = currCalYear;
     const isGlobal = (selectedSectorId === 'all');
 
     let displayTitle = `${monthName} de ${currentYear}`;
     if (epiName) displayTitle += ` - ${window.I18N?.labels?.filter || 'Filtro'}: ${epiName}`;
     title.innerText = displayTitle;
-    modal.style.display = '';
-    modal.classList.add('open');
+
+    modal.classList.add('active');
     document.querySelector('.main-content').style.overflow = 'hidden';
 
     if (isGlobal) {
@@ -1283,44 +1201,22 @@ function openDetailModal(monthIndex, monthName, epiName = '') {
 }
 
 function closeModal() {
-    const modal = document.getElementById('detailModal');
-    if (modal) {
-        modal.classList.remove('open');
-        document.querySelector('.main-content').style.overflow = '';
-    }
+    const modals = document.querySelectorAll('.modal-premium, .modal-calendar, .modal-overlay-calendar');
+    modals.forEach(m => m.classList.remove('active'));
+    document.querySelector('.main-content').style.overflow = '';
 }
 
 function loadCharts() {
-    // Garante que o Chart.js está disponível antes de renderizar
     if (typeof Chart === 'undefined') {
-        console.warn('[epiGuard] Chart.js ainda não carregou. Tentando novamente em 300ms...');
         setTimeout(loadCharts, 300);
         return;
     }
 
     fetch(`${window.BASE_PATH}/api/charts?sector_id=${selectedSectorId}`)
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            return res.json();
-        })
+        .then(res => res.json())
         .then(response => {
             try {
-                if (response.summary) {
-                    window.totalStudents = response.summary.total_students;
-                    const elDia = document.getElementById('kpiDia');
-                    const elSemana = document.getElementById('kpiSemana');
-                    const elMes = document.getElementById('kpiMes');
-                    const elMedia = document.getElementById('kpiMedia');
-                    if (elDia) elDia.innerText = response.summary.today;
-                    if (elSemana) elSemana.innerText = response.summary.week;
-                    if (elMes) elMes.innerText = response.summary.month;
-
-                    if (elMedia && response.summary.total_students > 0) {
-                        const conformidade = Math.round(((response.summary.total_students - response.summary.today) / response.summary.total_students) * 100);
-                        elMedia.innerText = `${Math.max(0, conformidade)}%`;
-                        updateConformityStatus(conformidade);
-                    }
-                }
+                if (response.summary) updateKPIElements(response.summary);
 
                 if (mainChartInstance) { mainChartInstance.destroy(); mainChartInstance = null; }
                 if (doughnutChartInstance) { doughnutChartInstance.destroy(); doughnutChartInstance = null; }
@@ -1337,60 +1233,49 @@ function loadCharts() {
                     const config = { bg: epiColorsMap[fullName] || '#94a3b8', label: fullName };
                     let dataKey = null;
 
-                    if (lowerName.includes('capacete') || lowerName.includes('helmet')) { dataKey = 'capacete'; }
-                    else if (lowerName.includes('oculos') || lowerName.includes('óculos') || lowerName.includes('glasses')) { dataKey = 'oculos'; }
-                    else if (lowerName.includes('jaqueta') || lowerName.includes('jacket')) { dataKey = 'jaqueta'; }
-                    else if (lowerName.includes('avental') || lowerName.includes('apron')) { dataKey = 'avental'; }
-                    else if (lowerName.includes('luva') || lowerName.includes('glove')) { dataKey = 'luvas'; }
-                    else if (lowerName.includes('mascara') || lowerName.includes('máscara') || lowerName.includes('mask')) { dataKey = 'mascara'; }
-                    else if (lowerName.includes('protetor') || lowerName.includes('protector')) { dataKey = 'protetor'; }
+                    if (lowerName.includes('capacete')) dataKey = 'capacete';
+                    else if (lowerName.includes('oculos')) dataKey = 'oculos';
+                    else if (lowerName.includes('jaqueta')) dataKey = 'jaqueta';
+                    else if (lowerName.includes('avental')) dataKey = 'avental';
+                    else if (lowerName.includes('luva')) dataKey = 'luvas';
+                    else if (lowerName.includes('mascara')) dataKey = 'mascara';
+                    else if (lowerName.includes('protetor')) dataKey = 'protetor';
 
-                    if (config && response.bar && response.bar[dataKey]) {
+                    if (dataKey && response.bar && response.bar[dataKey]) {
                         const baseColor = config.bg;
-                        const bgColor = isArea ? `${baseColor}33` : baseColor; // 20% opacity for area fill
-
                         datasets.push({
                             label: config.label,
                             data: response.bar[dataKey],
-                            backgroundColor: bgColor,
+                            backgroundColor: isArea ? `${baseColor}33` : baseColor,
                             borderColor: baseColor,
                             borderWidth: chartType === 'line' ? 3 : 1,
-                            tension: 0.4, // Smooth lines
-                            fill: isArea,
-                            borderRadius: chartType === 'bar' ? 4 : 0
+                            tension: 0.4,
+                            fill: isArea
                         });
                     }
                 });
 
-                // Always add Total
                 if (response.bar && response.bar.total) {
                     const totalColor = epiColorsMap['Total'] || '#E30613';
-                    const bgColor = isArea ? `${totalColor}33` : totalColor;
-
                     datasets.push({
                         label: window.I18N?.labels?.total || 'Total',
                         data: response.bar.total,
-                        backgroundColor: bgColor,
+                        backgroundColor: isArea ? `${totalColor}33` : totalColor,
                         borderColor: totalColor,
                         borderWidth: chartType === 'line' ? 4 : 1,
                         tension: 0.4,
-                        fill: isArea,
-                        borderRadius: chartType === 'bar' ? 4 : 0
+                        fill: isArea
                     });
                 }
 
-                // --- GRÁFICO PRINCIPAL ---
                 const canvasMain = document.getElementById('mainChart');
                 if (canvasMain) {
-                    const ctxMain = canvasMain.getContext('2d');
-                    mainChartInstance = new Chart(ctxMain, {
+                    mainChartInstance = new Chart(canvasMain.getContext('2d'), {
                         type: chartType,
                         data: { labels: monthsFull, datasets: datasets },
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             tension: 0.4,
-                            animation: { duration: 400, easing: 'easeOutQuart' },
-                            interaction: { mode: 'index', intersect: false },
                             onClick: (evt, active, chart) => {
                                 const points = chart.getElementsAtEventForMode(evt, 'index', { intersect: false }, true);
                                 if (points.length > 0) {
@@ -1398,49 +1283,34 @@ function loadCharts() {
                                     const exactPoints = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
                                     let filterEPI = '';
                                     if (exactPoints.length > 0) {
-                                        const dsIdx = exactPoints[0].datasetIndex;
-                                        filterEPI = chart.data.datasets[dsIdx]?.label || '';
+                                        filterEPI = chart.data.datasets[exactPoints[0].datasetIndex]?.label || '';
                                     }
                                     openDetailModal(monthIndex, monthsFull[monthIndex], filterEPI);
                                 }
                             },
-                            plugins: {
-                                legend: { labels: { usePointStyle: true, padding: 20 } }
-                            },
-                            scales: {
-                                y: { beginAtZero: true, suggestedMax: 10, ticks: { stepSize: 1 }, grid: { display: true, color: 'rgba(0,0,0,0.05)' } },
-                                x: { grid: { display: false } }
-                            }
+                            plugins: { legend: { labels: { usePointStyle: true, padding: 20 } } },
+                            scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
                         }
                     });
                 }
 
-                // --- GRÁFICO DOUGHNUT ---
-                const isDoughnutEmpty = !response.doughnut || response.doughnut.total === 0;
-                const doughnutBgColor = isDoughnutEmpty ? ['#f1f5f9'] : (response.doughnut.colors || ['#E30613']);
-                const doughnutHoverColor = isDoughnutEmpty ? ['#e2e8f0'] : undefined;
-
                 const canvasDoughnut = document.getElementById('doughnutChart');
                 if (canvasDoughnut) {
-                    const ctxDoughnut = canvasDoughnut.getContext('2d');
-                    doughnutChartInstance = new Chart(ctxDoughnut, {
+                    const isDoughnutEmpty = !response.doughnut || response.doughnut.total === 0;
+                    doughnutChartInstance = new Chart(canvasDoughnut.getContext('2d'), {
                         type: 'doughnut',
                         data: {
-                            labels: isDoughnutEmpty ? [(window.I18N?.labels?.no_records_simple || 'Sem Infrações')] : response.doughnut.labels,
+                            labels: isDoughnutEmpty ? ['Sem Infrações'] : response.doughnut.labels,
                             datasets: [{
                                 data: isDoughnutEmpty ? [1] : response.doughnut.data,
-                                backgroundColor: doughnutBgColor,
-                                hoverBackgroundColor: doughnutHoverColor,
-                                borderWidth: 2
+                                backgroundColor: isDoughnutEmpty ? ['#f1f5f9'] : response.doughnut.colors
                             }]
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false, cutout: '75%',
-                            animation: { duration: 400, easing: 'easeOutQuart' },
                             onClick: (evt, active, chart) => {
                                 if (active.length > 0) {
-                                    const index = active[0].index;
-                                    const label = chart.data.labels[index];
+                                    const label = chart.data.labels[active[0].index];
                                     openDetailModal(selectedDate.getMonth(), monthsFull[selectedDate.getMonth()], label);
                                 }
                             }
@@ -1448,45 +1318,23 @@ function loadCharts() {
                     });
                 }
 
-                // --- TOP OCORRÊNCIAS ---
                 const topList = document.getElementById('topInfractions');
                 if (topList && response.doughnut && response.doughnut.total > 0) {
                     topList.innerHTML = '';
-                    const dataLabels = response.doughnut.labels;
-                    const dataValues = response.doughnut.data;
-                    const max = Math.max(...dataValues);
-                    dataLabels.forEach((label, i) => {
-                        if (dataValues[i] > 0) {
-                            const pct = Math.round((dataValues[i] / max) * 100);
-                            const color = response.doughnut.colors[i] || '#E30613';
+                    const max = Math.max(...response.doughnut.data);
+                    response.doughnut.labels.forEach((label, i) => {
+                        if (response.doughnut.data[i] > 0) {
+                            const pct = Math.round((response.doughnut.data[i] / max) * 100);
                             topList.innerHTML += `
                                 <div class="list-item">
                                     <span class="occ-name">${label}</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${pct}%; background-color: ${color};"></div>
-                                    </div>
-                                </div>
-                            `;
+                                    <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%; background-color: ${response.doughnut.colors[i]};"></div></div>
+                                </div>`;
                         }
                     });
                 }
-
-            } catch (jsErr) {
-                console.error('[epiGuard] Erro ao renderizar gráficos:', jsErr);
-            }
-        })
-        .catch(err => {
-            console.error('[epiGuard] Falha na requisição /api/charts:', err);
+            } catch (e) { console.error('Erro render grf:', e); }
         });
-}
-
-function closeModal() {
-    const detailModal = document.getElementById('detailModal');
-    if (detailModal) {
-        detailModal.classList.remove('open');
-    }
-    const mc = document.querySelector('.main-content');
-    if (mc) mc.style.overflow = '';
 }
 
 function selectMonth(index) {
@@ -1520,15 +1368,11 @@ function updatePercentagesDinamicamente() {
     const datePrevWeek = new Date(startOfSelectedWeek);
     datePrevWeek.setDate(datePrevWeek.getDate() - 7);
 
-    let totalOntem = 0;
-    let totalSemanaPassada = 0;
-
+    let totalOntem = 0, totalSemanaPassada = 0;
     allOccurrences.forEach(item => {
         const dateStr = item.full_date || item.data_hora || item.date;
         if (!dateStr) return;
         const itemDate = new Date(dateStr.replace(/-/g, '/'));
-        if (isNaN(itemDate.getTime())) return;
-
         if (isSameDay(datePrevDay, itemDate)) totalOntem++;
         if (isSameWeek(datePrevWeek, itemDate)) totalSemanaPassada++;
     });
@@ -1541,26 +1385,124 @@ function updatePercentagesDinamicamente() {
     }
 }
 
-// O sistema de notificações agora é gerenciado globalmente pelo notifications.js
-// para evitar duplicidade e erros de sincronização.
+/**
+ * Função central para atualizar todos os elementos de KPI no topo do dashboard.
+ */
+function updateKPIElements(summary) {
+    if (!summary) return;
+    window.totalStudents = summary.total_students || 20;
 
+    const elDia = document.getElementById('kpiDia');
+    const elSemana = document.getElementById('kpiSemana');
+    const elMes = document.getElementById('kpiMes');
+    const elMedia = document.getElementById('kpiMedia');
 
-// Desbloqueia o áudio automaticamente no primeiro clique do instrutor
+    if (elDia) elDia.innerText = summary.today ?? 0;
+    if (elSemana) elSemana.innerText = summary.week ?? 0;
+    if (elMes) elMes.innerText = summary.month ?? 0;
+
+    // Tornar cards clicáveis (Infrações)
+    const cardHoje = document.getElementById('cardKpiHoje');
+    if (cardHoje) {
+        if ((summary.today ?? 0) > 0) {
+            cardHoje.onclick = () => confirmRedirect('hoje');
+            cardHoje.style.cursor = 'pointer';
+        } else {
+            cardHoje.onclick = null;
+            cardHoje.style.cursor = 'default';
+        }
+    }
+
+    const cardSemana = document.getElementById('cardKpiSemana');
+    if (cardSemana) {
+        if ((summary.week ?? 0) > 0) {
+            cardSemana.onclick = () => confirmRedirect('semana');
+            cardSemana.style.cursor = 'pointer';
+        } else {
+            cardSemana.onclick = null;
+            cardSemana.style.cursor = 'default';
+        }
+    }
+
+    const cardMes = document.getElementById('cardKpiMes');
+    if (cardMes) {
+        if ((summary.month ?? 0) > 0) {
+            cardMes.onclick = () => confirmRedirect('mes');
+            cardMes.style.cursor = 'pointer';
+        } else {
+            cardMes.onclick = null;
+            cardMes.style.cursor = 'default';
+        }
+    }
+
+    if (elMedia && window.totalStudents > 0) {
+        let infraCount = 0;
+        let periodLabel = '';
+
+        if (selectedCompliancePeriod === 'hoje') {
+            infraCount = summary.students_today || 0;
+            periodLabel = (window.I18N?.labels?.daily || 'DIÁRIA').toUpperCase();
+        } else if (selectedCompliancePeriod === 'semana') {
+            infraCount = summary.students_week || 0;
+            periodLabel = (window.I18N?.labels?.weekly || 'SEMANAL').toUpperCase();
+        } else if (selectedCompliancePeriod === 'mes') {
+            infraCount = summary.students_month || 0;
+            periodLabel = (window.I18N?.labels?.monthly || 'MENSAL').toUpperCase();
+        } else if (selectedCompliancePeriod === 'anual') {
+            infraCount = summary.students_month || 0;
+            periodLabel = (window.I18N?.labels?.annual || 'ANUAL').toUpperCase();
+        }
+
+        const conformidade = Math.max(0, Math.round(((window.totalStudents - infraCount) / window.totalStudents) * 100));
+        elMedia.innerText = `${conformidade}%`;
+
+        const header = document.getElementById('complianceHeader');
+        if (header) {
+            const conformityLabel = window.I18N?.labels?.conformity || 'CONFORMIDADE';
+            header.innerText = `${conformityLabel.toUpperCase()} (${periodLabel})`;
+        }
+        updateConformityStatus(conformidade);
+    }
+}
+
+// --- REDIRECIONAMENTOS ---
+
+function confirmRedirect(period) {
+    pendingRedirectPeriod = period;
+    const modal = document.getElementById('confirmInfractionsModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.querySelector('.main-content').style.overflow = 'hidden';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
+    }
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirmInfractionsModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.querySelector('.main-content').style.overflow = '';
+    }
+}
+
+function goToInfractions() {
+    const period = pendingRedirectPeriod || 'todos';
+    window.location.href = `${window.BASE_PATH}/infractions?periodo=${period}`;
+}
+
+// Desbloqueia o áudio automaticamente no primeiro clique
 document.addEventListener('click', function unlockAudio() {
     const dummyAudio = new Audio(`${window.BASE_PATH}/assets/som/notificacao.mp3`);
-    dummyAudio.volume = 0; // Toca mudo só para ganhar permissão
+    dummyAudio.volume = 0;
     dummyAudio.play().then(() => {
-        console.log("🔊 Sistema de áudio ativado com sucesso!");
         document.removeEventListener('click', unlockAudio);
-    }).catch(e => console.error("Erro ao ativar som:", e));
+    }).catch(e => console.error("Erro áudio:", e));
 }, { once: true });
 
-// Observer para disparar atualizações de badges quando o texto dos KPIs mudar
-const observer = new MutationObserver(() => {
-    updatePercentagesDinamicamente();
+// Observer para disparar atualizações de badges
+const observer = new MutationObserver(() => updatePercentagesDinamicamente());
+const obsConfig = { childList: true, characterData: true, subtree: true };
+['kpiDia', 'kpiSemana', 'kpiMes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el, obsConfig);
 });
-
-const config = { childList: true, characterData: true, subtree: true };
-if (document.getElementById('kpiDia')) observer.observe(document.getElementById('kpiDia'), config);
-if (document.getElementById('kpiSemana')) observer.observe(document.getElementById('kpiSemana'), config);
-if (document.getElementById('kpiMes')) observer.observe(document.getElementById('kpiMes'), config);

@@ -68,6 +68,9 @@ class DashboardService
                 'today' => $this->occurrenceRepository->countDaily($now, $sectorIds),
                 'week' => $this->occurrenceRepository->countWeekly($now, $sectorIds),
                 'month' => $this->occurrenceRepository->countMonthly($now, $sectorIds),
+                'students_today' => $this->occurrenceRepository->countUniqueStudentsDaily($now, $sectorIds),
+                'students_week' => $this->occurrenceRepository->countUniqueStudentsWeekly($now, $sectorIds),
+                'students_month' => $this->occurrenceRepository->countUniqueStudentsMonthly($now, $sectorIds),
                 'total_students' => count($this->employeeRepository->findAll())
             ],
             'bar' => $barData['stats'],

@@ -747,7 +747,8 @@ ob_start();
 <form action="<?= BASE_PATH ?>/management/departments" method="GET" class="setor-filters" id="filterForm">
     <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="searchInputSettings" name="search" placeholder="<?= __('Pesquisar setores...') ?>" oninput="filterSetores()" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+        <input type="text" id="searchInputSettings" name="search" placeholder="<?= __('Pesquisar setores...') ?>"
+            oninput="filterSetores()" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
     </div>
 
     <!-- Hidden Fields for Filters -->
@@ -760,10 +761,10 @@ ob_start();
         <div class="trigger-info">
             <span class="trigger-label"><?= __('Status') ?></span>
             <span class="trigger-value" id="label-status">
-                <?php 
+                <?php
                 $statusLabels = [
-                    'todos' => __('Todos os Status'), 
-                    'ativo' => __('Ativos'), 
+                    'todos' => __('Todos os Status'),
+                    'ativo' => __('Ativos'),
                     'inativo' => __('Inativos')
                 ];
                 echo $statusLabels[$filters['status'] ?? 'todos'] ?? 'Todos';
@@ -778,11 +779,11 @@ ob_start();
         <div class="trigger-info">
             <span class="trigger-label"><?= __('Risco') ?></span>
             <span class="trigger-value" id="label-risk">
-                <?php 
+                <?php
                 $riskLabels = [
-                    'todos' => __('Todos os Riscos'), 
-                    'baixo' => __('Baixo (< 5%)'), 
-                    'medio' => __('Médio (5% - 10%)'), 
+                    'todos' => __('Todos os Riscos'),
+                    'baixo' => __('Baixo (< 5%)'),
+                    'medio' => __('Médio (5% - 10%)'),
                     'alto' => __('Alto (>= 10%)')
                 ];
                 echo $riskLabels[$filters['risk'] ?? 'todos'] ?? 'Todos';
@@ -791,7 +792,7 @@ ob_start();
         </div>
         <i class="fa-solid fa-chevron-down"></i>
     </div>
-    
+
     <!-- Botão Adicionar Ajustado para a mesma linha -->
     <button type="button" class="btn-add-setor" onclick="openModal()">
         <i class="fa-solid fa-plus"></i> <?= __('Adicionar Setor') ?>
@@ -817,7 +818,8 @@ ob_start();
             <?php if (empty($setores)): ?>
                 <tr>
                     <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
-                        <i class="fa-solid fa-folder-open" style="font-size: 24px; display: block; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <i class="fa-solid fa-folder-open"
+                            style="font-size: 24px; display: block; margin-bottom: 10px; opacity: 0.5;"></i>
                         <?= __('Nenhum setor encontrado no banco de dados.') ?>
                     </td>
                 </tr>
@@ -831,37 +833,39 @@ ob_start();
                         <td><span class="setor-count"><?= $setor['total_funcionarios'] ?></span></td>
                         <td>
                             <div class="epi-icons">
-                                <?php 
+                                <?php
                                 $epiIconsMap = [
                                     'capacete' => 'fa-hard-hat'
                                 ];
-                                
+
                                 $episSetor = [];
                                 if (!empty($setor['epis_json'])) {
                                     $episSetor = json_decode($setor['epis_json'], true) ?: [];
                                 }
 
                                 if (empty($episSetor)): ?>
-                                    <span class="epi-icon-badge" title="<?= __('Nenhum EPI') ?>" style="opacity: 0.3;"><i class="fa-solid fa-shield-slash"></i></span>
+                                    <span class="epi-icon-badge" title="<?= __('Nenhum EPI') ?>" style="opacity: 0.3;"><i
+                                            class="epi-icon-badge"></i></span>
                                 <?php else:
-                                    foreach ($episSetor as $epiSlug): 
+                                    foreach ($episSetor as $epiSlug):
                                         $iconClass = $epiIconsMap[$epiSlug] ?? 'fa-shield';
                                         $label = ucfirst(str_replace('_', ' ', $epiSlug));
-                                ?>
-                                        <span class="epi-icon-badge" title="<?= $label ?>" data-epi="<?= $epiSlug ?>"><i class="fa-solid <?= $iconClass ?>"></i></span>
-                                <?php 
+                                        ?>
+                                        <span class="epi-icon-badge" title="<?= $label ?>" data-epi="<?= $epiSlug ?>"><i
+                                                class="fa-solid <?= $iconClass ?>"></i></span>
+                                    <?php
                                     endforeach;
-                                endif; 
+                                endif;
                                 ?>
                             </div>
                         </td>
                         <td>
-                            <?php 
+                            <?php
                             $risk = $setor['risk_p'] ?? 0;
                             $riskClass = 'baixo';
                             $riskLabel = __('Baixo');
                             $riskDesc = __('Risco controlado (0% - 5%). Indica que a vasta maioria dos colaboradores segue as normas de segurança.');
-                            
+
                             if ($risk >= 10) {
                                 $riskClass = 'alto';
                                 $riskLabel = __('Alto');
@@ -872,19 +876,26 @@ ob_start();
                                 $riskDesc = __('Atenção necessária (5% - 10%). Sinais de reincidência ou falta de uso ocasional de EPI.');
                             }
                             ?>
-                            <span class="risk-badge <?= $riskClass ?>" title="<?= $riskDesc ?> (<?= number_format((float)$risk, 1) ?>%)">
-                                <?= $riskLabel ?> (<?= number_format((float)$risk, 1) ?>%)
+                            <span class="risk-badge <?= $riskClass ?>"
+                                title="<?= $riskDesc ?> (<?= number_format((float) $risk, 1) ?>%)">
+                                <?= $riskLabel ?> (<?= number_format((float) $risk, 1) ?>%)
                             </span>
                         </td>
                         <td>
                             <div class="setor-actions">
-                                <span class="status-indicator" title="<?= $setor['status'] === 'ATIVO' ? __('Ativo') : __('Inativo') ?>" style="background: <?= $setor['status'] === 'ATIVO' ? '#10b981' : '#ef4444' ?>;"></span>
+                                <span class="status-indicator"
+                                    title="<?= $setor['status'] === 'ATIVO' ? __('Ativo') : __('Inativo') ?>"
+                                    style="background: <?= $setor['status'] === 'ATIVO' ? '#10b981' : '#ef4444' ?>;"></span>
                             </div>
                         </td>
                         <td>
                             <div class="setor-actions">
-                                <button class="btn-edit" title="<?= __('Editar') ?>" onclick="editSetor(this)" data-id="<?= $setor['id'] ?>" data-nome="<?= htmlspecialchars($setor['nome']) ?>" data-nome-en="<?= htmlspecialchars($setor['nome_en'] ?? '') ?>"><i class="fa-solid fa-pen"></i></button>
-                                <button class="btn-delete" title="<?= __('Excluir') ?>" onclick="deleteSetor(this)" data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-trash"></i></button>
+                                <button class="btn-edit" title="<?= __('Editar') ?>" onclick="editSetor(this)"
+                                    data-id="<?= $setor['id'] ?>" data-nome="<?= htmlspecialchars($setor['nome']) ?>"
+                                    data-nome-en="<?= htmlspecialchars($setor['nome_en'] ?? '') ?>"><i
+                                        class="fa-solid fa-pen"></i></button>
+                                <button class="btn-delete" title="<?= __('Excluir') ?>" onclick="deleteSetor(this)"
+                                    data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -920,9 +931,10 @@ ob_start();
             </div>
             <input type="file" id="fileUpload" accept=".xlsx,.xls,.pdf,.csv" style="display: none;">
             <div id="uploadFeedback" style="margin-top: 8px; font-size: 13px; color: #10b981; display: none;">
-                <i class="fa-solid fa-check-circle"></i> <span id="uploadCount">0</span> <?= __('funcionários detectados.') ?>
+                <i class="fa-solid fa-check-circle"></i> <span id="uploadCount">0</span>
+                <?= __('funcionários detectados.') ?>
             </div>
-            
+
             <!-- Lista de Funcionários -->
             <div class="employees-list-container" id="employeesListContainer">
                 <div id="employeesListItems"></div>
@@ -952,362 +964,362 @@ ob_start();
 </div>
 
 <script>
-(function() {
-    const BASE_PATH_LOCAL = '<?= BASE_PATH ?>';
-    let editingRow = null;
-    let currentSectorId = null;
-    let importedEmployees = [];
+    (function () {
+        const BASE_PATH_LOCAL = '<?= BASE_PATH ?>';
+        let editingRow = null;
+        let currentSectorId = null;
+        let importedEmployees = [];
 
-    function initPage() {
-        const fileInput = document.getElementById('fileUpload');
-        if (fileInput) {
-            // Remover listener antigo se houver para evitar duplicatas
-            fileInput.removeEventListener('change', handleFileUpload);
-            fileInput.addEventListener('change', handleFileUpload);
-        }
-        
-        // Re-renderizar ícones se necessário
-        if (window.lucide) lucide.createIcons();
-    }
-
-    async function handleFileUpload(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const feedback = document.getElementById('uploadFeedback');
-        const countSpan = document.getElementById('uploadCount');
-
-        try {
-            if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
-                await parseExcel(file);
-            } else if (file.name.endsWith('.pdf')) {
-                await parsePDF(file);
+        function initPage() {
+            const fileInput = document.getElementById('fileUpload');
+            if (fileInput) {
+                // Remover listener antigo se houver para evitar duplicatas
+                fileInput.removeEventListener('change', handleFileUpload);
+                fileInput.addEventListener('change', handleFileUpload);
             }
+
+            // Re-renderizar ícones se necessário
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const feedback = document.getElementById('uploadFeedback');
+            const countSpan = document.getElementById('uploadCount');
+
+            try {
+                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
+                    await parseExcel(file);
+                } else if (file.name.endsWith('.pdf')) {
+                    await parsePDF(file);
+                }
+
+                if (importedEmployees.length > 0) {
+                    feedback.style.display = 'block';
+                    countSpan.textContent = importedEmployees.length;
+                    renderEmployeeList(true);
+                } else {
+                    alert('<?= __('Nenhum funcionário encontrado no arquivo. Verifique a estrutura.') ?>');
+                    feedback.style.display = 'none';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('<?= __('Erro ao processar arquivo:') ?> ' + err.message);
+            }
+        }
+
+        function renderEmployeeList(isImport = false) {
+            const container = document.getElementById('employeesListContainer');
+            const listBody = document.getElementById('employeesListItems');
+            listBody.innerHTML = '';
 
             if (importedEmployees.length > 0) {
-                feedback.style.display = 'block';
-                countSpan.textContent = importedEmployees.length;
-                renderEmployeeList(true);
-            } else {
-                alert('<?= __('Nenhum funcionário encontrado no arquivo. Verifique a estrutura.') ?>');
-                feedback.style.display = 'none';
-            }
-        } catch (err) {
-            console.error(err);
-            alert('<?= __('Erro ao processar arquivo:') ?> ' + err.message);
-        }
-    }
-
-    function renderEmployeeList(isImport = false) {
-        const container = document.getElementById('employeesListContainer');
-        const listBody = document.getElementById('employeesListItems');
-        listBody.innerHTML = '';
-        
-        if (importedEmployees.length > 0) {
-            container.style.display = 'block';
-            importedEmployees.forEach((name, index) => {
-                const item = document.createElement('div');
-                item.className = 'employee-item';
-                item.innerHTML = `
+                container.style.display = 'block';
+                importedEmployees.forEach((name, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'employee-item';
+                    item.innerHTML = `
                     <span><i class="fa-solid fa-user" style="margin-right: 10px;"></i> ${name}</span>
                     ${isImport ? `<button class="btn-remove-employee" style="display: block;" onclick="removeImported(${index})"><i class="fa-solid fa-xmark"></i></button>` : ''}
                 `;
-                listBody.appendChild(item);
-            });
-        } else {
-            container.style.display = 'none';
+                    listBody.appendChild(item);
+                });
+            } else {
+                container.style.display = 'none';
+            }
         }
-    }
 
-    function removeImported(index) {
-        importedEmployees.splice(index, 1);
-        document.getElementById('uploadCount').textContent = importedEmployees.length;
-        renderEmployeeList(true);
-    }
+        function removeImported(index) {
+            importedEmployees.splice(index, 1);
+            document.getElementById('uploadCount').textContent = importedEmployees.length;
+            renderEmployeeList(true);
+        }
 
-    async function parseExcel(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
-                    const headerTerms = ['nome', 'funcionario', 'funcionário', 'aluno', 'estudante', 'colaborador'];
+        async function parseExcel(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-                    rows.forEach((row, index) => {
-                        // Look through columns to find a likely name
-                        for (let col = 0; col < Math.min(row.length, 3); col++) {
-                            let value = row[col];
-                            if (value && typeof value === 'string' && value.trim().length > 2) {
-                                let trimmed = value.trim();
-                                
-                                // Skip obvious headers in the first few rows
-                                if (index < 3 && headerTerms.some(term => trimmed.toLowerCase() === term)) {
-                                    continue;
+                        const headerTerms = ['nome', 'funcionario', 'funcionário', 'aluno', 'estudante', 'colaborador'];
+
+                        rows.forEach((row, index) => {
+                            // Look through columns to find a likely name
+                            for (let col = 0; col < Math.min(row.length, 3); col++) {
+                                let value = row[col];
+                                if (value && typeof value === 'string' && value.trim().length > 2) {
+                                    let trimmed = value.trim();
+
+                                    // Skip obvious headers in the first few rows
+                                    if (index < 3 && headerTerms.some(term => trimmed.toLowerCase() === term)) {
+                                        continue;
+                                    }
+
+                                    // Avoid numeric strings (like CPFs or IDs)
+                                    if (/^\d+$/.test(trimmed.replace(/[-.]/g, ''))) {
+                                        continue;
+                                    }
+
+                                    importedEmployees.push(trimmed);
+                                    break; // Found name in this row
                                 }
-
-                                // Avoid numeric strings (like CPFs or IDs)
-                                if (/^\d+$/.test(trimmed.replace(/[-.]/g, ''))) {
-                                    continue;
-                                }
-
-                                importedEmployees.push(trimmed);
-                                break; // Found name in this row
                             }
-                        }
-                    });
-                    
-                    // Deduplicate
-                    importedEmployees = [...new Set(importedEmployees)];
-                    resolve();
-                } catch (err) { reject(err); }
-            };
-            reader.onerror = reject;
-            reader.readAsArrayBuffer(file);
-        });
-    }
+                        });
 
-    async function parsePDF(file) {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const strings = textContent.items.map(item => item.str.trim()).filter(s => s.length > 2);
-            
-            // Lógica simples: cada string considerável é tratada como um potencial nome
-            importedEmployees.push(...strings);
-        }
-        importedEmployees = [...new Set(importedEmployees)];
-    }
-
-    // --- Modal ---
-    function openModal(isEdit = false, row = null) {
-        const modal = document.getElementById('modalSetor');
-        const title = modal.querySelector('.modal-setor-header h2');
-        const btn = document.getElementById('btnCriarSetor');
-
-        modal.classList.add('active');
-
-        if (isEdit && row) {
-            editingRow = row;
-            currentSectorId = row.querySelector('.btn-edit').getAttribute('data-id');
-            const nome = row.querySelector('.btn-edit').getAttribute('data-nome');
-            const nomeEn = row.querySelector('.btn-edit').getAttribute('data-nome-en');
-            document.getElementById('inputNomeSetor').value = nome;
-            document.getElementById('inputNomeEnSetor').value = nomeEn || '';
-            
-            // Marcar EPIs já selecionados
-            const rowEpis = Array.from(row.querySelectorAll('.epi-icon-badge')).map(b => b.getAttribute('data-epi'));
-            document.querySelectorAll('.epi-card').forEach(card => {
-                if (rowEpis.includes(card.getAttribute('data-epi'))) {
-                    card.classList.add('selected');
-                }
+                        // Deduplicate
+                        importedEmployees = [...new Set(importedEmployees)];
+                        resolve();
+                    } catch (err) { reject(err); }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
             });
+        }
 
-            editingRow = row;
-            title.textContent = '<?= __('Editar Setor') ?>';
-            btn.textContent = '<?= __('Atualizar Setor') ?>';
+        async function parsePDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-            // Buscar funcionários atuais
-            fetch(`${BASE_PATH_LOCAL}/api/departments/employees?id=${currentSectorId}`)
-                .then(r => r.json())
-                .then(res => {
-                    if (res.success) {
-                        importedEmployees = res.data;
-                        renderEmployeeList(false);
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const strings = textContent.items.map(item => item.str.trim()).filter(s => s.length > 2);
+
+                // Lógica simples: cada string considerável é tratada como um potencial nome
+                importedEmployees.push(...strings);
+            }
+            importedEmployees = [...new Set(importedEmployees)];
+        }
+
+        // --- Modal ---
+        function openModal(isEdit = false, row = null) {
+            const modal = document.getElementById('modalSetor');
+            const title = modal.querySelector('.modal-setor-header h2');
+            const btn = document.getElementById('btnCriarSetor');
+
+            modal.classList.add('active');
+
+            if (isEdit && row) {
+                editingRow = row;
+                currentSectorId = row.querySelector('.btn-edit').getAttribute('data-id');
+                const nome = row.querySelector('.btn-edit').getAttribute('data-nome');
+                const nomeEn = row.querySelector('.btn-edit').getAttribute('data-nome-en');
+                document.getElementById('inputNomeSetor').value = nome;
+                document.getElementById('inputNomeEnSetor').value = nomeEn || '';
+
+                // Marcar EPIs já selecionados
+                const rowEpis = Array.from(row.querySelectorAll('.epi-icon-badge')).map(b => b.getAttribute('data-epi'));
+                document.querySelectorAll('.epi-card').forEach(card => {
+                    if (rowEpis.includes(card.getAttribute('data-epi'))) {
+                        card.classList.add('selected');
                     }
                 });
-        } else {
-            editingRow = null;
-            title.textContent = '<?= __('Adicionar Setor') ?>';
-            btn.textContent = '<?= __('Criar Setor') ?>';
-        }
-    }
 
-    function closeModal() {
-        const modal = document.getElementById('modalSetor');
-        if (!modal) return;
-        modal.classList.remove('active');
-        document.getElementById('inputNomeSetor').value = '';
-        document.getElementById('inputNomeEnSetor').value = '';
-        document.getElementById('uploadFeedback').style.display = 'none';
-        document.getElementById('employeesListContainer').style.display = 'none';
-        importedEmployees = [];
-        currentSectorId = null;
-        editingRow = null;
-        document.querySelectorAll('.epi-card').forEach(c => c.classList.remove('selected'));
-    }
+                editingRow = row;
+                title.textContent = '<?= __('Editar Setor') ?>';
+                btn.textContent = '<?= __('Atualizar Setor') ?>';
 
-    function toggleEpi(card) {
-        card.classList.toggle('selected');
-    }
-
-    async function criarSetor() {
-        const nome = document.getElementById('inputNomeSetor').value;
-        const selectedEpis = Array.from(document.querySelectorAll('.epi-card.selected')).map(c => c.getAttribute('data-epi'));
-
-        // Inteligência de tradução automática para setores comuns
-        const translationMap = {
-            'soldagem': 'Welding',
-            'montagem': 'Assembly',
-            'logística': 'Logistics',
-            'logistica': 'Logistics',
-            'pintura': 'Painting',
-            'administração': 'Administration',
-            'administracao': 'Administration',
-            'financeiro': 'Financial',
-            'rh': 'HR',
-            'recursos humanos': 'Human Resources',
-            'ti': 'IT',
-            'tecnologia': 'Technology',
-            'qualidade': 'Quality',
-            'produção': 'Production',
-            'producao': 'Production',
-            'estoque': 'Stock',
-            'manutenção': 'Maintenance',
-            'manutencao': 'Maintenance',
-            'recepção': 'Reception',
-            'recepcao': 'Reception',
-            'expedição': 'Expedition',
-            'expedicao': 'Expedition'
-        };
-
-        // Tenta traduzir ou usa o original se não encontrar no mapa
-        const lowerNome = nome.toLowerCase().trim();
-        let nomeEn = translationMap[lowerNome] || nome;
-        
-        // Pequena lógica extra: se terminar com " TIG" ou " MIG", mantém o sufixo no inglês
-        if (lowerNome.includes('soldagem tig')) nomeEn = 'TIG Welding';
-        if (lowerNome.includes('soldagem mig')) nomeEn = 'MIG Welding';
-
-        if (!nome) {
-            alert('<?= __('Por favor, informe o nome do setor.') ?>');
-            return;
-        }
-
-        const formData = {
-            nome: nome,
-            nome_en: nomeEn,
-            epis: selectedEpis,
-            funcionarios: importedEmployees
-        };
-
-        try {
-            const endpoint = currentSectorId ? `${BASE_PATH_LOCAL}/api/departments/update` : `${BASE_PATH_LOCAL}/api/departments/create`;
-            if (currentSectorId) formData.id = currentSectorId;
-
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                alert(currentSectorId ? '<?= __('Setor atualizado!') ?>' : '<?= __('Setor criado com sucesso!') ?>');
-                location.reload();
+                // Buscar funcionários atuais
+                fetch(`${BASE_PATH_LOCAL}/api/departments/employees?id=${currentSectorId}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success) {
+                            importedEmployees = res.data;
+                            renderEmployeeList(false);
+                        }
+                    });
             } else {
-                alert('<?= __('Erro') ?>: ' + result.message);
+                editingRow = null;
+                title.textContent = '<?= __('Adicionar Setor') ?>';
+                btn.textContent = '<?= __('Criar Setor') ?>';
             }
-        } catch (err) {
-            console.error(err);
-            alert('<?= __('Erro na comunicação com o servidor.') ?>');
         }
-    }
 
-    function filterSetores() {
-        const term = document.getElementById('searchInputSettings').value.toLowerCase();
-        const rows = document.querySelectorAll('#setoresTableBody tr');
-        rows.forEach(row => {
-            const nomeContainer = row.querySelector('.setor-nome');
-            if (nomeContainer) {
-                const nome = nomeContainer.textContent.toLowerCase();
-                row.style.display = nome.includes(term) ? '' : 'none';
-            }
-        });
-    }
-
-    // --- Deletar Setor (Premium Modal) ---
-    let deleteTargetId = null;
-
-    function deleteSetor(btn) {
-        deleteTargetId = btn.getAttribute('data-id');
-        const modal = document.getElementById('confirmDeleteModal');
-        if (modal) {
-            modal.classList.add('active');
-            toggleScroll(true);
-        }
-    }
-
-    function closeDeleteModal() {
-        const modal = document.getElementById('confirmDeleteModal');
-        if (modal) {
+        function closeModal() {
+            const modal = document.getElementById('modalSetor');
+            if (!modal) return;
             modal.classList.remove('active');
-            toggleScroll(false);
+            document.getElementById('inputNomeSetor').value = '';
+            document.getElementById('inputNomeEnSetor').value = '';
+            document.getElementById('uploadFeedback').style.display = 'none';
+            document.getElementById('employeesListContainer').style.display = 'none';
+            importedEmployees = [];
+            currentSectorId = null;
+            editingRow = null;
+            document.querySelectorAll('.epi-card').forEach(c => c.classList.remove('selected'));
         }
-        deleteTargetId = null;
-    }
 
-    async function doDeleteSetor() {
-        if (!deleteTargetId) return;
-        
-        const btn = document.getElementById('btnConfirmDelete');
-        const originalText = btn.innerHTML;
-        
-        btn.disabled = true;
-        btn.querySelector('.btn-text').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <?= __('Excluindo...') ?>`;
+        function toggleEpi(card) {
+            card.classList.toggle('selected');
+        }
 
-        try {
-            const response = await fetch(`${BASE_PATH_LOCAL}/api/departments/delete`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: deleteTargetId })
+        async function criarSetor() {
+            const nome = document.getElementById('inputNomeSetor').value;
+            const selectedEpis = Array.from(document.querySelectorAll('.epi-card.selected')).map(c => c.getAttribute('data-epi'));
+
+            // Inteligência de tradução automática para setores comuns
+            const translationMap = {
+                'soldagem': 'Welding',
+                'montagem': 'Assembly',
+                'logística': 'Logistics',
+                'logistica': 'Logistics',
+                'pintura': 'Painting',
+                'administração': 'Administration',
+                'administracao': 'Administration',
+                'financeiro': 'Financial',
+                'rh': 'HR',
+                'recursos humanos': 'Human Resources',
+                'ti': 'IT',
+                'tecnologia': 'Technology',
+                'qualidade': 'Quality',
+                'produção': 'Production',
+                'producao': 'Production',
+                'estoque': 'Stock',
+                'manutenção': 'Maintenance',
+                'manutencao': 'Maintenance',
+                'recepção': 'Reception',
+                'recepcao': 'Reception',
+                'expedição': 'Expedition',
+                'expedicao': 'Expedition'
+            };
+
+            // Tenta traduzir ou usa o original se não encontrar no mapa
+            const lowerNome = nome.toLowerCase().trim();
+            let nomeEn = translationMap[lowerNome] || nome;
+
+            // Pequena lógica extra: se terminar com " TIG" ou " MIG", mantém o sufixo no inglês
+            if (lowerNome.includes('soldagem tig')) nomeEn = 'TIG Welding';
+            if (lowerNome.includes('soldagem mig')) nomeEn = 'MIG Welding';
+
+            if (!nome) {
+                alert('<?= __('Por favor, informe o nome do setor.') ?>');
+                return;
+            }
+
+            const formData = {
+                nome: nome,
+                nome_en: nomeEn,
+                epis: selectedEpis,
+                funcionarios: importedEmployees
+            };
+
+            try {
+                const endpoint = currentSectorId ? `${BASE_PATH_LOCAL}/api/departments/update` : `${BASE_PATH_LOCAL}/api/departments/create`;
+                if (currentSectorId) formData.id = currentSectorId;
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(currentSectorId ? '<?= __('Setor atualizado!') ?>' : '<?= __('Setor criado com sucesso!') ?>');
+                    location.reload();
+                } else {
+                    alert('<?= __('Erro') ?>: ' + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('<?= __('Erro na comunicação com o servidor.') ?>');
+            }
+        }
+
+        function filterSetores() {
+            const term = document.getElementById('searchInputSettings').value.toLowerCase();
+            const rows = document.querySelectorAll('#setoresTableBody tr');
+            rows.forEach(row => {
+                const nomeContainer = row.querySelector('.setor-nome');
+                if (nomeContainer) {
+                    const nome = nomeContainer.textContent.toLowerCase();
+                    row.style.display = nome.includes(term) ? '' : 'none';
+                }
             });
-            const result = await response.json();
-            if (result.success) {
-                location.reload();
-            } else {
-                alert('Erro: ' + result.message);
-                closeDeleteModal();
-            }
-        } catch (err) {
-            console.error(err);
-            closeDeleteModal();
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
+        }
+
+        // --- Deletar Setor (Premium Modal) ---
+        let deleteTargetId = null;
+
+        function deleteSetor(btn) {
+            deleteTargetId = btn.getAttribute('data-id');
+            const modal = document.getElementById('confirmDeleteModal');
+            if (modal) {
+                modal.classList.add('active');
+                toggleScroll(true);
             }
         }
-    }
 
-    function editSetor(btn) {
-        const row = btn.closest('tr');
-        openModal(true, row);
-    }
+        function closeDeleteModal() {
+            const modal = document.getElementById('confirmDeleteModal');
+            if (modal) {
+                modal.classList.remove('active');
+                toggleScroll(false);
+            }
+            deleteTargetId = null;
+        }
 
-    // Exposição Global para onclick do HTML
-    window.openModal = openModal;
-    window.closeModal = closeModal;
-    window.toggleEpi = toggleEpi;
-    window.criarSetor = criarSetor;
-    window.filterSetores = filterSetores;
-    window.deleteSetor = deleteSetor;
-    window.closeDeleteModal = closeDeleteModal;
-    window.doDeleteSetor = doDeleteSetor;
-    window.editSetor = editSetor;
-    window.removeImported = removeImported;
+        async function doDeleteSetor() {
+            if (!deleteTargetId) return;
 
-    // Listeners de inicialização
-    document.addEventListener('DOMContentLoaded', initPage);
-    document.addEventListener('spaPageLoaded', initPage);
-    initPage();
-})();
+            const btn = document.getElementById('btnConfirmDelete');
+            const originalText = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.querySelector('.btn-text').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <?= __('Excluindo...') ?>`;
+
+            try {
+                const response = await fetch(`${BASE_PATH_LOCAL}/api/departments/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: deleteTargetId })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Erro: ' + result.message);
+                    closeDeleteModal();
+                }
+            } catch (err) {
+                console.error(err);
+                closeDeleteModal();
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            }
+        }
+
+        function editSetor(btn) {
+            const row = btn.closest('tr');
+            openModal(true, row);
+        }
+
+        // Exposição Global para onclick do HTML
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.toggleEpi = toggleEpi;
+        window.criarSetor = criarSetor;
+        window.filterSetores = filterSetores;
+        window.deleteSetor = deleteSetor;
+        window.closeDeleteModal = closeDeleteModal;
+        window.doDeleteSetor = doDeleteSetor;
+        window.editSetor = editSetor;
+        window.removeImported = removeImported;
+
+        // Listeners de inicialização
+        document.addEventListener('DOMContentLoaded', initPage);
+        document.addEventListener('spaPageLoaded', initPage);
+        initPage();
+    })();
 </script>
 
 <!-- Modern Picker Modal (Apple Style) -->
@@ -1334,23 +1346,23 @@ ob_start();
             { value: 'inativo', label: '<?= __('Inativos') ?>' }
         ],
         risk: [
-            { 
-                value: 'todos', 
+            {
+                value: 'todos',
                 label: '<?= __('Todos os Riscos') ?>',
                 description: '<?= __('Exibe todos os setores independente do nível de risco.') ?>'
             },
-            { 
-                value: 'baixo', 
+            {
+                value: 'baixo',
                 label: '<?= __('Baixo (< 5%)') ?>',
                 description: '<?= __('Risco controlado. Majoritária conformidade com as normas de segurança.') ?>'
             },
-            { 
-                value: 'medio', 
+            {
+                value: 'medio',
                 label: '<?= __('Médio (5% - 10%)') ?>',
                 description: '<?= __('Atenção necessária. Sinais de reincidência ou falta de uso de EPI.') ?>'
             },
-            { 
-                value: 'alto', 
+            {
+                value: 'alto',
                 label: '<?= __('Alto (>= 10%)') ?>',
                 description: '<?= __('Risco crítico. Exige intervenção imediata e novos treinamentos.') ?>'
             }
@@ -1364,7 +1376,7 @@ ob_start();
         <i class="fa-solid fa-triangle-exclamation main-icon" style="color: #f59e0b;"></i>
         <h2><?= __('Deseja desativar este setor?') ?></h2>
         <p><?= __('O setor deixará de aparecer no monitoramento, mas os dados históricos serão preservados.') ?></p>
-        
+
         <div class="confirmation-actions" style="margin-top: 30px;">
             <button class="btn-liquid" id="btnConfirmDelete" onclick="doDeleteSetor()">
                 <div class="btn-text">

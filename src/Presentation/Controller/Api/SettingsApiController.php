@@ -17,10 +17,10 @@ class SettingsApiController
     public function updateEpiColor()
     {
         header('Content-Type: application/json');
-        
+
         $input = json_decode(file_get_contents('php://input'), true);
-        
-        $id = isset($input['id']) ? (int)$input['id'] : 0;
+
+        $id = isset($input['id']) ? (int) $input['id'] : 0;
         $color = $input['color'] ?? null;
         $nomeEn = $input['nome_en'] ?? null;
 
@@ -57,7 +57,7 @@ class SettingsApiController
     public function resetColors()
     {
         header('Content-Type: application/json');
-        
+
         try {
             $success = $this->epiRepository->resetToDefaults();
             echo json_encode(['success' => $success]);
@@ -70,7 +70,7 @@ class SettingsApiController
     public function updateChartStyle()
     {
         header('Content-Type: application/json');
-        
+
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -92,7 +92,7 @@ class SettingsApiController
 
         try {
             $userRepo = new \epiGuard\Infrastructure\Persistence\MySQLUserRepository();
-            $success = $userRepo->updateChartPreference((int)$_SESSION['user_id'], $style);
+            $success = $userRepo->updateChartPreference((int) $_SESSION['user_id'], $style);
             echo json_encode(['success' => $success]);
         } catch (\Exception $e) {
             http_response_code(500);

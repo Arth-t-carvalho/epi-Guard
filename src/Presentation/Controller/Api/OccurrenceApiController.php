@@ -43,6 +43,7 @@ class OccurrenceApiController
                 s.nome AS name, 
                 e.nome AS `desc`, 
                 DATE_FORMAT(o.data_hora, '%H:%i') AS time,
+                f.nome AS employee,
                 o.funcionario_id
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
@@ -116,7 +117,20 @@ class OccurrenceApiController
 
         $query .= " ORDER BY o.data_hora DESC";
 
+        $now = date('Y-m-d');
+        $ref = "$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01";
         $stmt = $db->prepare($query);
+        $nowDt = new \DateTime($now);
+        $refDt = new \DateTime($ref);
+
+        $summary = [
+            'today' => $this->occurrenceRepo->countDaily($nowDt, $sectorIds),
+            'week' => $this->occurrenceRepo->countWeekly($nowDt, $sectorIds),
+            'month' => $this->occurrenceRepo->countMonthly($refDt, $sectorIds),
+            'students_today' => $this->occurrenceRepo->countUniqueStudentsDaily($nowDt, $sectorIds),
+            'students_week' => $this->occurrenceRepo->countUniqueStudentsWeekly($nowDt, $sectorIds),
+            'students_month' => $this->occurrenceRepo->countUniqueStudentsMonthly($refDt, $sectorIds)
+        ];
 
         $types = "ii";
         $params = [$month, $year];

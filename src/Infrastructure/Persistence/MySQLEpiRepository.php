@@ -101,7 +101,7 @@ class MySQLEpiRepository implements EpiRepositoryInterface
     {
         // 1. Reset 'Total' to original epiGuard Red
         $this->db->query("UPDATE epis SET cor = '#E30613' WHERE nome = 'Total' AND status = 'SISTEMA'");
-        
+
         // 2. Reset 'Capacete' to original Blue
         $this->db->query("UPDATE epis SET cor = '#06377c' WHERE nome LIKE '%Capacete%'");
 
@@ -110,7 +110,7 @@ class MySQLEpiRepository implements EpiRepositoryInterface
 
         // 4. Reset others to default gray-slate
         $this->db->query("UPDATE epis SET cor = '#94a3b8' WHERE nome NOT IN ('Total') AND nome NOT LIKE '%Capacete%' AND nome NOT LIKE '%Oculos%' AND nome NOT LIKE '%Óculos%'");
-        
+
         return true;
     }
 

@@ -33,7 +33,7 @@ ob_start();
         </div>
         <div class="summary-card">
             <div class="summary-icon green">
-                <i class="fa-solid fa-shield-halved"></i>
+                <i class="epi-icon-badge"></i>
             </div>
             <div class="summary-info">
                 <span class="summary-label"><?= __('Super Admins') ?></span>

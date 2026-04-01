@@ -195,7 +195,7 @@ ob_start();
                                 <span><?= __('Setor') ?>: <?= htmlspecialchars($infraction['setor_sigla'] ?? 'N/A') ?></span>
                             </div>
                             <div class="info-row-premium">
-                                <i class="fa-solid fa-shield-halved"></i>
+                                <i class="epi-icon-badge"></i>
                                 <span><?= __('EPI') ?>: <?= htmlspecialchars(__db($infraction, 'epi_nome')) ?></span>
                             </div>
                             <div class="info-row-premium">
