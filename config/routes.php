@@ -1,0 +1,40 @@
+<?php
+
+use epiGuard\Presentation\Controller\AuthController;
+use epiGuard\Presentation\Controller\DashboardController;
+use epiGuard\Presentation\Controller\InfractionController;
+use epiGuard\Presentation\Controller\ManagementController;
+use epiGuard\Presentation\Controller\OccurrenceController;
+
+return [
+    '/login' => [AuthController::class, 'index'],
+    '/register' => [AuthController::class, 'register'],
+    '/cadastro' => [AuthController::class, 'register'],
+    '/recuperar-senha' => [AuthController::class, 'resetPassword'],
+    '/dashboard' => [DashboardController::class, 'index'],
+    '/api/charts' => [\epiGuard\Presentation\Controller\Api\ChartApiController::class, 'index'],
+    '/api/calendar' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'calendar'],
+    '/api/modal_details' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'details'],
+    '/api/check_notificacoes' => [\epiGuard\Presentation\Controller\Api\NotificationApiController::class, 'check'],
+    '/infractions' => [InfractionController::class, 'index'],
+    '/occurrences' => [OccurrenceController::class, 'index'],
+    '/management/departments' => [ManagementController::class, 'departments'],
+    '/management/employees' => [ManagementController::class, 'employees'],
+    '/management/instructors' => [ManagementController::class, 'instructors'],
+    '/api/departments' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'index'],
+    '/api/departments/create' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'create'],
+    '/api/departments/update' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'update'],
+    '/api/departments/delete' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'delete'],
+    '/api/departments/employees' => [\epiGuard\Presentation\Controller\Api\DepartmentApiController::class, 'employees'],
+    '/monitoring' => [\epiGuard\Presentation\Controller\MonitoringController::class, 'index'],
+    '/api/occurrence/store' => [\epiGuard\Presentation\Controller\Api\OccurrenceStoreApiController::class, 'store'],
+    '/api/occurrence/hide' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'hide'],
+    '/api/occurrence/toggle-favorite' => [\epiGuard\Presentation\Controller\Api\OccurrenceApiController::class, 'toggleFavorite'],
+    '/api/simulate-occurrence' => [\epiGuard\Presentation\Controller\Api\SimulationApiController::class, 'simulate'],
+    '/api/export-insights' => [\epiGuard\Presentation\Controller\Api\ExportApiController::class, 'insights'],
+    '/api/export/infractions-report' => [\epiGuard\Presentation\Controller\Api\ExportApiController::class, 'infractionsReport'],
+    '/api/settings/epi-color' => [\epiGuard\Presentation\Controller\Api\SettingsApiController::class, 'updateEpiColor'],
+    '/api/settings/reset-colors' => [\epiGuard\Presentation\Controller\Api\SettingsApiController::class, 'resetColors'],
+    '/api/settings/chart-style' => [\epiGuard\Presentation\Controller\Api\SettingsApiController::class, 'updateChartStyle'],
+    '/settings' => [\epiGuard\Presentation\Controller\SettingsController::class, 'index'],
+];

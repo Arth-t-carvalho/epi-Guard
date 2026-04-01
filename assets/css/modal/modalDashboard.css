@@ -1,0 +1,625 @@
+/* =========================================
+   MODAL DASHBOARD - Ranking, Calendário e Detalhes
+   ========================================= */
+
+/* =========================================
+   MODAL DE RANKING
+   ========================================= */
+.modal-ranking-header {
+    padding: 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+html.dark-theme .modal-ranking-header {
+    background: #1e293b;
+    border-bottom-color: #334155;
+}
+
+.modal-ranking-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+}
+
+.modal-ranking-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 20px;
+}
+
+.modal-ranking-body::-webkit-scrollbar { width: 6px; }
+.modal-ranking-body::-webkit-scrollbar-thumb { border-radius: 10px; }
+
+.ranking-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.ranking-table th {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    z-index: 10;
+}
+
+html.dark-theme .ranking-table th {
+    background: #1e293b;
+    color: #94a3b8;
+}
+
+.ranking-row {
+    transition: all 0.2s ease;
+}
+
+.ranking-row:hover {
+    transform: translateX(5px);
+}
+
+.ranking-row:hover td {
+    background: #f8fafc !important;
+}
+
+.ranking-row td {
+    padding: 12px 15px;
+    font-size: 14px;
+    background: #ffffff;
+}
+
+html.dark-theme .ranking-row td {
+    background: #1e293b;
+    color: #f8fafc;
+}
+
+html.dark-theme .ranking-row:hover td {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.ranking-row td:first-child {
+    border-radius: 10px 0 0 10px;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.ranking-row td:last-child {
+    border-radius: 0 10px 10px 0;
+    text-align: right;
+}
+
+/* =========================================
+   CALENDAR MODAL OVERLAY (Expandido)
+   ========================================= */
+.modal-overlay-calendar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.modal-overlay-calendar.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.calendar-wrapper {
+    background: #fff;
+    width: 380px;
+    border-radius: 16px;
+    padding: 25px;
+    position: relative;
+    border: 1px solid #D1D5DB;
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.25),
+        0 10px 10px -5px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+html.dark-theme .calendar-wrapper {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.close-btn-cal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #9CA3AF;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.close-btn-cal:hover {
+    background: #F3F4F6;
+    color: #EF4444;
+}
+
+.cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-right: 20px;
+}
+
+.month-nav-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-btn-cal {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #4B5563;
+    transition: all 0.2s;
+}
+
+.nav-btn-cal:hover {
+    background: #E30613;
+    color: white;
+    border-color: #E30613;
+}
+
+.selector-display {
+    font-weight: 700;
+    font-size: 16px;
+    color: #1F2937;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+html.dark-theme .selector-display {
+    color: #f8fafc;
+}
+
+.selector-container {
+    position: relative;
+}
+
+.selector-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 5px;
+    z-index: 50;
+    min-width: 120px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+html.dark-theme .selector-dropdown {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.selector-dropdown.active {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background-color: #F3F4F6;
+    color: #E30613;
+}
+
+.dropdown-item.selected {
+    background-color: #FEF2F2;
+    color: #E30613;
+    font-weight: bold;
+}
+
+/* CORPO DO CALENDÁRIO (DIAS) */
+.calendar-body .weeks {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    list-style: none;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #F3F4F6;
+    padding-bottom: 10px;
+}
+
+.calendar-body .weeks li {
+    font-weight: 600;
+    font-size: 13px;
+    color: #9CA3AF;
+    text-align: center;
+}
+
+.calendar-body .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    list-style: none;
+    gap: 5px;
+}
+
+.calendar-body .days li {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.2s;
+}
+
+html.dark-theme .calendar-body .days li {
+    color: #e2e8f0;
+}
+
+.days li.inactive {
+    color: #D1D5DB;
+    pointer-events: none;
+}
+
+html.dark-theme .days li.inactive {
+    color: #475569;
+}
+
+.days li.today {
+    color: #E30613;
+    font-weight: bold;
+    background: #FEF2F2;
+}
+
+html.dark-theme .days li.today {
+    background: rgba(227, 6, 19, 0.2);
+    color: #ff4d4d;
+}
+
+.days li.active {
+    background: #E30613;
+    color: #fff;
+    font-weight: bold;
+}
+
+.days li:not(.active):not(.inactive):hover {
+    background: #F3F4F6;
+}
+
+html.dark-theme .days li:not(.active):not(.inactive):hover {
+    background: #334155;
+}
+
+.calendar-day-btn.active {
+    background-color: var(--primary) !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(227, 6, 19, 0.3);
+}
+
+.calendar-day-btn:hover:not(.empty):not(.active) {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+/* INPUT MANUAL (Rodapé do calendário) */
+.input-area {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #E5E7EB;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+html.dark-theme .input-wrapper {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+.input-wrapper:focus-within {
+    border-color: #E30613;
+    box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.1);
+}
+
+.icon-left {
+    width: 20px;
+    height: 20px;
+    fill: #9CA3AF;
+    margin-right: 10px;
+}
+
+html.dark-theme .icon-left {
+    fill: #64748b;
+}
+
+.input-wrapper input {
+    border: none;
+    background: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    color: #374151;
+}
+
+html.dark-theme .input-wrapper input {
+    color: #f8fafc;
+}
+
+/* BOTÃO LUPA */
+.btn-action-right {
+    background: #F3F4F6;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 5px;
+    padding: 0 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-action-right svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke-width: 2.5px;
+}
+
+.btn-action-right:hover {
+    background: #FFFFFF;
+    border-color: #9CA3AF;
+    transform: translateY(-2px);
+    box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.2),
+        0 4px 6px -2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action-right:hover svg {
+    stroke: #E30613;
+    transform: scale(1.1);
+}
+
+.btn-action-right:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
+    background: #E5E7EB;
+}
+
+/* =========================================
+   CALENDAR MODAL (Seletor de Data — .modal-calendar)
+   ========================================= */
+.modal-calendar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-calendar.active {
+    display: flex;
+}
+
+.modal-calendar .modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 340px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    margin: auto;
+    animation: dropIn 0.3s ease;
+}
+
+html.dark-theme .modal-calendar .modal-content {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+.modal-calendar .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.modal-calendar .calendar-header button {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    color: var(--secondary);
+    transition: 0.2s;
+}
+
+.modal-calendar .calendar-header button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.modal-calendar .month-selector {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--secondary);
+    display: flex;
+    gap: 6px;
+}
+
+html.dark-theme .modal-calendar .month-selector {
+    color: #f8fafc;
+}
+
+.modal-calendar .weeks {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.modal-calendar .days {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    gap: 4px;
+}
+
+.modal-calendar .days li {
+    padding: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.modal-calendar .days li:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.modal-calendar .days li.inactive {
+    color: #cbd5e1;
+    cursor: default;
+}
+
+.modal-calendar .days li.inactive:hover {
+    background: transparent;
+    color: #cbd5e1;
+}
+
+.modal-calendar .days li.today {
+    background: #f1f5f9;
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+.modal-calendar .days li.active {
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+}
+
+.modal-calendar .manual-input {
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.modal-calendar .input-wrapper {
+    display: flex;
+    gap: 8px;
+    transition: 0.3s;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+html.dark-theme .modal-calendar .input-wrapper {
+    background: #0f172a;
+    border-color: #334155;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.modal-calendar .input-wrapper.error-shake {
+    animation: shake-red 0.4s ease;
+}
+
+.modal-calendar .input-wrapper input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: 0.2s;
+    background: white;
+}
+
+html.dark-theme .modal-calendar .input-wrapper input {
+    background: #1e293b;
+    border-color: #475569;
+    color: #f8fafc;
+}
+
+.modal-calendar .input-wrapper input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.modal-calendar .input-wrapper button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.modal-calendar .input-wrapper button:hover {
+    background: var(--primary-dark);
+}
