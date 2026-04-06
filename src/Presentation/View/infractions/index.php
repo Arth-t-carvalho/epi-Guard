@@ -14,8 +14,8 @@ ob_start();
     window.BASE_PATH = '<?= BASE_PATH ?>';
 </script>
 
-<!-- Header -->
-<header class="header">
+<!-- Custom Header for Infractions -->
+<div class="page-header-custom">
     <div class="page-title">
         <h1><?= __('Infrações') ?></h1>
         <p><?= __('Gestão de ocorrências e infrações de EPI') ?></p>
@@ -25,7 +25,7 @@ ob_start();
             <i class="fa-solid fa-file-export"></i> <?= __('Exportar') ?>
         </button>
     </div>
-</header>
+</div>
 
 <div class="page-content">
 
@@ -90,7 +90,12 @@ ob_start();
                     <span class="trigger-label"><?= __('Status') ?></span>
                     <span class="trigger-value" id="label-status">
                         <?php
-                        $statusLabels = ['todos' => __('Todos os Status'), 'pendente' => __('Pendente'), 'resolvido' => __('Resolvido')];
+                        $statusLabels = [
+                            'todos' => __('Todos'), 
+                            'pendente' => __('Pendente'), 
+                            'resolvido' => __('Resolvido'),
+                            'inativo' => __('Inativo')
+                        ];
                         echo $statusLabels[$filters['status']] ?? 'Todos';
                         ?>
                     </span>
@@ -751,7 +756,8 @@ ob_start();
         status: [
             { value: 'todos', label: 'Todos os Status' },
             { value: 'pendente', label: 'Pendente' },
-            { value: 'resolvido', label: 'Resolvido' }
+            { value: 'resolvido', label: 'Resolvido' },
+            { value: 'inativo', label: 'Inativo (Oculto)' }
         ],
         epi: [
             { value: 'todos', label: 'Todos os EPIs' },

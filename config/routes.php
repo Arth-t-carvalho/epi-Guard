@@ -34,5 +34,8 @@ return [
     '/api/export-insights' => [\epiGuard\Presentation\Controller\Api\ExportApiController::class, 'insights'],
     '/api/epis/update-colors' => [\epiGuard\Presentation\Controller\Api\EpiApiController::class, 'updateColors'],
     '/settings' => [\epiGuard\Presentation\Controller\SettingsController::class, 'index'],
+    '/api/machines/list' => [\epiGuard\Presentation\Controller\Api\MachineApiController::class, 'list'],
+    '/api/machines/create' => [\epiGuard\Presentation\Controller\Api\MachineApiController::class, 'create'],
+    '/api/machines/delete' => [\epiGuard\Presentation\Controller\Api\MachineApiController::class, 'delete'],
     '/logout' => [\epiGuard\Presentation\Controller\AuthController::class, 'logout'],
 ];

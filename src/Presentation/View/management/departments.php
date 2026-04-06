@@ -727,6 +727,58 @@ $extraHead = '
         .btn-remove-employee:hover {
             color: #ef4444;
         }
+        /* Machine Modal Specifics */
+        .machine-form-box {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 24px;
+        }
+
+        .machine-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .machine-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .machine-info .m-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .machine-info .m-epi {
+            font-size: 11px;
+            font-weight: 700;
+            color: #E30613;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* DARK MODE - Machine Modal */
+        html.dark-theme .machine-form-box {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: var(--border);
+        }
+
+        html.dark-theme .machine-list-item {
+            border-bottom-color: var(--border);
+        }
+
+        html.dark-theme .machine-info .m-name {
+            color: var(--text-main);
+        }
+
+        html.dark-theme .machine-info .m-epi {
+            color: var(--primary);
+        }
     </style>
 ';
 
@@ -870,6 +922,7 @@ ob_start();
                         <td>
                             <div class="setor-actions">
                                 <span class="status-indicator" title="<?= $setor['status'] === 'ATIVO' ? 'Ativo' : 'Inativo' ?>" style="background: <?= $setor['status'] === 'ATIVO' ? '#10b981' : '#ef4444' ?>;"></span>
+                                <button class="btn-edit" title="Máquinas" onclick="openMachineModal(<?= $setor['id'] ?>, '<?= htmlspecialchars($setor['nome']) ?>')"><i class="fa-solid fa-gears"></i></button>
                                 <button class="btn-edit" title="Editar" onclick="editSetor(this)" data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-pen"></i></button>
                                 <button class="btn-delete" title="Excluir" onclick="deleteSetor(this)" data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-trash"></i></button>
                             </div>
@@ -952,6 +1005,54 @@ ob_start();
         <div class="modal-setor-footer">
             <button class="btn-cancel" onclick="closeModal()"><?= __('Cancelar') ?></button>
             <button class="btn-create" id="btnCriarSetor" onclick="criarSetor()"><?= __('Confirmar') ?></button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL GESTÃO DE MÁQUINAS ==================== -->
+<div class="modal-setor-overlay" id="modalMaquinas">
+    <div class="modal-setor" style="width: 600px;">
+        <div class="modal-setor-header">
+            <div>
+                <h2 id="machineModalTitle">Máquinas do Setor</h2>
+                <p id="machineModalSubtitle" style="font-size: 13px; color: #94a3b8; font-weight: 500;">Gerencie os equipamentos e seus EPIs obrigatórios</p>
+            </div>
+            <button class="modal-close-btn" onclick="closeMachineModal()">&times;</button>
+        </div>
+
+        <!-- Formulário para Adicionar Máquina -->
+        <div class="machine-form-box">
+            <h3 style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-plus-circle" style="color: #E30613;"></i> Nova Máquina
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Nome da Máquina</label>
+                    <input class="form-input" type="text" id="inputMachineName" placeholder="Ex: Torno CNC 01">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">EPI Necessário</label>
+                    <select class="form-input" id="selectMachineEpi">
+                        <option value="">Selecione o EPI...</option>
+                        <?php foreach ($epis as $epi): ?>
+                            <option value="<?= $epi->getId() ?>"><?= htmlspecialchars($epi->getName()) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-create" style="width: 100%; margin-top: 16px;" onclick="addMachine()">Adicionar Máquina</button>
+        </div>
+
+        <!-- Lista de Máquinas -->
+        <div class="form-group">
+            <label class="form-label">Máquinas Cadastradas</label>
+            <div id="machinesListContainer" style="border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: transparent;">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+
+        <div class="modal-setor-footer">
+            <button class="btn-cancel" onclick="closeMachineModal()">Fechar</button>
         </div>
     </div>
 </div>
@@ -1212,6 +1313,115 @@ ob_start();
     function editSetor(btn) {
         const row = btn.closest('tr');
         openModal(true, row);
+    }
+
+    // --- MÁQUINAS ---
+    let currentMachineSectorId = null;
+
+    function openMachineModal(sectorId, sectorName) {
+        currentMachineSectorId = sectorId;
+        document.getElementById('machineModalTitle').textContent = `Máquinas - ${sectorName}`;
+        document.getElementById('modalMaquinas').classList.add('active');
+        loadMachines();
+    }
+
+    function closeMachineModal() {
+        document.getElementById('modalMaquinas').classList.remove('active');
+        document.getElementById('inputMachineName').value = '';
+        document.getElementById('selectMachineEpi').value = '';
+        currentMachineSectorId = null;
+    }
+
+    async function loadMachines() {
+        const container = document.getElementById('machinesListContainer');
+        
+        try {
+            const response = await fetch(`${BASE_PATH_LOCAL}/api/machines/list?sector_id=${currentMachineSectorId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                if (result.data.length === 0) {
+                    container.innerHTML = `<div style="padding: 30px; text-align: center; color: #94a3b8;">Nenhuma máquina cadastrada neste setor.</div>`;
+                    return;
+                }
+
+                let html = '';
+                result.data.forEach(m => {
+                    html += `
+                        <div class="machine-list-item">
+                            <div class="machine-info">
+                                <div class="m-name">${m.nome}</div>
+                                <div class="m-epi">
+                                    <i class="fa-solid fa-shield-halved"></i> ${m.epi_nome}
+                                </div>
+                            </div>
+                            <button onclick="deleteMachine(${m.id})" style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 8px; transition: 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `<div style="padding: 30px; text-align: center; color: #ef4444;">Erro ao carregar máquinas.</div>`;
+            }
+        } catch (err) {
+            container.innerHTML = `<div style="padding: 30px; text-align: center; color: #ef4444;">Erro na comunicação com o servidor.</div>`;
+        }
+    }
+
+    async function addMachine() {
+        const nome = document.getElementById('inputMachineName').value;
+        const epiId = document.getElementById('selectMachineEpi').value;
+
+        if (!nome || !epiId) {
+            alert('Preencha o nome da máquina e selecione um EPI.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${BASE_PATH_LOCAL}/api/machines/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome: nome,
+                    setor_id: currentMachineSectorId,
+                    epi_id: epiId
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('inputMachineName').value = '';
+                document.getElementById('selectMachineEpi').value = '';
+                loadMachines();
+            } else {
+                alert('Erro: ' + result.message);
+            }
+        } catch (err) {
+            alert('Erro ao adicionar máquina.');
+        }
+    }
+
+    async function deleteMachine(id) {
+        if (!confirm('Deseja remover esta máquina?')) return;
+
+        try {
+            const response = await fetch(`${BASE_PATH_LOCAL}/api/machines/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                loadMachines();
+            } else {
+                alert('Erro: ' + result.message);
+            }
+        } catch (err) {
+            alert('Erro ao remover máquina.');
+        }
     }
 </script>
 

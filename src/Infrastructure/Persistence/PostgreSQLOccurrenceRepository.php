@@ -390,7 +390,24 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 LEFT JOIN setores s ON f.setor_id = s.id
                 LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                 LEFT JOIN epis e ON oe.epi_id = e.id
-                WHERE o.tipo = 'INFRACAO' AND o.oculto = FALSE";
+                WHERE o.tipo = 'INFRACAO'";
+
+        // 1. Visibilidade / Status Inativo
+        if (isset($filters['status']) && $filters['status'] === 'inativo') {
+            $sql .= " AND o.oculto = TRUE";
+        } else {
+            // Default: show only active (non-hidden)
+            $sql .= " AND o.oculto = FALSE";
+        }
+
+        // 2. Status (pendente / resolvido)
+        if (isset($filters['status'])) {
+            if ($filters['status'] === 'pendente') {
+                $sql .= " AND NOT EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id)";
+            } elseif ($filters['status'] === 'resolvido') {
+                $sql .= " AND EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id)";
+            }
+        }
 
         $params = [];
 

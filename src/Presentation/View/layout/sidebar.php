@@ -6,8 +6,7 @@ $currentRoute = str_replace($basePath, '', $currentPath);
 ?>
 <aside class="sidebar">
     <div class="brand">
-        <div class="logo-circle"></div>
-        EPI <span>GUARD</span>
+        FACCHINI
     </div>
 
     <nav class="nav-menu">
