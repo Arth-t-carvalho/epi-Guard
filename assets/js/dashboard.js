@@ -519,18 +519,24 @@ let selectedSectorIds = []; // Novo: Array de setores selecionados
 
 function openCourseModal() {
     const modal = document.getElementById('courseModal');
+    const header = document.querySelector('.header');
     if (modal) {
         modal.classList.add('active');
+        if (header) header.style.opacity = '0';
+        if (header) header.style.pointerEvents = 'none';
         document.querySelector('.main-content').style.overflow = 'hidden';
         if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
-        updateSelectionUI(); // Sincroniza checks com o estado
+        updateSelectionUI(); 
     }
 }
 
 function closeCourseModal() {
     const modal = document.getElementById('courseModal');
+    const header = document.querySelector('.header');
     if (modal) {
         modal.classList.remove('active');
+        if (header) header.style.opacity = '1';
+        if (header) header.style.pointerEvents = 'auto';
         document.querySelector('.main-content').style.overflow = '';
     }
 }
@@ -668,8 +674,11 @@ function irParaInfracoes(nome) {
 window.confirmRedirect = function(period) {
     pendingRedirectPeriod = period;
     const modal = document.getElementById('confirmInfractionsModal');
+    const header = document.querySelector('.header');
     if (modal) {
         modal.classList.add('active');
+        if (header) header.style.opacity = '0';
+        if (header) header.style.pointerEvents = 'none';
         document.querySelector('.main-content').style.overflow = 'hidden';
         if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
     }
@@ -677,8 +686,11 @@ window.confirmRedirect = function(period) {
 
 window.closeConfirmModal = function() {
     const modal = document.getElementById('confirmInfractionsModal');
+    const header = document.querySelector('.header');
     if (modal) {
         modal.classList.remove('active');
+        if (header) header.style.opacity = '1';
+        if (header) header.style.pointerEvents = 'auto';
         document.querySelector('.main-content').style.overflow = '';
     }
 }
@@ -781,8 +793,11 @@ function updateConformityStatus(valor) {
 
 function openComplianceModal() {
     const modal = document.getElementById('complianceModal');
+    const header = document.querySelector('.header');
     if (modal) {
         modal.classList.add('active');
+        if (header) header.style.opacity = '0';
+        if (header) header.style.pointerEvents = 'none';
         document.querySelector('.main-content').style.overflow = 'hidden';
         document.querySelectorAll('.period-option').forEach(opt => opt.classList.remove('active'));
         const activeOpt = document.getElementById(`opt-period-${selectedCompliancePeriod}`);
@@ -793,8 +808,11 @@ function openComplianceModal() {
 
 function closeComplianceModal() {
     const modal = document.getElementById('complianceModal');
+    const header = document.querySelector('.header');
     if (modal) {
         modal.classList.remove('active');
+        if (header) header.style.opacity = '1';
+        if (header) header.style.pointerEvents = 'auto';
         document.querySelector('.main-content').style.overflow = '';
     }
 }

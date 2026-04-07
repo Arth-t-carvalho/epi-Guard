@@ -34,8 +34,13 @@ class ChartApiController
         if (isset($_GET['sector_id']) && $_GET['sector_id'] !== 'all') {
             $sectorIds = array_map('intval', explode(',', $_GET['sector_id']));
         }
+
+        $refDate = null;
+        if (isset($_GET['ref_date'])) {
+            $refDate = new \DateTimeImmutable($_GET['ref_date']);
+        }
         
-        $data = $this->dashboardService->getChartData($sectorIds);
+        $data = $this->dashboardService->getChartData($sectorIds, $refDate);
 
         echo json_encode($data);
     }

@@ -45,7 +45,7 @@ $extraHead = '
             background: #E30613;
             color: #fff;
             border: none;
-            border-radius: 10px;
+            border-radius: 2px; /* Bem quadrado */
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
@@ -75,7 +75,7 @@ $extraHead = '
             gap: 10px;
             background: #fff;
             border: 1px solid #e5e7eb;
-            border-radius: 10px;
+            border-radius: 2px; /* Ultra-Squared */
             padding: 10px 16px;
             min-width: 280px;
             transition: 0.2s;
@@ -108,7 +108,7 @@ $extraHead = '
         .setor-filters select {
             padding: 10px 16px;
             border: 1px solid #e5e7eb;
-            border-radius: 10px;
+            border-radius: 2px; /* Ultra-Squared */
             font-size: 13px;
             font-family: "Inter", sans-serif;
             color: #1F2937;
@@ -126,7 +126,7 @@ $extraHead = '
         /* Tabela */
         .setor-table-wrapper {
             background: #fff;
-            border-radius: 16px;
+            border-radius: 4px; /* Industrial */
             border: 1px solid #f0f0f5;
             overflow-y: auto;
             flex: 1;
@@ -196,7 +196,7 @@ $extraHead = '
         .epi-icon-badge {
             width: 30px;
             height: 30px;
-            border-radius: 8px;
+            border-radius: 4px;
             background: #f1f5f9;
             display: flex;
             align-items: center;
@@ -229,7 +229,7 @@ $extraHead = '
         .btn-edit {
             width: 30px;
             height: 30px;
-            border-radius: 8px;
+            border-radius: 2px; /* Bem quadrado */
             border: 1px solid #e5e7eb;
             background: #fff;
             display: flex;
@@ -250,7 +250,7 @@ $extraHead = '
         .btn-delete {
             width: 30px;
             height: 30px;
-            border-radius: 8px;
+            border-radius: 2px; /* Bem quadrado */
             border: 1px solid #fee2e2;
             background: #fff;
             display: flex;
@@ -270,7 +270,7 @@ $extraHead = '
         .btn-machines {
             width: 30px;
             height: 30px;
-            border-radius: 8px;
+            border-radius: 2px; /* Bem quadrado */
             border: 1px solid #e5e7eb;
             background: #fff;
             display: flex;
@@ -291,7 +291,7 @@ $extraHead = '
         /* Machine Modal Specifics */
         .machine-form-box {
             background: #f8fafc;
-            border-radius: 14px;
+            border-radius: 4px;
             padding: 20px;
             border: 1px solid #e2e8f0;
             margin-bottom: 24px;
@@ -324,7 +324,7 @@ $extraHead = '
             background: #E30613;
             color: #fff;
             border: none;
-            border-radius: 10px;
+            border-radius: 2px; /* Bem quadrado */
             font-size: 14px;
             font-weight: 700;
             cursor: pointer;
@@ -349,7 +349,7 @@ $extraHead = '
             padding: 12px 16px;
             background: #fff;
             border: 1px solid #e5e7eb;
-            border-radius: 10px;
+            border-radius: 4px;
             margin-bottom: 8px;
         }
 
@@ -438,7 +438,7 @@ $extraHead = '
 
         .modal-setor {
             background: #fff;
-            border-radius: 18px;
+            border-radius: 4px; /* Industrial */
             padding: 32px;
             width: 520px;
             max-height: 85vh;
@@ -503,7 +503,7 @@ $extraHead = '
             width: 100%;
             padding: 12px 16px;
             border: 1px solid #e5e7eb;
-            border-radius: 10px;
+            border-radius: 2px; /* Bem quadrado */
             font-size: 14px;
             font-family: "Inter", sans-serif;
             color: #1F2937;
@@ -561,7 +561,7 @@ $extraHead = '
             gap: 12px;
             padding: 14px 16px;
             border: 1px solid #e5e7eb;
-            border-radius: 12px;
+            border-radius: 4px;
             cursor: pointer;
             transition: 0.2s;
             background: #fff;
@@ -581,7 +581,7 @@ $extraHead = '
             width: 36px;
             height: 36px;
             background: #f1f5f9;
-            border-radius: 10px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -636,7 +636,7 @@ $extraHead = '
             background: #E30613;
             color: #fff;
             border: none;
-            border-radius: 10px;
+            border-radius: 2px; /* Bem quadrado */
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;

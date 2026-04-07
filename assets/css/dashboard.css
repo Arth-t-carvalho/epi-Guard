@@ -82,7 +82,7 @@
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid rgba(227, 6, 19, 0.1);
     padding: 8px 16px;
-    border-radius: 12px;
+    border-radius: 4px; /* Reto industrial */
     font-size: 13px;
     font-weight: 700;
     color: var(--secondary);
@@ -147,7 +147,7 @@
     background: white;
     border: 1px solid var(--border);
     padding: 6px 14px;
-    border-radius: 10px;
+    border-radius: 4px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -648,7 +648,7 @@ html.dark-theme .occ-avatar {
     gap: 15px;
     background: #ffffff;
     padding: 8px 18px;
-    border-radius: 12px;
+    border-radius: 4px;
     border: 1px solid #e2e8f0;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

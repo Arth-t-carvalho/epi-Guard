@@ -51,10 +51,10 @@ class DashboardService
             );
     }
 
-    public function getChartData(null|int|array $sectorIds = null): array
+    public function getChartData(null|int|array $sectorIds = null, ?\DateTimeInterface $referenceDate = null): array
     {
-        $now = new \DateTimeImmutable();
-        $year = (int)$now->format('Y');
+        $ref = $referenceDate ? \DateTimeImmutable::createFromInterface($referenceDate) : new \DateTimeImmutable();
+        $year = (int)$ref->format('Y');
 
         if (is_int($sectorIds)) {
             $sectorIds = [$sectorIds];
@@ -62,16 +62,40 @@ class DashboardService
 
         $barData = $this->occurrenceRepository->getMonthlyInfractionStats($year, $sectorIds);
 
+        // --- Cálculos de Tendência ---
+        
+        // 1. Diário (vs Ontem)
+        $todayCount = $this->occurrenceRepository->countDaily($ref, $sectorIds);
+        $yesterday = $ref->modify('-1 day');
+        $yesterdayCount = $this->occurrenceRepository->countDaily($yesterday, $sectorIds);
+        $todayTrend = $this->calculateTrend($todayCount, $yesterdayCount);
+
+        // 2. Semanal (vs Semana Passada)
+        // YEARWEEK(ref, 1) pega a semana ISO
+        $weekCount = $this->occurrenceRepository->countWeekly($ref, $sectorIds);
+        $lastWeek = $ref->modify('-7 days');
+        $lastWeekCount = $this->occurrenceRepository->countWeekly($lastWeek, $sectorIds);
+        $weekTrend = $this->calculateTrend($weekCount, $lastWeekCount);
+
+        // 3. Mensal (vs Mês Passado)
+        $monthCount = $this->occurrenceRepository->countMonthly($ref, $sectorIds);
+        $lastMonth = $ref->modify('-1 month');
+        $lastMonthCount = $this->occurrenceRepository->countMonthly($lastMonth, $sectorIds);
+        $monthTrend = $this->calculateTrend($monthCount, $lastMonthCount);
+
         return [
             'status' => 'success',
             'summary' => [
-                'today' => $this->occurrenceRepository->countDaily($now, $sectorIds),
-                'week' => $this->occurrenceRepository->countWeekly($now, $sectorIds),
-                'month' => $this->occurrenceRepository->countMonthly($now, $sectorIds),
-                'students_today' => $this->occurrenceRepository->countUniqueStudentsDaily($now, $sectorIds),
-                'students_week' => $this->occurrenceRepository->countUniqueStudentsWeekly($now, $sectorIds),
-                'students_month' => $this->occurrenceRepository->countUniqueStudentsMonthly($now, $sectorIds),
-                'students_year' => $this->occurrenceRepository->countUniqueStudentsYearly($now, $sectorIds),
+                'today' => $todayCount,
+                'today_trend' => $todayTrend,
+                'week' => $weekCount,
+                'week_trend' => $weekTrend,
+                'month' => $monthCount,
+                'month_trend' => $monthTrend,
+                'students_today' => $this->occurrenceRepository->countUniqueStudentsDaily($ref, $sectorIds),
+                'students_week' => $this->occurrenceRepository->countUniqueStudentsWeekly($ref, $sectorIds),
+                'students_month' => $this->occurrenceRepository->countUniqueStudentsMonthly($ref, $sectorIds),
+                'students_year' => $this->occurrenceRepository->countUniqueStudentsYearly($ref, $sectorIds),
                 'total_students' => $this->employeeRepository->countAll($sectorIds)
             ],
             'bar' => $barData['stats'],
@@ -96,5 +120,13 @@ class DashboardService
             }
         }
         return 'bar';
+    }
+
+    private function calculateTrend(int $current, int $previous): float
+    {
+        if ($previous === 0) {
+            return $current > 0 ? 100.0 : 0.0;
+        }
+        return round((($current - $previous) / $previous) * 100, 1);
     }
 }

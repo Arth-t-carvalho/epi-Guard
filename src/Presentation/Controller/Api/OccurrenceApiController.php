@@ -13,6 +13,7 @@ class OccurrenceApiController
 {
     private MySQLOccurrenceRepository $occurrenceRepo;
     private MySQLDepartmentRepository $departmentRepo;
+    private \Facchini\Application\Service\DashboardService $dashboardService;
 
     public function __construct()
     {
@@ -23,6 +24,7 @@ class OccurrenceApiController
         $epiRepo = new MySQLEpiRepository();
         $this->occurrenceRepo = new MySQLOccurrenceRepository($employeeRepo, $userRepo, $epiRepo);
         $this->departmentRepo = $deptRepo;
+        $this->dashboardService = new \Facchini\Application\Service\DashboardService($employeeRepo, $this->occurrenceRepo, $userRepo);
     }
     public function calendar()
     {

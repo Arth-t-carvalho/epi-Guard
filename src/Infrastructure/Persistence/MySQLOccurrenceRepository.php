@@ -86,7 +86,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE DATE(o.data_hora) = ? AND o.tipo = 'INFRACAO'";
+                  WHERE DATE(o.data_hora) = ? AND o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -117,7 +117,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE YEARWEEK(o.data_hora, 1) = YEARWEEK(?, 1) AND o.tipo = 'INFRACAO'";
+                  WHERE YEARWEEK(o.data_hora, 1) = YEARWEEK(?, 1) AND o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -148,7 +148,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE MONTH(o.data_hora) = MONTH(?) AND YEAR(o.data_hora) = YEAR(?) AND o.tipo = 'INFRACAO'";
+                  WHERE MONTH(o.data_hora) = MONTH(?) AND YEAR(o.data_hora) = YEAR(?) AND o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -179,7 +179,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE DATE(o.data_hora) = ? AND o.tipo = 'INFRACAO'";
+                  WHERE DATE(o.data_hora) = ? AND o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -210,7 +210,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE YEARWEEK(o.data_hora, 1) = YEARWEEK(?, 1) AND o.tipo = 'INFRACAO'";
+                  WHERE YEARWEEK(o.data_hora, 1) = YEARWEEK(?, 1) AND o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -241,7 +241,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE MONTH(o.data_hora) = MONTH(?) AND YEAR(o.data_hora) = YEAR(?) AND o.tipo = 'INFRACAO'";
+                  WHERE MONTH(o.data_hora) = MONTH(?) AND YEAR(o.data_hora) = YEAR(?) AND o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -272,7 +272,7 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE YEAR(o.data_hora) = YEAR(?) AND o.tipo = 'INFRACAO'";
+                  WHERE YEAR(o.data_hora) = YEAR(?) AND o.tipo = 'INFRACAO' AND o.oculto = FALSE";
 
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
@@ -297,6 +297,58 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $stmt->execute();
         $res = $stmt->get_result()->fetch_assoc();
         return (int) $res['total'];
+    }
+
+    public function countRange(\DateTimeInterface $start, \DateTimeInterface $end, ?array $sectorIds = null): int
+    {
+        $startStr = $start->format('Y-m-d 00:00:00');
+        $endStr = $end->format('Y-m-d 23:59:59');
+        $activeFilial = $_SESSION['active_filial_id'] ?? 1;
+
+        $query = "SELECT COUNT(*) as total FROM ocorrencias o 
+                  JOIN funcionarios f ON o.funcionario_id = f.id 
+                  WHERE o.data_hora BETWEEN ? AND ? AND o.tipo = 'INFRACAO' AND o.oculto = FALSE AND o.filial_id = ?";
+
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+            $types = 'ssi' . str_repeat('i', count($sectorIds));
+            $params = array_merge([$startStr, $endStr, $activeFilial], $sectorIds);
+        } else {
+            $types = 'ssi';
+            $params = [$startStr, $endStr, $activeFilial];
+        }
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        return (int) $stmt->get_result()->fetch_assoc()['total'];
+    }
+
+    public function countUniqueStudentsRange(\DateTimeInterface $start, \DateTimeInterface $end, ?array $sectorIds = null): int
+    {
+        $startStr = $start->format('Y-m-d 00:00:00');
+        $endStr = $end->format('Y-m-d 23:59:59');
+        $activeFilial = $_SESSION['active_filial_id'] ?? 1;
+
+        $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
+                  JOIN funcionarios f ON o.funcionario_id = f.id 
+                  WHERE o.data_hora BETWEEN ? AND ? AND o.tipo = 'INFRACAO' AND o.oculto = FALSE AND o.filial_id = ?";
+
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+            $types = 'ssi' . str_repeat('i', count($sectorIds));
+            $params = array_merge([$startStr, $endStr, $activeFilial], $sectorIds);
+        } else {
+            $types = 'ssi';
+            $params = [$startStr, $endStr, $activeFilial];
+        }
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        return (int) $stmt->get_result()->fetch_assoc()['total'];
     }
 
     public function getMonthlyInfractionStats(int $year, ?array $sectorIds = null): array
@@ -663,18 +715,17 @@ class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
             $types .= "s";
         }
 
-        if (!empty($filters['status']) && $filters['status'] !== 'todos') {
-            if ($filters['status'] === 'resolvido') {
-                $sql .= " AND EXISTS (SELECT 1 FROM acoes_ocorrencia ao2 WHERE ao2.ocorrencia_id = o.id)";
-            } elseif ($filters['status'] === 'pendente') {
-                $sql .= " AND NOT EXISTS (SELECT 1 FROM acoes_ocorrencia ao2 WHERE ao2.ocorrencia_id = o.id)";
-            }
-        }
-
-        if (!empty($filters['visibilidade']) && $filters['visibilidade'] === 'inativos') {
+        if (!empty($filters['status']) && $filters['status'] === 'inativo') {
             $sql .= " AND o.oculto = TRUE";
         } else {
             $sql .= " AND o.oculto = FALSE";
+            if (!empty($filters['status']) && $filters['status'] !== 'todos') {
+                if ($filters['status'] === 'resolvido') {
+                    $sql .= " AND EXISTS (SELECT 1 FROM acoes_ocorrencia ao2 WHERE ao2.ocorrencia_id = o.id)";
+                } elseif ($filters['status'] === 'pendente') {
+                    $sql .= " AND NOT EXISTS (SELECT 1 FROM acoes_ocorrencia ao2 WHERE ao2.ocorrencia_id = o.id)";
+                }
+            }
         }
 
         if (!empty($filters['periodo']) && $filters['periodo'] !== 'todos') {

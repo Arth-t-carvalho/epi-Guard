@@ -18,7 +18,7 @@ $extraHead = '
         background: var(--bg-card);
         width: 90%;
         max-width: 500px;
-        border-radius: var(--radius);
+        border-radius: 4px; /* Bem quadrado */
         overflow: hidden;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         border: 1px solid var(--border);
@@ -57,7 +57,7 @@ $extraHead = '
         width: 100%;
         padding: 10px 14px;
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 2px; /* Bem quadrado */
         font-size: 14px;
         transition: 0.2s;
     }

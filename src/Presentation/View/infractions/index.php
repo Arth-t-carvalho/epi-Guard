@@ -45,7 +45,7 @@ function formatInfractionDuration($start, $end = null) {
     <div class="header-actions">
         <!-- Botão Novo Exportar (Vermelho / Destaque) -->
         <button class="btn-primary" onclick="openExportModal()"
-            style="background: var(--primary); border-radius: 12px; font-weight: 800; padding: 12px 24px;">
+            style="background: var(--primary); border-radius: 2px; font-weight: 800; padding: 12px 24px;">
             <i class="fa-solid fa-plus"></i> <?= __('Exportar') ?>
         </button>
     </div>
@@ -75,7 +75,6 @@ function formatInfractionDuration($start, $end = null) {
         <input type="hidden" name="date_from" id="hiddenDate_from"
             value="<?= htmlspecialchars($filters['date_from']) ?>">
         <input type="hidden" name="date_to" id="hiddenDate_to" value="<?= htmlspecialchars($filters['date_to']) ?>">
-        <input type="hidden" name="visibilidade" id="hiddenVisibilidade" value="<?= htmlspecialchars($filters['visibilidade']) ?>">
         <input type="hidden" name="order" id="hiddenOrder" value="<?= htmlspecialchars($filters['order']) ?>">
 
         <!-- 1. PERÍODO -->
@@ -122,7 +121,8 @@ function formatInfractionDuration($start, $end = null) {
                         $statusLabels = [
                             'todos' => __('Todos os status'),
                             'pendente' => __('Pendente'),
-                            'resolvido' => __('Resolvido')
+                            'resolvido' => __('Resolvido'),
+                            'inativo' => __('Inativo')
                         ];
                         echo $statusLabels[$filters['status']] ?? __('Todos os status');
                         ?>
@@ -146,19 +146,6 @@ function formatInfractionDuration($start, $end = null) {
             </div>
         </div>
 
-        <!-- 4. VISIBILIDADE -->
-        <div class="filter-group">
-            <div class="modern-picker-trigger" onclick="openModernPicker('visibilidade')">
-                <i class="fa-solid fa-eye" style="color: var(--primary);"></i>
-                <div class="trigger-info">
-                    <span class="trigger-label"><?= __('VISIBILIDADE') ?></span>
-                    <span class="trigger-value" id="label-visibilidade">
-                        <?= $filters['visibilidade'] === 'inativos' ? __('Inativos') : __('Ativos') ?>
-                    </span>
-                </div>
-                <i class="fa-solid fa-chevron-down"></i>
-            </div>
-        </div>
 
         <!-- 5. ORDENAR POR -->
         <div class="filter-group">
@@ -1385,7 +1372,8 @@ function formatInfractionDuration($start, $end = null) {
         status: [
             { value: 'todos', label: '<?= __('Todos os Status') ?>' },
             { value: 'pendente', label: '<?= __('Pendente') ?>' },
-            { value: 'resolvido', label: '<?= __('Resolvido') ?>' }
+            { value: 'resolvido', label: '<?= __('Resolvido') ?>' },
+            { value: 'inativo', label: '<?= __('Inativo') ?>' }
         ],
         epi: [
             { value: 'todos', label: '<?= __('Todos os EPIs') ?>' },
@@ -1401,10 +1389,6 @@ function formatInfractionDuration($start, $end = null) {
             { value: 'recentes', label: '<?= __('Mais Recentes') ?>' },
             { value: 'alfabetica', label: '<?= __('Ordem Alfabética') ?>' },
             { value: 'frequentes', label: '<?= __('Mais Frequentes') ?>' }
-        ],
-        visibilidade: [
-            { value: 'ativos', label: '<?= __('Ativos') ?>', description: '<?= __('Exibir registros visíveis') ?>' },
-            { value: 'inativos', label: '<?= __('Inativos') ?>', description: '<?= __('Exibir registros apagados') ?>' }
         ]
     };
 

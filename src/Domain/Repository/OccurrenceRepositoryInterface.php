@@ -40,6 +40,10 @@ interface OccurrenceRepositoryInterface
     public function countUniqueStudentsMonthly(\DateTimeInterface $date, ?array $sectorIds = null): int;
     
     public function countUniqueStudentsYearly(\DateTimeInterface $date, ?array $sectorIds = null): int;
+    
+    public function countRange(\DateTimeInterface $start, \DateTimeInterface $end, ?array $sectorIds = null): int;
+    
+    public function countUniqueStudentsRange(\DateTimeInterface $start, \DateTimeInterface $end, ?array $sectorIds = null): int;
 
     /**
      * Retorna array com contagens por mês para o gráfico de barras

@@ -68,16 +68,24 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    color: rgba(255, 255, 255, 0.7);
+    padding: 14px 18px;
+    /* Ligeiramente maior */
+    color: #ffffff;
+    /* Branco puro */
     text-decoration: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
+    border-radius: 4px;
+    /* Mais quadrado/industrial */
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    /* Maior */
+    font-weight: 800;
+    /* Mais pesado/estilo fábrica */
+    text-transform: uppercase;
+    /* Industrial */
+    letter-spacing: 1px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    /* Garante que o pseudo-elemento respeite os cantos */
 }
 
 .nav-item:hover {
@@ -103,17 +111,31 @@
     right: 0;
     top: 0;
     height: 100%;
-    width: 6px;
-    /* Mais grossa */
-    background: linear-gradient(180deg, #E30613 0%, #a3040d 100%);
-    /* Degradê leve e elegante */
-    box-shadow: -1px 0 4px rgba(227, 6, 19, 0.2);
+    width: 8px;
+    /* Mais robusta */
+    background: #E30613;
+    box-shadow: -2px 0 8px rgba(227, 6, 19, 0.3);
+}
+
+.nav-item i,
+.nav-item svg {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 28px !important;
+    stroke-width: 2.2px;
+    /* Reduzido para um traço mais fino e elegante */
+    transition: all 0.3s ease;
+    opacity: 1;
+    color: inherit;
+    flex-shrink: 0;
 }
 
 .nav-item.active i,
 .nav-item.active svg {
-    stroke-width: 2.5px !important;
-    filter: drop-shadow(0 0 5px rgba(227, 6, 19, 0.4));
+    stroke-width: 2.8px !important;
+    /* Ligeiramente mais grosso apenas para destaque */
+    filter: none !important;
+    /* Removido brilho/glow */
 }
 
 .nav-group {
@@ -164,11 +186,14 @@
     align-items: center;
     gap: 10px;
     padding: 10px 16px;
-    color: var(--text-muted) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
     text-decoration: none;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 500;
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     transition: all 0.2s;
 }
 
@@ -179,8 +204,16 @@
 
 .nav-subitem.active {
     color: var(--primary) !important;
-    font-weight: 700 !important;
-    background: rgba(227, 6, 19, 0.08) !important;
+    font-weight: 800 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    transform: translateX(4px);
+}
+
+.nav-subitem i,
+.nav-subitem svg {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 18px !important;
 }
 
 /* =========================================
@@ -200,7 +233,8 @@
     padding: 12px 16px;
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius);
+    border-radius: 2px;
+    /* Bem quadrado */
     color: white;
     font-size: 16px;
     font-weight: 600;
@@ -213,8 +247,17 @@
 }
 
 @keyframes pulse-red-border {
-    0%, 100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); border-color: rgba(255, 255, 255, 0.3); }
-    50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); border-color: white; }
+
+    0%,
+    100% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        border-color: white;
+    }
 }
 
 .ai-toggle-btn:hover {
@@ -506,18 +549,7 @@ html.dark-theme .ai-chat-input input:focus {
    ========================================= */
 .branch-dropdown {
     display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    min-width: 200px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    z-index: 10000;
-    margin-top: 8px;
-    padding: 8px;
-    overflow: hidden;
+    /* Agora usaremos um modal centralizado */
 }
 
 .branch-dropdown.show {
@@ -526,8 +558,15 @@ html.dark-theme .ai-chat-input input:focus {
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .branch-item {
@@ -556,16 +595,23 @@ html.dark-theme .ai-chat-input input:focus {
 .header-branch-btn {
     background: white;
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 16px;
+    border-radius: 4px;
+    /* Industrial squared */
+    padding: 6px 12px;
+    /* Menor que o perfil */
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'Inter', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
+    /* Mais forte */
+    font-size: 12px;
+    /* Menor que o perfil */
     color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .header-branch-btn:hover {
@@ -583,7 +629,7 @@ html.dark-theme .branch-item {
 }
 
 html.dark-theme .branch-item:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 html.dark-theme .header-branch-btn {

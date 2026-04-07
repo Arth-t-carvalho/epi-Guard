@@ -38,9 +38,10 @@
     -webkit-backdrop-filter: blur(12px);
     display: none;
     justify-content: center;
-    align-items: center;
+    align-items: center; /* Centralização vertical */
     z-index: 10000;
     opacity: 0;
+    padding: 20px; /* Margem de segurança */
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -279,13 +280,14 @@ html.dark-theme .modal .modal-header {
     background: white;
     width: 90%;
     max-width: 480px;
-    border-radius: 24px;
+    border-radius: 8px; /* Mais quadrado */
     padding: 35px;
     text-align: center;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
     margin: auto;
-    transform: scale(0.9) translateY(20px);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-top: 4px solid var(--primary); /* Estilo KPI Card */
+    transform: translateY(20px);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 html.dark-theme .modal-confirmation-content {
@@ -338,7 +340,7 @@ html.dark-theme .modal-confirmation-content p {
     width: 100%;
     padding: 16px 24px;
     border: none;
-    border-radius: 14px;
+    border-radius: 6px; /* Mais quadrado */
     cursor: pointer;
     overflow: hidden;
     color: #fff;
@@ -347,8 +349,8 @@ html.dark-theme .modal-confirmation-content p {
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 25px rgba(227, 6, 19, 0.2);
-    background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%);
+    box-shadow: 0 8px 15px rgba(227, 6, 19, 0.15);
+    background: linear-gradient(135deg, #E30613 0%, #bf040f 100%);
 }
 
 .btn-liquid:hover {
@@ -372,12 +374,12 @@ html.dark-theme .modal-confirmation-content p {
     background: #f8fafc;
     color: #475569;
     border: 1px solid #e2e8f0;
-    border-radius: 14px;
+    border-radius: 6px; /* Mais quadrado */
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.05);
 }
 
 html.dark-theme .btn-light-shadow {

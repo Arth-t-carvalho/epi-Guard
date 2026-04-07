@@ -4,20 +4,19 @@
 
 /* MODAL PREMIUM (Versão Seleção de Setor) */
 .modal-premium-content {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.98);
     width: 90%;
     max-width: 650px;
-    border-radius: 32px;
-    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    margin: auto;
-    transform: scale(0.8) translateY(40px) rotateX(-10deg);
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    perspective: 1000px;
+    margin: 0; /* Removido auto para evitar conflitos com flex do pai */
+    border-top: 4px solid var(--primary);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .modal-premium.active .modal-premium-content {
-    transform: scale(1) translateY(0) rotateX(0deg);
+    transform: translateY(0);
 }
 
 /* Dark Mode Overrides */
@@ -155,7 +154,7 @@ html.dark-theme .modal-premium-footer {
     color: white;
     border: none;
     padding: 12px 24px;
-    border-radius: 12px;
+    border-radius: 6px; /* Mais quadrado */
     font-weight: 700;
     font-size: 14px;
     display: flex;
@@ -163,7 +162,7 @@ html.dark-theme .modal-premium-footer {
     gap: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(227, 6, 19, 0.2);
+    box-shadow: 0 4px 10px rgba(227, 6, 19, 0.2);
 }
 
 .btn-apply-filter:hover {
