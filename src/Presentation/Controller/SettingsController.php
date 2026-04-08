@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Facchini\Presentation\Controller;
 
-use Facchini\Infrastructure\Persistence\MySQLUserRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLUserRepository;
 
 class SettingsController
 {
@@ -15,11 +15,11 @@ class SettingsController
         }
 
         // 3. Busca de EPIs para configuração de cores
-        $epiRepo = new \Facchini\Infrastructure\Persistence\MySQLEpiRepository();
+        $epiRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository();
         $episData = $epiRepo->findAllForSettings();
 
         // 4. Busca dados do Usuário logado
-        $userRepo = new \Facchini\Infrastructure\Persistence\MySQLUserRepository();
+        $userRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLUserRepository();
         $currentUser = null;
         if (isset($_SESSION['user_id'])) {
             $currentUser = $userRepo->findById((int)$_SESSION['user_id']);

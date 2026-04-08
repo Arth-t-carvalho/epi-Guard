@@ -59,7 +59,7 @@ html.dark-theme {
 .filter-bar select {
     padding: 10px 14px;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 4px;
     font-size: 13px;
     font-family: 'Inter', sans-serif;
     background: white;
@@ -88,7 +88,7 @@ html.dark-theme {
 .search-input-wrapper {
     background: white;
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border-radius: 4px;
     height: 42px;
     display: flex;
     align-items: center;
@@ -109,7 +109,7 @@ html.dark-theme .page-content {
     background: white;
     border: 1px solid #e2e8f0;
     padding: 0 15px;
-    border-radius: 10px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -196,7 +196,7 @@ html.dark-theme .modern-picker-trigger .trigger-value {
    ========================================= */
 .table-card {
     background: var(--bg-card) !important;
-    border-radius: 20px !important;
+    border-radius: 4px !important;
     padding: 0 !important;
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
@@ -305,7 +305,7 @@ html.dark-theme .data-table tbody tr.is-bookmarked {
 .btn-action-premium {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -371,7 +371,7 @@ html.dark-theme .btn-action-premium:hover {
 
 .infraction-card {
     background: var(--bg-card);
-    border-radius: 20px;
+    border-radius: 4px;
     overflow: hidden;
     border: 1px solid var(--border);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -417,7 +417,7 @@ html.dark-theme .infraction-card.is-bookmarked {
     top: 12px;
     right: 12px;
     padding: 6px 12px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
@@ -462,7 +462,7 @@ html.dark-theme .card-footer-premium {
 .btn-card-action-premium {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: 4px;
     background: var(--infra-btn-bg);
     border: 1px solid var(--infra-btn-border);
     color: var(--infra-btn-text);

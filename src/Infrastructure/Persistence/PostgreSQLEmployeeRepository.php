@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace epiGuard\Infrastructure\Persistence;
+namespace Facchini\Infrastructure\Persistence;
 
-use epiGuard\Domain\Entity\Employee;
-use epiGuard\Domain\ValueObject\CPF;
-use epiGuard\Domain\Repository\EmployeeRepositoryInterface;
-use epiGuard\Domain\Repository\DepartmentRepositoryInterface;
-use epiGuard\Infrastructure\Database\Connection;
+use Facchini\Domain\Entity\Employee;
+use Facchini\Domain\ValueObject\CPF;
+use Facchini\Domain\Repository\EmployeeRepositoryInterface;
+use Facchini\Domain\Repository\DepartmentRepositoryInterface;
+use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 
 class PostgreSQLEmployeeRepository implements EmployeeRepositoryInterface
@@ -92,6 +92,22 @@ class PostgreSQLEmployeeRepository implements EmployeeRepositoryInterface
         $stmt->execute($params);
     }
 
+    public function countAll(?array $sectorIds = null): int
+    {
+        $sql = "SELECT COUNT(*) FROM funcionarios WHERE status = 'ATIVO'";
+        $params = [];
+        
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $sql .= " AND setor_id IN ($placeholders)";
+            $params = $sectorIds;
+        }
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
+    }
+
     public function delete(Employee $employee): void
     {
         $stmt = $this->db->prepare("DELETE FROM funcionarios WHERE id = ?");
@@ -103,7 +119,7 @@ class PostgreSQLEmployeeRepository implements EmployeeRepositoryInterface
         $department = $this->departmentRepository->findById((int) $row['setor_id']);
         
         if (!$department) {
-            $department = new \epiGuard\Domain\Entity\Department(
+            $department = new \Facchini\Domain\Entity\Department(
                 name: 'Setor Desconhecido',
                 code: 'N/A',
                 epis: [],

@@ -1,12 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace epiGuard\Infrastructure\Persistence;
+namespace Facchini\Infrastructure\Persistence;
 
-use epiGuard\Domain\Entity\Department;
-use epiGuard\Domain\Repository\DepartmentRepositoryInterface;
-use epiGuard\Infrastructure\Database\Connection;
-use DateTimeImmutable;
+use Facchini\Domain\Entity\Department;
+use Facchini\Domain\Repository\DepartmentRepositoryInterface;
+use Facchini\Infrastructure\Database\Connection;
 
 class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 {
@@ -19,7 +18,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function findById(int $id): ?Department
     {
-        $stmt = $this->db->prepare("SELECT id, nome, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE id = ?");
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch()) {
@@ -31,7 +30,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function findByCode(string $code): ?Department
     {
-        $stmt = $this->db->prepare("SELECT id, nome, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE sigla = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE sigla = ?");
         $stmt->execute([$code]);
 
         if ($row = $stmt->fetch()) {
@@ -43,7 +42,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function findByName(string $name): ?Department
     {
-        $stmt = $this->db->prepare("SELECT id, nome, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE nome = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE nome = ?");
         $stmt->execute([$name]);
 
         if ($row = $stmt->fetch()) {
@@ -56,7 +55,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
     /** @return Department[] */
     public function findAll(): array
     {
-        $stmt = $this->db->query("SELECT id, nome, sigla, status, criado_em, atualizado_em FROM setores ORDER BY nome ASC");
+        $stmt = $this->db->query("SELECT id, nome, nome_en, sigla, status, criado_em, atualizado_em FROM setores ORDER BY nome ASC");
         $departments = [];
 
         while ($row = $stmt->fetch()) {
@@ -71,7 +70,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
      */
     public function findAllWithStats(array $filters = []): array
     {
-        $sql = "SELECT s.id, s.nome, s.sigla, s.status, s.epis_json, s.criado_em, s.atualizado_em, 
+        $sql = "SELECT s.id, s.nome, s.nome_en, s.sigla, s.status, s.epis_json, s.criado_em, s.atualizado_em, 
                        (SELECT COUNT(*) FROM funcionarios WHERE setor_id = s.id) as total_funcionarios,
                        COALESCE(risk_data.risk_p, 0) as risk_p
                 FROM setores s 
@@ -106,14 +105,15 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function save(Department $department): void
     {
-        $stmt = $this->db->prepare("INSERT INTO setores (nome, sigla, epis_json) VALUES (?, ?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO setores (nome, nome_en, sigla, epis_json) VALUES (?, ?, ?, ?)");
         $params = [
             $department->getName(),
+            $department->getNameEn(),
             $department->getCode(),
             json_encode($department->getEpis())
         ];
@@ -124,9 +124,10 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function update(Department $department): void
     {
-        $stmt = $this->db->prepare("UPDATE setores SET nome = ?, sigla = ?, epis_json = ? WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE setores SET nome = ?, nome_en = ?, sigla = ?, epis_json = ? WHERE id = ?");
         $params = [
             $department->getName(),
+            $department->getNameEn(),
             $department->getCode(),
             json_encode($department->getEpis()),
             $department->getId()
@@ -151,10 +152,10 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
             name: $row['nome'],
             code: $row['sigla'],
             epis: $episList,
+            nameEn: $row['nome_en'],
             id: (int)$row['id'],
             createdAt: new \DateTimeImmutable($row['criado_em']),
             updatedAt: $row['atualizado_em'] ? new \DateTimeImmutable($row['atualizado_em']) : null
         );
     }
 }
-

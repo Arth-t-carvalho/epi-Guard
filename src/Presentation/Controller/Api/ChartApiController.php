@@ -3,12 +3,11 @@
 namespace Facchini\Presentation\Controller\Api;
 
 use Facchini\Application\Service\DashboardService;
-use Facchini\Infrastructure\Persistence\MySQLOccurrenceRepository;
-use Facchini\Infrastructure\Persistence\MySQLEmployeeRepository;
-use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
-use Facchini\Infrastructure\Persistence\MySQLUserRepository;
-use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
-use Facchini\Application\Validator\OccurrenceValidator;
+use Facchini\Infrastructure\Persistence\PostgreSQLOccurrenceRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLUserRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
 
 class ChartApiController
 {
@@ -17,11 +16,11 @@ class ChartApiController
     public function __construct()
     {
         // Injeção de dependências manual para o contexto desse projeto PHP puro
-        $deptRepo = new MySQLDepartmentRepository();
-        $employeeRepo = new MySQLEmployeeRepository($deptRepo);
-        $userRepo = new MySQLUserRepository();
-        $epiRepo = new MySQLEpiRepository();
-        $occurrenceRepo = new MySQLOccurrenceRepository($employeeRepo, $userRepo, $epiRepo);
+        $deptRepo = new PostgreSQLDepartmentRepository();
+        $employeeRepo = new PostgreSQLEmployeeRepository($deptRepo);
+        $userRepo = new PostgreSQLUserRepository();
+        $epiRepo = new PostgreSQLEpiRepository();
+        $occurrenceRepo = new PostgreSQLOccurrenceRepository($employeeRepo, $userRepo, $epiRepo);
         
         $this->dashboardService = new DashboardService($employeeRepo, $occurrenceRepo, $userRepo);
     }

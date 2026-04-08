@@ -32,12 +32,9 @@ class BranchApiController
         header('Content-Type: application/json');
         
         $db = \Facchini\Infrastructure\Database\Connection::getInstance();
-        $result = $db->query("SELECT id, nome FROM filiais ORDER BY id ASC");
+        $stmt = $db->query("SELECT id, nome FROM filiais ORDER BY id ASC");
         
-        $filiais = [];
-        while ($row = $result->fetch_assoc()) {
-            $filiais[] = $row;
-        }
+        $filiais = $stmt->fetchAll();
         
         echo json_encode($filiais);
     }

@@ -55,7 +55,7 @@
     background: white;
     width: 90%;
     max-width: 800px;
-    border-radius: 12px;
+    border-radius: 4px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     padding: 25px;
     transform: translateY(-50px) scale(0.95);
@@ -189,7 +189,7 @@ html.dark-theme .custom-table td {
     background: #1F2937;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 3px;
     cursor: pointer;
     font-weight: 500;
     transition: background 0.2s;
@@ -224,7 +224,7 @@ html.dark-theme .custom-table td {
     background: white;
     width: 90%;
     max-width: 850px;
-    border-radius: 16px;
+    border-radius: 4px;
     padding: 28px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     margin: auto;
@@ -279,7 +279,7 @@ html.dark-theme .modal .modal-header {
     background: white;
     width: 90%;
     max-width: 480px;
-    border-radius: 24px;
+    border-radius: 4px;
     padding: 35px;
     text-align: center;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
@@ -338,7 +338,7 @@ html.dark-theme .modal-confirmation-content p {
     width: 100%;
     padding: 16px 24px;
     border: none;
-    border-radius: 14px;
+    border-radius: 4px;
     cursor: pointer;
     overflow: hidden;
     color: #fff;
@@ -372,7 +372,7 @@ html.dark-theme .modal-confirmation-content p {
     background: #f8fafc;
     color: #475569;
     border: 1px solid #e2e8f0;
-    border-radius: 14px;
+    border-radius: 4px;
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;

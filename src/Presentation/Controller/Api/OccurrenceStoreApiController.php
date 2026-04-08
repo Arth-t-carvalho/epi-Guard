@@ -6,7 +6,7 @@ use Facchini\Infrastructure\Database\Connection;
 
 class OccurrenceStoreApiController
 {
-    private \mysqli $db;
+    private \PDO $db;
 
     public function __construct()
     {
@@ -39,29 +39,25 @@ class OccurrenceStoreApiController
 
                 // Atualizar a data_hora da infração original para o que foi selecionado no formulário
                 $stmtUpdate = $this->db->prepare("UPDATE ocorrencias SET data_hora = ? WHERE id = ?");
-                $stmtUpdate->bind_param('si', $dataFormatada, $ocorrenciaId);
-                $stmtUpdate->execute();
+                $stmtUpdate->execute([$dataFormatada, $ocorrenciaId]);
 
                 // Limpar EPIs anteriores para esta ocorrência para garantir a nova seleção
                 $stmtDeleteEpi = $this->db->prepare("DELETE FROM ocorrencia_epis WHERE ocorrencia_id = ?");
-                $stmtDeleteEpi->bind_param('i', $ocorrenciaId);
-                $stmtDeleteEpi->execute();
+                $stmtDeleteEpi->execute([$ocorrenciaId]);
             } else {
                 // 1. Inserir na tabela ocorrencias (novo registro)
                 $sql = "INSERT INTO ocorrencias (funcionario_id, data_hora, tipo, filial_id) VALUES (?, ?, 'INFRACAO', ?)";
                 $stmt = $this->db->prepare($sql);
                 $activeFilial = $_SESSION['active_filial_id'] ?? 1;
-                $stmt->bind_param('isi', $funcionarioId, $dataFormatada, $activeFilial);
-                $stmt->execute();
-                $ocorrenciaId = (int) $this->db->insert_id;
+                $stmt->execute([$funcionarioId, $dataFormatada, $activeFilial]);
+                $ocorrenciaId = (int) $this->db->lastInsertId();
             }
 
             // 2. Inserir EPI envolvido (se selecionado - unificado para novo e assinado)
             if ($epiId !== 'none' && $epiId !== '' && (int) $epiId > 0) {
                 $epiIdInt = (int) $epiId;
                 $stmtEpi = $this->db->prepare("INSERT INTO ocorrencia_epis (ocorrencia_id, epi_id) VALUES (?, ?)");
-                $stmtEpi->bind_param('ii', $ocorrenciaId, $epiIdInt);
-                $stmtEpi->execute();
+                $stmtEpi->execute([$ocorrenciaId, $epiIdInt]);
             }
 
             // 3. Inserir ação disciplinar (se há tipo de ação)
@@ -80,8 +76,7 @@ class OccurrenceStoreApiController
                 // Usar usuario_id = 1 como padrão (administrador)
                 $usuarioId = 1;
                 $stmtAcao = $this->db->prepare("INSERT INTO acoes_ocorrencia (ocorrencia_id, usuario_id, tipo, observacao) VALUES (?, ?, ?, ?)");
-                $stmtAcao->bind_param('iiss', $ocorrenciaId, $usuarioId, $tipoEnum, $observacao);
-                $stmtAcao->execute();
+                $stmtAcao->execute([$ocorrenciaId, $usuarioId, $tipoEnum, $observacao]);
             }
 
             // 4. Upload de evidências
@@ -101,8 +96,7 @@ class OccurrenceStoreApiController
                     if (move_uploaded_file($tmpName, $destPath)) {
                         $caminhoRelativo = '/uploads/evidencias/' . $filename;
                         $stmtEv = $this->db->prepare("INSERT INTO evidencias (ocorrencia_id, caminho_imagem) VALUES (?, ?)");
-                        $stmtEv->bind_param('is', $ocorrenciaId, $caminhoRelativo);
-                        $stmtEv->execute();
+                        $stmtEv->execute([$ocorrenciaId, $caminhoRelativo]);
                     }
                 }
             }

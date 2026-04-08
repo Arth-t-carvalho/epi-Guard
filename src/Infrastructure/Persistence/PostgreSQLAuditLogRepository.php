@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace epiGuard\Infrastructure\Persistence;
+namespace Facchini\Infrastructure\Persistence;
 
-use epiGuard\Domain\Entity\AuditLog;
-use epiGuard\Domain\Repository\AuditLogRepositoryInterface;
-use epiGuard\Infrastructure\Database\Connection;
+use Facchini\Domain\Entity\AuditLog;
+use Facchini\Domain\Repository\AuditLogRepositoryInterface;
+use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 use PDO;
 

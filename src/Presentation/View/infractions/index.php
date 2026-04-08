@@ -407,7 +407,7 @@ function formatInfractionDuration($start, $end = null) {
                     <select id="exportSectorSelect" onchange="onSectorSelectChange(this)">
                         <option value="" disabled selected><?= __('Escolha um setor...') ?></option>
                         <?php
-                        $deptRepo = new \Facchini\Infrastructure\Persistence\MySQLDepartmentRepository();
+                        $deptRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository();
                         $sectors = $deptRepo->findAll();
                         foreach ($sectors as $sector):
                             ?>

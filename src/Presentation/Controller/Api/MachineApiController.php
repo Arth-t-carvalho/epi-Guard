@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Facchini\Presentation\Controller\Api;
 
-use Facchini\Infrastructure\Persistence\MySQLMachineRepository;
-use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLMachineRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
 use Facchini\Domain\Entity\Machine;
 
 class MachineApiController
@@ -19,7 +19,7 @@ class MachineApiController
                 return;
             }
 
-            $repo = new MySQLMachineRepository();
+            $repo = new PostgreSQLMachineRepository();
             $machines = $repo->findByDepartment($setorId);
 
             $data = array_map(function (Machine $m) {
@@ -55,7 +55,7 @@ class MachineApiController
                 epiId: !empty($input['epi_id']) ? (int)$input['epi_id'] : null
             );
 
-            $repo = new MySQLMachineRepository();
+            $repo = new PostgreSQLMachineRepository();
             $repo->save($machine);
 
             echo json_encode(['success' => true, 'data' => ['id' => $machine->getId()]]);
@@ -78,7 +78,7 @@ class MachineApiController
                 return;
             }
 
-            $repo = new MySQLMachineRepository();
+            $repo = new PostgreSQLMachineRepository();
             $repo->delete($id);
 
             echo json_encode(['success' => true]);
@@ -92,7 +92,7 @@ class MachineApiController
     {
         header('Content-Type: application/json; charset=utf-8');
         try {
-            $repo = new MySQLEpiRepository();
+            $repo = new PostgreSQLEpiRepository();
             $epis = $repo->findAll();
 
             $data = array_map(function ($epi) {

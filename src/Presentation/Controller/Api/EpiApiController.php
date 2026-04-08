@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace epiGuard\Presentation\Controller\Api;
+namespace Facchini\Presentation\Controller\Api;
 
-use epiGuard\Infrastructure\Persistence\PostgreSQLEpiRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
 
 class EpiApiController
 {

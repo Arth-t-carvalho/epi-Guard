@@ -115,7 +115,7 @@ body::after {
     width: 300px;
     height: 4px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    border-radius: 4px;
     margin: 20px auto;
     overflow: hidden;
 }
@@ -219,7 +219,7 @@ body::after {
     width: 100%;
     max-width: 600px;
     border: 2px solid var(--white);
-    border-radius: 40px;
+    border-radius: 8px;
     overflow: hidden;
     background: var(--white);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
@@ -240,7 +240,7 @@ body::after {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 25px;
+    border-radius: 4px;
 }
 
 .carousel-dots {
@@ -264,7 +264,7 @@ body::after {
 .dot.active {
     background: var(--white);
     width: 25px;
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 
@@ -325,9 +325,9 @@ body::after {
     align-items: center;
     justify-content: center;
     padding: 0 10%;
-    border-top-left-radius: 60px;
+    border-top-left-radius: 8px;
     /* Arredondamento conforme imagem */
-    border-bottom-left-radius: 60px;
+    border-bottom-left-radius: 8px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     transition: flex 1s cubic-bezier(0.77, 0, 0.175, 1),
         width 1s cubic-bezier(0.77, 0, 0.175, 1),
@@ -404,7 +404,7 @@ body::after {
     padding: 16px 16px 16px 50px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 4px;
     font-size: 1rem;
     transition: all 0.3s ease;
     box-shadow: 0 20px 40px rgba(0, 0, 0.5, 0.2);
@@ -433,7 +433,7 @@ body::after {
     background: var(--login-btn);
     color: var(--white);
     border: none;
-    border-radius: 12px;
+    border-radius: 4px;
     font-size: 1rem;
     font-weight: 700;
     display: flex;
@@ -472,7 +472,7 @@ body::after {
 /* Estilos extras para alertas e inputs de seleção no NAP */
 .alert {
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 4px;
     margin-bottom: 20px;
     font-weight: 500;
     font-size: 0.9rem;
@@ -498,7 +498,7 @@ body::after {
     padding: 16px 16px 16px 50px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 4px;
     font-size: 1rem;
     transition: all 0.3s ease;
     appearance: none;

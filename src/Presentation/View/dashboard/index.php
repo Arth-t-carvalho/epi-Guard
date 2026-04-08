@@ -278,7 +278,7 @@ ob_start();
                 </div>
 
                 <?php
-                $deptRepo = new \Facchini\Infrastructure\Persistence\MySQLDepartmentRepository();
+                $deptRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository();
                 $sectors = $deptRepo->findAll();
                 foreach ($sectors as $sector):
                     ?>

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Facchini\Presentation\Controller\Api;
 
-use Facchini\Infrastructure\Persistence\MySQLEmployeeRepository;
-use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
 use Facchini\Domain\Entity\Employee;
 use Facchini\Domain\Entity\Department;
 use Facchini\Domain\ValueObject\CPF;
@@ -13,14 +13,14 @@ use DateTimeImmutable;
 
 class EmployeeApiController
 {
-    private MySQLEmployeeRepository $repository;
-    private MySQLDepartmentRepository $deptRepository;
+    private PostgreSQLEmployeeRepository $repository;
+    private PostgreSQLDepartmentRepository $deptRepository;
     private array $config;
 
     public function __construct()
     {
-        $this->deptRepository = new MySQLDepartmentRepository();
-        $this->repository = new MySQLEmployeeRepository($this->deptRepository);
+        $this->deptRepository = new PostgreSQLDepartmentRepository();
+        $this->repository = new PostgreSQLEmployeeRepository($this->deptRepository);
         $this->config = require __DIR__ . '/../../../../config/app.php';
     }
 

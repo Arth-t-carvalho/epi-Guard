@@ -1,12 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace epiGuard\Infrastructure\Persistence;
+namespace Facchini\Infrastructure\Persistence;
 
-use epiGuard\Domain\Entity\EpiItem;
-use epiGuard\Domain\Repository\EpiRepositoryInterface;
-use epiGuard\Infrastructure\Database\Connection;
-use DateTimeImmutable;
+use Facchini\Domain\Entity\EpiItem;
+use Facchini\Domain\Repository\EpiRepositoryInterface;
+use Facchini\Infrastructure\Database\Connection;
 
 class PostgreSQLEpiRepository implements EpiRepositoryInterface
 {
@@ -19,7 +18,7 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
 
     public function findById(int $id): ?EpiItem
     {
-        $stmt = $this->db->prepare("SELECT id, nome, descricao, cor, status FROM epis WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, nome_en, descricao, cor, status FROM epis WHERE id = ?");
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch()) {
@@ -32,7 +31,7 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
     /** @return EpiItem[] */
     public function findAll(): array
     {
-        $stmt = $this->db->query("SELECT id, nome, descricao, cor, status FROM epis WHERE status = 'ATIVO' ORDER BY nome ASC");
+        $stmt = $this->db->query("SELECT id, nome, nome_en, descricao, cor, status FROM epis WHERE status = 'ATIVO' ORDER BY nome ASC");
         $epis = [];
 
         while ($row = $stmt->fetch()) {
@@ -42,11 +41,25 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
         return $epis;
     }
 
+    /**
+     * Retorna todos os EPIs ativos com foco em campos de configuração
+     */
+    public function findAllForSettings(): array
+    {
+        $stmt = $this->db->query("SELECT id, nome, nome_en, descricao, cor FROM epis WHERE status = 'ATIVO' ORDER BY nome ASC");
+        $epis = [];
+        while ($row = $stmt->fetch()) {
+            $epis[] = $this->hydrate($row);
+        }
+        return $epis;
+    }
+
     public function save(EpiItem $epiItem): void
     {
-        $stmt = $this->db->prepare("INSERT INTO epis (nome, descricao, cor, status) VALUES (?, ?, ?, 'ATIVO')");
+        $stmt = $this->db->prepare("INSERT INTO epis (nome, nome_en, descricao, cor, status) VALUES (?, ?, ?, ?, 'ATIVO')");
         $params = [
             $epiItem->getName(),
+            $epiItem->getNameEn(),
             $epiItem->getDescription(),
             $epiItem->getColor()
         ];
@@ -57,9 +70,10 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
 
     public function update(EpiItem $epiItem): void
     {
-        $stmt = $this->db->prepare("UPDATE epis SET nome = ?, descricao = ?, cor = ? WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE epis SET nome = ?, nome_en = ?, descricao = ?, cor = ? WHERE id = ?");
         $params = [
             $epiItem->getName(),
+            $epiItem->getNameEn(),
             $epiItem->getDescription(),
             $epiItem->getColor(),
             $epiItem->getId()
@@ -73,15 +87,25 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
         $stmt->execute([$epiItem->getId()]);
     }
 
+    public function resetToDefaults(): bool
+    {
+        try {
+            $this->db->query("UPDATE epis SET cor = '#E30613'");
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
     private function hydrate(array $row): EpiItem
     {
         return new EpiItem(
             name: $row['nome'],
-            isRequired: true, // Padrão
-            description: $row['descricao'],
             color: $row['cor'] ?? '#E30613',
+            isRequired: true, // Padrao
+            description: $row['descricao'],
+            nameEn: $row['nome_en'],
             id: (int) $row['id']
         );
     }
 }
-

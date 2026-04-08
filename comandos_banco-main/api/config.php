@@ -4,13 +4,13 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json; charset=UTF-8");
 
-$host = 'localhost';
+$host = '127.0.0.1';
 $db   = 'epi_guard';
-$user = 'root';
-$pass = '';
-$charset = 'utf8mb4';
+$user = 'postgres';
+$pass = 'F@cchini2025';
+$port = '5432';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=disable";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -20,8 +20,6 @@ $options = [
 try {
      $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-     // If database doesn't exist, we might need to create it or handle it.
-     // For now, we just output the error.
      echo json_encode(["status" => "error", "message" => "Connection failed: " . $e->getMessage()]);
      exit;
 }

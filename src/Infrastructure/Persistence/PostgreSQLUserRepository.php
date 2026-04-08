@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace epiGuard\Infrastructure\Persistence;
+namespace Facchini\Infrastructure\Persistence;
 
-use epiGuard\Domain\Entity\User;
-use epiGuard\Domain\ValueObject\Email;
-use epiGuard\Domain\ValueObject\UserRole;
-use epiGuard\Domain\Repository\UserRepositoryInterface;
-use epiGuard\Infrastructure\Database\Connection;
+use Facchini\Domain\Entity\User;
+use Facchini\Domain\ValueObject\Email;
+use Facchini\Domain\ValueObject\UserRole;
+use Facchini\Domain\Repository\UserRepositoryInterface;
+use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 
 class PostgreSQLUserRepository implements UserRepositoryInterface
@@ -21,7 +21,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     public function findById(int $id): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, criado_em, atualizado_em FROM usuarios WHERE id = ?");
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch()) {
@@ -33,7 +33,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     public function findByEmail(Email $email): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO'");
+        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO'");
         $stmt->execute([$email->getValue()]);
 
         if ($row = $stmt->fetch()) {
@@ -45,7 +45,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     public function findByUsername(string $username): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO'");
+        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO'");
         $stmt->execute([$username]);
 
         if ($row = $stmt->fetch()) {
@@ -58,7 +58,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
     /** @return User[] */
     public function findAll(): array
     {
-        $stmt = $this->db->query("SELECT id, nome, usuario, senha, cargo, criado_em, atualizado_em FROM usuarios ORDER BY nome ASC");
+        $stmt = $this->db->query("SELECT id, nome, usuario, senha, cargo, pref_grafico, criado_em, atualizado_em FROM usuarios ORDER BY nome ASC");
         $users = [];
         while ($row = $stmt->fetch()) {
             $users[] = $this->hydrate($row);
@@ -131,6 +131,12 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
         $stmt->execute([$user->getId()]);
     }
 
+    public function updateChartPreference(int $userId, string $style): bool
+    {
+        $stmt = $this->db->prepare("UPDATE usuarios SET pref_grafico = ? WHERE id = ?");
+        return $stmt->execute([$style, $userId]);
+    }
+
     private function hydrate(array $row): User
     {
         // Mapeamento de cargo para UserRole (suportando os cargos antigos)
@@ -150,6 +156,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
             email: new Email($row['usuario']),
             passwordHash: $row['senha'],
             role: $role,
+            chartPreference: $row['pref_grafico'] ?? 'bar',
             id: (int) $row['id'],
             createdAt: new DateTimeImmutable($row['criado_em']),
             updatedAt: $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null

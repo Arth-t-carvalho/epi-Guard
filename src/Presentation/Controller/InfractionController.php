@@ -2,24 +2,24 @@
 
 namespace Facchini\Presentation\Controller;
 
-use Facchini\Infrastructure\Persistence\MySQLOccurrenceRepository;
-use Facchini\Infrastructure\Persistence\MySQLEmployeeRepository;
-use Facchini\Infrastructure\Persistence\MySQLUserRepository;
-use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
-use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLOccurrenceRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLUserRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
+use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
 
 class InfractionController
 {
-    private MySQLOccurrenceRepository $occurrenceRepository;
-    private MySQLEpiRepository $epiRepository;
+    private PostgreSQLOccurrenceRepository $occurrenceRepository;
+    private PostgreSQLEpiRepository $epiRepository;
 
     public function __construct()
     {
-        $deptRepo = new MySQLDepartmentRepository();
-        $employeeRepo = new MySQLEmployeeRepository($deptRepo);
-        $userRepo = new MySQLUserRepository();
-        $this->epiRepository = new MySQLEpiRepository();
-        $this->occurrenceRepository = new MySQLOccurrenceRepository($employeeRepo, $userRepo, $this->epiRepository);
+        $deptRepo = new PostgreSQLDepartmentRepository();
+        $employeeRepo = new PostgreSQLEmployeeRepository($deptRepo);
+        $userRepo = new PostgreSQLUserRepository();
+        $this->epiRepository = new PostgreSQLEpiRepository();
+        $this->occurrenceRepository = new PostgreSQLOccurrenceRepository($employeeRepo, $userRepo, $this->epiRepository);
     }
 
     public function index()

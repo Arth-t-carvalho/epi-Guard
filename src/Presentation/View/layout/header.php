@@ -81,17 +81,17 @@ $displayRole = $roleDisplay[strtoupper($userRole)] ?? $userRole;
         <?php
         $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
         $db = \Facchini\Infrastructure\Database\Connection::getInstance();
-        $filiaisRes = $db->query("SELECT id, nome FROM filiais ORDER BY id ASC");
-        $filiais = [];
+        $stmt = $db->query("SELECT id, nome FROM filiais ORDER BY id ASC");
+        $filiais = $stmt->fetchAll();
         $activeFilialName = 'Aparecida do Taboado';
         
-        if ($filiaisRes) {
-            while ($f = $filiaisRes->fetch_assoc()) {
-                $filiais[] = $f;
-                if ($f['id'] == $activeFilialId)
-                    $activeFilialName = $f['nome'];
+        foreach ($filiais as $f) {
+            if ($f['id'] == $activeFilialId) {
+                $activeFilialName = $f['nome'];
+                break;
             }
-        } else {
+        }
+        if (empty($filiais)) {
             // Fallback default if table missing
             $filiais = [['id' => 1, 'nome' => 'Aparecida do Taboado']];
         }
@@ -238,7 +238,7 @@ $displayRole = $roleDisplay[strtoupper($userRole)] ?? $userRole;
         background: white;
         width: 90%;
         max-width: 600px;
-        border-radius: 12px;
+        border-radius: 4px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         overflow: hidden;
         border-top: 4px solid var(--primary);
@@ -277,7 +277,7 @@ $displayRole = $roleDisplay[strtoupper($userRole)] ?? $userRole;
         border: none;
         width: 34px;
         height: 34px;
-        border-radius: 50%;
+        border-radius: 4px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -319,7 +319,7 @@ $displayRole = $roleDisplay[strtoupper($userRole)] ?? $userRole;
         width: 100%;
         padding: 12px 12px 12px 40px;
         border: 1.5px solid #e2e8f0;
-        border-radius: 8px;
+        border-radius: 4px;
         font-size: 14px;
         background: #f8fafc;
         transition: all 0.2s;
@@ -393,7 +393,7 @@ $displayRole = $roleDisplay[strtoupper($userRole)] ?? $userRole;
         font-size: 11px;
         font-weight: 700;
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: 2px;
         background: #f1f5f9;
         color: #64748b;
     }
@@ -415,7 +415,7 @@ $displayRole = $roleDisplay[strtoupper($userRole)] ?? $userRole;
         color: white;
         border: none;
         padding: 12px 24px;
-        border-radius: 8px;
+        border-radius: 4px;
         font-weight: 700;
         font-size: 14px;
         display: flex;

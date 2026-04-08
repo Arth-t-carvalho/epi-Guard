@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace epiGuard\Infrastructure\Persistence;
+namespace Facchini\Infrastructure\Persistence;
 
-use epiGuard\Domain\Entity\Occurrence;
-use epiGuard\Domain\Repository\OccurrenceRepositoryInterface;
-use epiGuard\Domain\Repository\EmployeeRepositoryInterface;
-use epiGuard\Domain\Repository\UserRepositoryInterface;
-use epiGuard\Domain\Repository\EpiRepositoryInterface;
-use epiGuard\Domain\ValueObject\OccurrenceStatus;
-use epiGuard\Domain\ValueObject\OccurrenceType;
-use epiGuard\Infrastructure\Database\Connection;
+use Facchini\Domain\Entity\Occurrence;
+use Facchini\Domain\Repository\OccurrenceRepositoryInterface;
+use Facchini\Domain\Repository\EmployeeRepositoryInterface;
+use Facchini\Domain\Repository\UserRepositoryInterface;
+use Facchini\Domain\Repository\EpiRepositoryInterface;
+use Facchini\Domain\ValueObject\OccurrenceStatus;
+use Facchini\Domain\ValueObject\OccurrenceType;
+use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 use DateTimeInterface;
 
@@ -145,6 +145,140 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
         return (int) $res['total'];
     }
 
+    public function countRange(DateTimeInterface $start, DateTimeInterface $end, ?array $sectorIds = null): int
+    {
+        $query = "SELECT COUNT(*) as total FROM ocorrencias o 
+                  JOIN funcionarios f ON o.funcionario_id = f.id 
+                  WHERE o.data_hora::date BETWEEN ? AND ? AND o.tipo = 'INFRACAO'";
+        
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+        }
+        
+        $stmt = $this->db->prepare($query);
+        $params = [$start->format('Y-m-d'), $end->format('Y-m-d')];
+        if (!empty($sectorIds)) {
+            $params = array_merge($params, $sectorIds);
+        }
+        
+        $stmt->execute($params);
+        $res = $stmt->fetch();
+        return (int) $res['total'];
+    }
+
+    public function countUniqueStudentsDaily(DateTimeInterface $date, ?array $sectorIds = null): int
+    {
+        $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
+                  JOIN funcionarios f ON o.funcionario_id = f.id 
+                  WHERE o.data_hora::date = ? AND o.tipo = 'INFRACAO'";
+        
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+        }
+        
+        $stmt = $this->db->prepare($query);
+        $params = [$date->format('Y-m-d')];
+        if (!empty($sectorIds)) {
+            $params = array_merge($params, $sectorIds);
+        }
+        
+        $stmt->execute($params);
+        $res = $stmt->fetch();
+        return (int) $res['total'];
+    }
+
+    public function countUniqueStudentsWeekly(DateTimeInterface $date, ?array $sectorIds = null): int
+    {
+        $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
+                  JOIN funcionarios f ON o.funcionario_id = f.id 
+                  WHERE to_char(o.data_hora, 'IYYYIW') = to_char(?::date, 'IYYYIW') AND o.tipo = 'INFRACAO'";
+        
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+        }
+        
+        $stmt = $this->db->prepare($query);
+        $params = [$date->format('Y-m-d')];
+        if (!empty($sectorIds)) {
+            $params = array_merge($params, $sectorIds);
+        }
+        
+        $stmt->execute($params);
+        $res = $stmt->fetch();
+        return (int) $res['total'];
+    }
+
+    public function countUniqueStudentsMonthly(DateTimeInterface $date, ?array $sectorIds = null): int
+    {
+        $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
+                  JOIN funcionarios f ON o.funcionario_id = f.id 
+                  WHERE EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM ?::date) 
+                  AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO'";
+        
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+        }
+        
+        $stmt = $this->db->prepare($query);
+        $dateStr = $date->format('Y-m-d');
+        $params = [$dateStr, $dateStr];
+        if (!empty($sectorIds)) {
+            $params = array_merge($params, $sectorIds);
+        }
+        
+        $stmt->execute($params);
+        $res = $stmt->fetch();
+        return (int) $res['total'];
+    }
+
+    public function countUniqueStudentsYearly(DateTimeInterface $date, ?array $sectorIds = null): int
+    {
+        $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
+                  JOIN funcionarios f ON o.funcionario_id = f.id 
+                  WHERE EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO'";
+        
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+        }
+        
+        $stmt = $this->db->prepare($query);
+        $params = [$date->format('Y-m-d')];
+        if (!empty($sectorIds)) {
+            $params = array_merge($params, $sectorIds);
+        }
+        
+        $stmt->execute($params);
+        $res = $stmt->fetch();
+        return (int) $res['total'];
+    }
+
+    public function countUniqueStudentsRange(DateTimeInterface $start, DateTimeInterface $end, ?array $sectorIds = null): int
+    {
+        $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
+                  JOIN funcionarios f ON o.funcionario_id = f.id 
+                  WHERE o.data_hora::date BETWEEN ? AND ? AND o.tipo = 'INFRACAO'";
+        
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+        }
+        
+        $stmt = $this->db->prepare($query);
+        $params = [$start->format('Y-m-d'), $end->format('Y-m-d')];
+        if (!empty($sectorIds)) {
+            $params = array_merge($params, $sectorIds);
+        }
+        
+        $stmt->execute($params);
+        $res = $stmt->fetch();
+        return (int) $res['total'];
+    }
+
     public function getMonthlyInfractionStats(int $year, ?array $sectorIds = null): array
     {
         $allowedEpiNames = [];
@@ -159,15 +293,12 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
         }
 
         $stats = [
-            'capacete' => array_fill(0, 12, 0),
-            'oculos' => array_fill(0, 12, 0),
-            'jaqueta' => array_fill(0, 12, 0),
-            'avental' => array_fill(0, 12, 0),
-            'luvas' => array_fill(0, 12, 0),
-            'mascara' => array_fill(0, 12, 0),
-            'protetor' => array_fill(0, 12, 0),
             'total' => array_fill(0, 12, 0)
         ];
+
+        foreach ($allowedEpiNames as $name) {
+            $stats[$name] = array_fill(0, 12, 0);
+        }
 
         $sectorClause = "";
         $epiClause = "";
@@ -209,21 +340,9 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             $mesIdx = (int) $row['mes'] - 1;
             if ($mesIdx < 0 || $mesIdx >= 12) continue;
             
-            $nome = strtolower($row['epi_nome']);
-            if (str_contains($nome, 'capacete')) {
-                $stats['capacete'][$mesIdx] += (int) $row['total'];
-            } elseif (str_contains($nome, 'oculos') || str_contains($nome, 'óculos')) {
-                $stats['oculos'][$mesIdx] += (int) $row['total'];
-            } elseif (str_contains($nome, 'jaqueta')) {
-                $stats['jaqueta'][$mesIdx] += (int) $row['total'];
-            } elseif (str_contains($nome, 'avental')) {
-                $stats['avental'][$mesIdx] += (int) $row['total'];
-            } elseif (str_contains($nome, 'luva')) {
-                $stats['luvas'][$mesIdx] += (int) $row['total'];
-            } elseif (str_contains($nome, 'mascara') || str_contains($nome, 'máscara')) {
-                $stats['mascara'][$mesIdx] += (int) $row['total'];
-            } elseif (str_contains($nome, 'protetor')) {
-                $stats['protetor'][$mesIdx] += (int) $row['total'];
+            $nome = $row['epi_nome'];
+            if (isset($stats[$nome])) {
+                $stats[$nome][$mesIdx] += (int) $row['total'];
             }
         }
 
@@ -251,9 +370,17 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             }
         }
 
+        // Recuperar cores dos EPIs
+        $epiColors = [];
+        $epiStmt = $this->db->query("SELECT nome, cor FROM epis WHERE status = 'ATIVO'");
+        while ($row = $epiStmt->fetch()) {
+            $epiColors[$row['nome']] = $row['cor'];
+        }
+
         return [
             'stats' => $stats,
-            'allowed_epis' => $allowedEpiNames
+            'allowed_epis' => $allowedEpiNames,
+            'epi_colors' => $epiColors
         ];
     }
 
@@ -310,11 +437,18 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
         
         $labels = [];
         $data = [];
+        $colors = [];
         $totalSum = 0;
 
         while ($row = $stmt->fetch()) {
             $labels[] = $row['nome'];
             $data[] = (int) $row['total'];
+            
+            // Buscar cor do EPI
+            $cStmt = $this->db->prepare("SELECT cor FROM epis WHERE nome = ? LIMIT 1");
+            $cStmt->execute([$row['nome']]);
+            $colors[] = $cStmt->fetchColumn() ?: '#E30613';
+            
             $totalSum += (int) $row['total'];
         }
 
@@ -322,6 +456,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             return [
                 'labels' => [],
                 'data' => [],
+                'colors' => [],
                 'total' => 0
             ];
         }
@@ -329,6 +464,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
         return [
             'labels' => $labels,
             'data' => $data,
+            'colors' => $colors,
             'total' => $totalSum
         ];
     }
@@ -437,6 +573,34 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll();
+    }
+
+    public function getWorstMonth(?array $sectorIds = null): array
+    {
+        $query = "
+            SELECT 
+                EXTRACT(MONTH FROM o.data_hora)::int as mes,
+                COUNT(*) as total
+            FROM ocorrencias o
+            JOIN funcionarios f ON o.funcionario_id = f.id
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)
+        ";
+        
+        $params = [];
+        if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
+            $params = $sectorIds;
+        }
+        
+        $query .= " GROUP BY mes ORDER BY total DESC LIMIT 1";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->execute($params);
+        $row = $stmt->fetch();
+        
+        if (!$row) return ['month' => date('n'), 'count' => 0];
+        return ['month' => (int) $row['mes'], 'count' => (int) $row['total']];
     }
 
     public function findNewInfractions(int $lastId): array

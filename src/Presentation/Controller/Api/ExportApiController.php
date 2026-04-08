@@ -6,7 +6,7 @@ use Facchini\Infrastructure\Database\Connection;
 
 class ExportApiController
 {
-    private \mysqli $db;
+    private \PDO $db;
 
     public function __construct()
     {
@@ -56,15 +56,14 @@ class ExportApiController
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
             JOIN setores s ON f.setor_id = s.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ? AND o.filial_id = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ? AND o.filial_id = ?
             GROUP BY s.id, s.nome
             ORDER BY total_infracoes DESC
             LIMIT 1
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('ii', $year, $activeFilial);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$year, $activeFilial]);
+        $result = $stmt->fetch();
 
         return $result ? [
             'nome' => $result['nome'],
@@ -79,24 +78,19 @@ class ExportApiController
             FROM ocorrencias o
             JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
             JOIN epis e ON oe.epi_id = e.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ? AND o.filial_id = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ? AND o.filial_id = ?
             GROUP BY e.id, e.nome
             ORDER BY total_infracoes DESC
             LIMIT 5
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('ii', $year, $activeFilial);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$year, $activeFilial]);
+        $rows = $stmt->fetchAll();
 
-        $epis = [];
-        while ($row = $result->fetch_assoc()) {
-            $epis[] = [
-                'nome' => $row['nome'],
-                'total' => (int) $row['total_infracoes']
-            ];
-        }
-        return $epis;
+        return array_map(fn($row) => [
+            'nome' => $row['nome'],
+            'total' => (int) $row['total_infracoes']
+        ], $rows);
     }
 
     private function getWorstMonth(int $year, int $activeFilial): array
@@ -108,17 +102,16 @@ class ExportApiController
         ];
 
         $query = "
-            SELECT MONTH(o.data_hora) as mes, COUNT(o.id) as total_infracoes
+            SELECT EXTRACT(MONTH FROM o.data_hora) as mes, COUNT(o.id) as total_infracoes
             FROM ocorrencias o
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ? AND o.filial_id = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ? AND o.filial_id = ?
             GROUP BY mes
             ORDER BY total_infracoes DESC
             LIMIT 1
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('ii', $year, $activeFilial);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$year, $activeFilial]);
+        $result = $stmt->fetch();
 
         if ($result) {
             $mesNum = (int) $result['mes'];
@@ -134,22 +127,21 @@ class ExportApiController
     private function getWorstDayOfWeek(int $year, int $activeFilial): array
     {
         $dayNames = [
-            1 => 'Domingo', 2 => 'Segunda-feira', 3 => 'Terça-feira',
-            4 => 'Quarta-feira', 5 => 'Quinta-feira', 6 => 'Sexta-feira', 7 => 'Sábado'
+            0 => 'Domingo', 1 => 'Segunda-feira', 2 => 'Terça-feira',
+            3 => 'Quarta-feira', 4 => 'Quinta-feira', 5 => 'Sexta-feira', 6 => 'Sábado'
         ];
 
         $query = "
-            SELECT DAYOFWEEK(o.data_hora) as dia_semana, COUNT(o.id) as total_infracoes
+            SELECT EXTRACT(DOW FROM o.data_hora) as dia_semana, COUNT(o.id) as total_infracoes
             FROM ocorrencias o
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ? AND o.filial_id = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ? AND o.filial_id = ?
             GROUP BY dia_semana
             ORDER BY total_infracoes DESC
             LIMIT 1
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('ii', $year, $activeFilial);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$year, $activeFilial]);
+        $result = $stmt->fetch();
 
         if ($result) {
             $diaNum = (int) $result['dia_semana'];
@@ -168,23 +160,18 @@ class ExportApiController
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
             JOIN setores s ON f.setor_id = s.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ? AND o.filial_id = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ? AND o.filial_id = ?
             GROUP BY s.id, s.nome
             ORDER BY total_infracoes DESC
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('ii', $year, $activeFilial);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$year, $activeFilial]);
+        $rows = $stmt->fetchAll();
 
-        $sectors = [];
-        while ($row = $result->fetch_assoc()) {
-            $sectors[] = [
-                'nome' => $row['nome'],
-                'total' => (int) $row['total_infracoes']
-            ];
-        }
-        return $sectors;
+        return array_map(fn($row) => [
+            'nome' => $row['nome'],
+            'total' => (int) $row['total_infracoes']
+        ], $rows);
     }
 
     private function getEpisRanking(int $year, int $activeFilial): array
@@ -194,45 +181,40 @@ class ExportApiController
             FROM ocorrencias o
             JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
             JOIN epis e ON oe.epi_id = e.id
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ? AND o.filial_id = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ? AND o.filial_id = ?
             GROUP BY e.id, e.nome
             ORDER BY total_infracoes DESC
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('ii', $year, $activeFilial);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$year, $activeFilial]);
+        $rows = $stmt->fetchAll();
 
-        $epis = [];
-        while ($row = $result->fetch_assoc()) {
-            $epis[] = [
-                'nome' => $row['nome'],
-                'total' => (int) $row['total_infracoes']
-            ];
-        }
-        return $epis;
+        return array_map(fn($row) => [
+            'nome' => $row['nome'],
+            'total' => (int) $row['total_infracoes']
+        ], $rows);
     }
 
     private function getMonthlyTotals(int $year, int $activeFilial): array
     {
         $query = "
-            SELECT MONTH(o.data_hora) as mes, COUNT(o.id) as total
+            SELECT EXTRACT(MONTH FROM o.data_hora) as mes, COUNT(o.id) as total
             FROM ocorrencias o
-            WHERE o.tipo = 'INFRACAO' AND YEAR(o.data_hora) = ? AND o.filial_id = ?
+            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ? AND o.filial_id = ?
             GROUP BY mes
             ORDER BY mes
         ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('ii', $year, $activeFilial);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$year, $activeFilial]);
+        $rows = $stmt->fetchAll();
 
         $totals = array_fill(1, 12, 0);
-        while ($row = $result->fetch_assoc()) {
+        foreach ($rows as $row) {
             $totals[(int)$row['mes']] = (int)$row['total'];
         }
         return $totals;
     }
+
     public function infractionsReport()
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -260,24 +242,19 @@ class ExportApiController
             // Construir filtro de data para as subqueries
             $dateFilter = "";
             $subParams = [];
-            $subTypes = "";
 
             if ($periodo === 'hoje') {
-                $dateFilter = " AND DATE(data_hora) = CURDATE()";
+                $dateFilter = " AND o.data_hora::date = CURRENT_DATE";
             } elseif ($periodo === 'semana') {
-                $dateFilter = " AND YEARWEEK(data_hora, 1) = YEARWEEK(CURDATE(), 1)";
+                $dateFilter = " AND EXTRACT(WEEK FROM o.data_hora) = EXTRACT(WEEK FROM CURRENT_DATE) AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)";
             } elseif ($periodo === 'mes') {
-                $dateFilter = " AND MONTH(data_hora) = MONTH(CURDATE()) AND YEAR(data_hora) = YEAR(CURDATE())";
+                $dateFilter = " AND EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)";
             } elseif ($periodo === 'personalizado' && !empty($dateFrom) && !empty($dateTo)) {
-                $dateFilter = " AND DATE(data_hora) BETWEEN ? AND ?";
+                $dateFilter = " AND o.data_hora::date BETWEEN ? AND ?";
                 $subParams[] = $dateFrom;
                 $subParams[] = $dateTo;
-                $subTypes .= "ss";
             }
 
-            // Precisamos que as subqueries de contagem e natureza respeitem o período.
-            // Removemos a trava estrita de filial para garantir que os dados de infração do colaborador apareçam,
-            // independentemente de em qual unidade ele estava quando a infração ocorreu.
             $query = "
                 SELECT 
                     f.nome as nome,
@@ -288,22 +265,18 @@ class ExportApiController
                     s.nome as departamento,
                     s.sigla as setor_sigla,
                     (SELECT COUNT(*) FROM ocorrencias o 
-                     WHERE o.funcionario_id = f.id AND o.tipo = 'INFRACAO' $dateFilter) as total_infracoes,
+                     WHERE o.funcionario_id = f.id AND o.tipo = 'INFRACAO' " . str_replace('o.','',$dateFilter) . ") as total_infracoes,
                     (SELECT e.nome 
                      FROM ocorrencia_epis oe 
                      JOIN epis e ON oe.epi_id = e.id 
                      JOIN ocorrencias o2 ON oe.ocorrencia_id = o2.id 
-                     WHERE o2.funcionario_id = f.id AND o2.tipo = 'INFRACAO' $dateFilter
-                     GROUP BY e.id 
+                     WHERE o2.funcionario_id = f.id AND o2.tipo = 'INFRACAO' " . str_replace('o.','o2.',$dateFilter) . "
+                     GROUP BY e.id, e.nome 
                      ORDER BY COUNT(*) DESC, e.nome ASC
                      LIMIT 1) as natureza,
-                    (SELECT AVG(
-                             TIMESTAMPDIFF(MINUTE, o3.data_hora, 
-                                           COALESCE((SELECT MIN(data_hora) FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o3.id), NOW())
-                             )
-                           ) 
-                     FROM ocorrencias o3 WHERE o3.funcionario_id = f.id AND o3.tipo = 'INFRACAO' $dateFilter) as media_minutos,
-                    (SELECT MAX(o4.data_hora) FROM ocorrencias o4 WHERE o4.funcionario_id = f.id AND o4.tipo = 'INFRACAO' $dateFilter) as ultima_infracao
+                    (SELECT AVG(EXTRACT(EPOCH FROM (COALESCE((SELECT MIN(data_hora) FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o3.id), NOW()) - o3.data_hora)) / 60)
+                     FROM ocorrencias o3 WHERE o3.funcionario_id = f.id AND o3.tipo = 'INFRACAO' " . str_replace('o.','o3.',$dateFilter) . ") as media_minutos,
+                    (SELECT MAX(o4.data_hora) FROM ocorrencias o4 WHERE o4.funcionario_id = f.id AND o4.tipo = 'INFRACAO' " . str_replace('o.','o4.',$dateFilter) . ") as ultima_infracao
                 FROM funcionarios f
                 LEFT JOIN setores s ON f.setor_id = s.id
                 WHERE f.id IN ($placeholders)
@@ -311,16 +284,26 @@ class ExportApiController
 
             $stmt = $this->db->prepare($query);
             
-            // Parâmetros: [subParams (count), subParams (natureza), subParams (media), subParams (ultima), ids da lista principal]
-            $allParams = array_merge($subParams, $subParams, $subParams, $subParams, $idArray);
-            $allTypes = $subTypes . $subTypes . $subTypes . $subTypes . str_repeat('i', count($idArray));
+            // Re-order params based on query: [subParams x 4 times for subqueries, then ids]
+            // Actually, in PostgreSQL with parameters inside subqueries, it can be tricky.
+            // Let's adjust the query to not use parameters in subqueries if possible, or repeat them.
+            $allParams = [];
+            // Subquery total_infracoes
+            if (!empty($subParams)) $allParams = array_merge($allParams, $subParams);
+            // Subquery natureza
+            if (!empty($subParams)) $allParams = array_merge($allParams, $subParams);
+            // Subquery media_minutos
+            if (!empty($subParams)) $allParams = array_merge($allParams, $subParams);
+            // Subquery ultima_infracao
+            if (!empty($subParams)) $allParams = array_merge($allParams, $subParams);
+            // Main query ids
+            $allParams = array_merge($allParams, $idArray);
 
-            $stmt->bind_param($allTypes, ...$allParams);
-            $stmt->execute();
-            $result = $stmt->get_result();
+            $stmt->execute($allParams);
+            $rows = $stmt->fetchAll();
 
             $data = [];
-            while ($row = $result->fetch_assoc()) {
+            foreach ($rows as $row) {
                 // Formatting media
                 $minutos = $row['media_minutos'] ? (int) $row['media_minutos'] : 0;
                 if ($minutos > 0) {
@@ -347,17 +330,17 @@ class ExportApiController
             $detailedQuery = "
                 SELECT 
                     o.id as ocorrencia_id,
-                    DATE_FORMAT(o.data_hora, '%d/%m/%Y %H:%i') as data_ocorrencia,
+                    to_char(o.data_hora, 'DD/MM/YYYY HH24:MI') as data_ocorrencia,
                     f.nome as funcionario_nome,
-                    IFNULL(s.sigla, s.nome) as setor,
-                    (SELECT GROUP_CONCAT(e.nome SEPARATOR ', ') FROM ocorrencia_epis oe JOIN epis e ON oe.epi_id = e.id WHERE oe.ocorrencia_id = o.id) as epis,
+                    COALESCE(s.sigla, s.nome) as setor,
+                    (SELECT string_agg(e.nome, ', ') FROM ocorrencia_epis oe JOIN epis e ON oe.epi_id = e.id WHERE oe.ocorrencia_id = o.id) as epis,
                     (SELECT ao.tipo FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id ORDER BY ao.data_hora DESC LIMIT 1) as acao_tomada,
-                    (SELECT DATE_FORMAT(ao.data_hora, '%d/%m/%Y %H:%i') FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id ORDER BY ao.data_hora DESC LIMIT 1) as data_resolucao,
+                    (SELECT to_char(ao.data_hora, 'DD/MM/YYYY HH24:MI') FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id ORDER BY ao.data_hora DESC LIMIT 1) as data_resolucao,
                     CASE 
                         WHEN EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id) THEN 'Resolvido'
                         ELSE 'Pendente'
                     END as status_ocorrencia,
-                    TIMESTAMPDIFF(MINUTE, o.data_hora, COALESCE((SELECT MIN(data_hora) FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id), NOW())) as minutos_sem_epi
+                    EXTRACT(EPOCH FROM (COALESCE((SELECT MIN(data_hora) FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id), NOW()) - o.data_hora)) / 60 as minutos_sem_epi
                 FROM ocorrencias o
                 JOIN funcionarios f ON o.funcionario_id = f.id
                 LEFT JOIN setores s ON f.setor_id = s.id
@@ -366,14 +349,11 @@ class ExportApiController
             ";
 
             $stmtDetail = $this->db->prepare($detailedQuery);
-            $allParamsDetail = array_merge($idArray, $subParams);
-            $allTypesDetail = str_repeat('i', count($idArray)) . $subTypes;
-            $stmtDetail->bind_param($allTypesDetail, ...$allParamsDetail);
-            $stmtDetail->execute();
-            $resultDetail = $stmtDetail->get_result();
+            $detailParams = array_merge($idArray, $subParams);
+            $stmtDetail->execute($detailParams);
             $detailedData = [];
             
-            while ($rowD = $resultDetail->fetch_assoc()) {
+            while ($rowD = $stmtDetail->fetch()) {
                 $minutos = (int) $rowD['minutos_sem_epi'];
                 if ($minutos > 0) {
                     $hours = floor($minutos / 60);

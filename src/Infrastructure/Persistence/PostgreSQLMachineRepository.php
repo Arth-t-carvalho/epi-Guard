@@ -8,9 +8,9 @@ use Facchini\Domain\Repository\MachineRepositoryInterface;
 use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 
-class MySQLMachineRepository implements MachineRepositoryInterface
+class PostgreSQLMachineRepository implements MachineRepositoryInterface
 {
-    private \mysqli $db;
+    private \PDO $db;
 
     public function __construct()
     {
@@ -20,11 +20,9 @@ class MySQLMachineRepository implements MachineRepositoryInterface
     public function findById(int $id): ?Machine
     {
         $stmt = $this->db->prepare("SELECT id, nome, setor_id, epi_id, criado_em, atualizado_em FROM maquinas WHERE id = ?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$id]);
 
-        if ($row = $result->fetch_assoc()) {
+        if ($row = $stmt->fetch()) {
             return $this->hydrate($row);
         }
 
@@ -35,12 +33,10 @@ class MySQLMachineRepository implements MachineRepositoryInterface
     public function findByDepartment(int $departmentId): array
     {
         $stmt = $this->db->prepare("SELECT id, nome, setor_id, epi_id, criado_em, atualizado_em FROM maquinas WHERE setor_id = ? ORDER BY nome ASC");
-        $stmt->bind_param('i', $departmentId);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->execute([$departmentId]);
 
         $machines = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $stmt->fetch()) {
             $machines[] = $this->hydrate($row);
         }
 
@@ -50,21 +46,20 @@ class MySQLMachineRepository implements MachineRepositoryInterface
     public function save(Machine $machine): void
     {
         $stmt = $this->db->prepare("INSERT INTO maquinas (nome, setor_id, epi_id) VALUES (?, ?, ?)");
-        $name = $machine->getName();
-        $deptId = $machine->getDepartmentId();
-        $epiId = $machine->getEpiId();
+        $params = [
+            $machine->getName(),
+            $machine->getDepartmentId(),
+            $machine->getEpiId()
+        ];
+        $stmt->execute($params);
 
-        $stmt->bind_param('sii', $name, $deptId, $epiId);
-        $stmt->execute();
-
-        $machine->setId($this->db->insert_id);
+        $machine->setId((int) $this->db->lastInsertId());
     }
 
     public function delete(int $id): void
     {
         $stmt = $this->db->prepare("DELETE FROM maquinas WHERE id = ?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
+        $stmt->execute([$id]);
     }
 
     private function hydrate(array $row): Machine

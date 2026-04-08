@@ -29,27 +29,20 @@ class NotificationApiController
                         f.nome AS funcionario_nome,
                         COALESCE(s.sigla, 'N/A') AS setor_sigla,
                         COALESCE(e.nome, 'PPE') AS epi_nome,
-                        DATE_FORMAT(o.data_hora, '%Y-%m-%d %H:%i:%s') AS data_hora
+                        to_char(o.data_hora, 'YYYY-MM-DD HH24:MI:SS') AS data_hora
                     FROM ocorrencias o
                     JOIN funcionarios f ON o.funcionario_id = f.id
                     LEFT JOIN setores s ON f.setor_id = s.id
                     LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                     LEFT JOIN epis e ON oe.epi_id = e.id
-                    WHERE o.tipo = 'INFRACAO' AND o.oculto = FALSE AND o.filial_id = " . (int)$activeFilial . "
+                    WHERE o.tipo = 'INFRACAO' AND o.oculto = FALSE AND o.filial_id = :filial
                     ORDER BY o.id DESC
                     LIMIT 50
                 ";
                 
-                $result = $db->query($sql);
-                
-                if ($result === false) {
-                    throw new \Exception('Query error: ' . $db->error);
-                }
-                
-                $dados = [];
-                while ($row = $result->fetch_assoc()) {
-                    $dados[] = $row;
-                }
+                $stmt = $db->prepare($sql);
+                $stmt->execute(['filial' => (int)$activeFilial]);
+                $dados = $stmt->fetchAll();
                 
                 $latestId = !empty($dados) ? (int)$dados[0]['id'] : 0;
                 
@@ -69,26 +62,19 @@ class NotificationApiController
                     f.nome AS funcionario_nome,
                     COALESCE(s.sigla, 'N/A') AS setor_sigla,
                     COALESCE(e.nome, 'PPE') AS epi_nome,
-                    DATE_FORMAT(o.data_hora, '%Y-%m-%d %H:%i:%s') AS data_hora
+                    to_char(o.data_hora, 'YYYY-MM-DD HH24:MI:SS') AS data_hora
                 FROM ocorrencias o
                 JOIN funcionarios f ON o.funcionario_id = f.id
                 LEFT JOIN setores s ON f.setor_id = s.id
                 LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                 LEFT JOIN epis e ON oe.epi_id = e.id
-                WHERE o.id > ? AND o.tipo = 'INFRACAO' AND o.oculto = FALSE AND o.filial_id = ?
+                WHERE o.id > :last_id AND o.tipo = 'INFRACAO' AND o.oculto = FALSE AND o.filial_id = :filial
                 ORDER BY o.id ASC
             ";
 
             $stmt = $db->prepare($sqlPolling);
-            $stmt->bind_param('ii', $last_id, $activeFilial);
-            
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            $dados = [];
-            while ($row = $result->fetch_assoc()) {
-                $dados[] = $row;
-            }
+            $stmt->execute(['last_id' => $last_id, 'filial' => $activeFilial]);
+            $dados = $stmt->fetchAll();
             
             $newLastId = $last_id;
             if (!empty($dados)) {
