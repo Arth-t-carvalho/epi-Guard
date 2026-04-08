@@ -1,1 +1,0 @@
-<?php error_reporting(E_ALL); ini_set('display_errors', 1); require 'src/bootstrap.php'; session_start(); $_COOKIE['Facchini-lang'] = 'en'; require 'src/Infrastructure/i18n.php'; ob_start(); try { require 'src/Presentation/View/dashboard/index.php'; } catch(Exception $e) { echo 'Error: '.$e->getMessage(); } echo substr(ob_get_clean(), 0, 1000);
