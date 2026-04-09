@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS maquinas CASCADE;
 DROP TABLE IF EXISTS logs_auditoria CASCADE;
 DROP TABLE IF EXISTS evidencias CASCADE;
 DROP TABLE IF EXISTS acoes_ocorrencia CASCADE;
@@ -171,7 +172,28 @@ CREATE TABLE IF NOT EXISTS evidencias (
 CREATE INDEX idx_evidencia_ocorrencia ON evidencias(ocorrencia_id);
 
 -- -----------------------------------------------------
--- 10. LOGS DE AUDITORIA
+-- 10. MAQUINAS
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS maquinas (
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  setor_id INT NOT NULL,
+  epi_id INT,
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_maquina_setor 
+    FOREIGN KEY (setor_id) 
+    REFERENCES setores(id) 
+    ON DELETE CASCADE,
+  CONSTRAINT fk_maquina_epi 
+    FOREIGN KEY (epi_id) 
+    REFERENCES epis(id) 
+    ON DELETE SET NULL
+);
+CREATE INDEX idx_maquina_setor ON maquinas(setor_id);
+
+-- -----------------------------------------------------
+-- 11. LOGS DE AUDITORIA
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS logs_auditoria (
     id SERIAL PRIMARY KEY,

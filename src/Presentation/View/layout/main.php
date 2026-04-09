@@ -7,12 +7,37 @@
     <title><?= $pageTitle ?? 'Facchini' ?></title>
     <meta name="google" content="notranslate">
     <!-- Leitura imediata de tema (Sempre Light conforme solicitado) -->
+    <!-- Leitura imediata de tema para evitar flashing -->
     <script>
         (function () {
-            // Removendo auto-leitura de tema escuro para manter conforme Foto 2 (Modo Claro)
-            document.documentElement.classList.remove('dark-theme');
-            localStorage.setItem('Facchini-theme', 'light');
+            const savedTheme = localStorage.getItem('Facchini-theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark-theme');
+            } else {
+                document.documentElement.classList.remove('dark-theme');
+            }
         })();
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle("dark-theme");
+            localStorage.setItem("Facchini-theme", isDark ? "dark" : "light");
+            
+            const themeIcon = document.getElementById("theme-icon-display");
+            if (themeIcon) {
+                themeIcon.setAttribute("data-lucide", isDark ? "sun" : "moon");
+            }
+            const themeLabel = document.getElementById("theme-text-display");
+            if (themeLabel) {
+                themeLabel.textContent = isDark ? "<?= __('Tema Claro') ?>" : "<?= __('Tema Escuro') ?>";
+            }
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            // Opcional: Notificar outros componentes que o tema mudou
+            window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: isDark ? 'dark' : 'light' } }));
+        }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

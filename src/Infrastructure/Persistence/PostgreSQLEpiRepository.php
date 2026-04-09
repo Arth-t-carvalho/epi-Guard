@@ -56,6 +56,28 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
 
     public function save(EpiItem $epiItem): void
     {
+        // Se for um novo item (sem ID) e estiver com a cor padrão, rotaciona a paleta
+        $currentColor = strtoupper(trim($epiItem->getColor()));
+        if ($epiItem->getId() === null && ($currentColor === '#E30613' || empty($currentColor))) {
+            try {
+                $colors = [
+                    '#E30613', // Vermelho Facchini
+                    '#FFC107', // Amarelo
+                    '#2196F3', // Azul
+                    '#4CAF50', // Verde
+                    '#FF9800', // Laranja
+                    '#9C27B0', // Roxo
+                    '#009688', // Teal
+                    '#3F51B5'  // Indigo
+                ];
+                $stmtCount = $this->db->query("SELECT COUNT(*) FROM epis");
+                $count = (int)$stmtCount->fetchColumn();
+                $epiItem->setColor($colors[$count % count($colors)]);
+            } catch (\Exception $e) {
+                // Em caso de erro, mantém o padrão da entidade
+            }
+        }
+
         $stmt = $this->db->prepare("INSERT INTO epis (nome, nome_en, descricao, cor, status) VALUES (?, ?, ?, ?, 'ATIVO')");
         $params = [
             $epiItem->getName(),
@@ -90,9 +112,43 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
     public function resetToDefaults(): bool
     {
         try {
-            $this->db->query("UPDATE epis SET cor = '#E30613'");
+            // Paleta expandida para maior variedade visual
+            $colors = [
+                '#E30613', // Vermelho Facchini
+                '#FFC107', // Amarelo
+                '#2196F3', // Azul
+                '#4CAF50', // Verde
+                '#FF9800', // Laranja
+                '#9C27B0', // Roxo
+                '#009688', // Teal
+                '#3F51B5'  // Indigo
+            ];
+            
+            // Buscar IDs dos EPIs ativos ordenados para manter consistência
+            $stmt = $this->db->query("SELECT id FROM epis WHERE status = 'ATIVO' ORDER BY nome ASC");
+            $ids = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+            
+            if (empty($ids)) {
+                return true;
+            }
+
+            // Iniciar transação para performance e integridade
+            $this->db->beginTransaction();
+            
+            $updateStmt = $this->db->prepare("UPDATE epis SET cor = ? WHERE id = ?");
+            
+            foreach ($ids as $index => $id) {
+                $color = $colors[$index % count($colors)];
+                $updateStmt->execute([$color, (int)$id]);
+            }
+            
+            $this->db->commit();
             return true;
         } catch (\Exception $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            error_log("Erro ao restaurar cores: " . $e->getMessage());
             return false;
         }
     }

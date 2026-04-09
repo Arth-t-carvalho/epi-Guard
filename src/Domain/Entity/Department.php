@@ -9,6 +9,7 @@ use DateTimeImmutable;
 class Department
 {
     private ?int $id;
+    private int $filialId;
     private string $name;
     private ?string $nameEn;
     private string $code;
@@ -21,6 +22,7 @@ class Department
         string $code,
         array $epis = [],
         ?string $nameEn = null,
+        int $filialId = 1,
         ?int $id = null,
         ?DateTimeImmutable $createdAt = null,
         ?DateTimeImmutable $updatedAt = null
@@ -30,6 +32,7 @@ class Department
         $this->nameEn = $nameEn;
         $this->code = $code;
         $this->epis = $epis;
+        $this->filialId = $filialId;
         $this->id = $id;
         $this->createdAt = $createdAt ?? new DateTimeImmutable();
         $this->updatedAt = $updatedAt;
@@ -43,6 +46,16 @@ class Department
     public function setId(int $id): void
     {
         $this->id = $id;
+    }
+
+    public function getFilialId(): int
+    {
+        return $this->filialId;
+    }
+
+    public function setFilialId(int $filialId): void
+    {
+        $this->filialId = $filialId;
     }
 
     public function getName(): string

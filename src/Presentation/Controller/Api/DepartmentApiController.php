@@ -16,8 +16,9 @@ class DepartmentApiController
         header('Content-Type: application/json; charset=utf-8');
 
         try {
+            $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
             $repo = new PostgreSQLDepartmentRepository();
-            $departments = $repo->findAll();
+            $departments = $repo->findAll($activeFilialId);
 
             $data = array_map(function (Department $dept) {
                 return [
@@ -80,8 +81,8 @@ class DepartmentApiController
                 name: $nome,
                 code: $sigla,
                 epis: $epis,
-                nameEn: !empty($nomeEn) ? $nomeEn : null
-            );
+                nameEn: !empty($nomeEn) ? $nomeEn : null,
+                filialId: $activeFilial);
 
             $repo->save($department);
 
@@ -147,11 +148,13 @@ class DepartmentApiController
                 return;
             }
 
-            // Validar nome duplicado (exceto se for o próprio setor)
-            $existing = $repo->findByName($nome);
-            if ($existing && $existing->getId() !== $id) {
+            // Validar nome duplicado (exceto se for o próprio setor) dentro da mesma filial
+            $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
+            $stmt = \Facchini\Infrastructure\Database\Connection::getInstance()->prepare("SELECT id FROM setores WHERE nome = ? AND filial_id = ? AND id <> ?");
+            $stmt->execute([$nome, $activeFilialId, $id]);
+            if ($stmt->fetch()) {
                 http_response_code(409);
-                echo json_encode(['success' => false, 'error' => 'Já existe outro setor cadastrado com este nome.']);
+                echo json_encode(['success' => false, 'error' => 'Já existe outro setor cadastrado com este nome nesta filial.']);
                 return;
             }
 
@@ -160,6 +163,7 @@ class DepartmentApiController
                 code: $sigla,
                 epis: $epis,
                 nameEn: !empty($nomeEn) ? $nomeEn : null,
+                filialId: $activeFilialId,
                 id: $id
             );
 

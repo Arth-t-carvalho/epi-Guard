@@ -6,9 +6,11 @@ class ManagementController
 {
     public function departments()
     {
+        $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
         $filters = [
             'status' => $_GET['status'] ?? 'ativo',
-            'risk' => $_GET['risk'] ?? 'todos'
+            'risk' => $_GET['risk'] ?? 'todos',
+            'filial_id' => $activeFilialId
         ];
         
         $repo = new \Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository();
@@ -18,8 +20,9 @@ class ManagementController
 
     public function employees()
     {
+        $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
         $deptRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository();
-        $setores = $deptRepo->findAll();
+        $setores = $deptRepo->findAll($activeFilialId);
         require_once __DIR__ . '/../View/management/employees.php';
     }
 

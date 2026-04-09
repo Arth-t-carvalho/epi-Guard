@@ -18,7 +18,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function findById(int $id): ?Department
     {
-        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, filial_id, status, epis_json, criado_em, atualizado_em FROM setores WHERE id = ?");
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch()) {
@@ -30,7 +30,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function findByCode(string $code): ?Department
     {
-        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE sigla = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, filial_id, status, epis_json, criado_em, atualizado_em FROM setores WHERE sigla = ?");
         $stmt->execute([$code]);
 
         if ($row = $stmt->fetch()) {
@@ -42,7 +42,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function findByName(string $name): ?Department
     {
-        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, status, epis_json, criado_em, atualizado_em FROM setores WHERE nome = ?");
+        $stmt = $this->db->prepare("SELECT id, nome, nome_en, sigla, filial_id, status, epis_json, criado_em, atualizado_em FROM setores WHERE nome = ?");
         $stmt->execute([$name]);
 
         if ($row = $stmt->fetch()) {
@@ -53,9 +53,18 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
     }
 
     /** @return Department[] */
-    public function findAll(): array
+    public function findAll(?int $filialId = null): array
     {
-        $stmt = $this->db->query("SELECT id, nome, nome_en, sigla, status, criado_em, atualizado_em FROM setores ORDER BY nome ASC");
+        $sql = "SELECT id, nome, nome_en, sigla, filial_id, status, criado_em, atualizado_em FROM setores";
+        $params = [];
+        if ($filialId !== null) {
+            $sql .= " WHERE filial_id = ?";
+            $params[] = $filialId;
+        }
+        $sql .= " ORDER BY nome ASC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
         $departments = [];
 
         while ($row = $stmt->fetch()) {
@@ -86,6 +95,10 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
                 WHERE 1=1";
 
         $params = [];
+        if (!empty($filters['filial_id'])) {
+            $sql .= " AND s.filial_id = ?";
+            $params[] = $filters['filial_id'];
+        }
         if (!empty($filters['status']) && $filters['status'] !== 'todos') {
             $sql .= " AND s.status = ?";
             $params[] = ($filters['status'] === 'ativo' ? 'ATIVO' : 'INATIVO');
@@ -110,12 +123,13 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function save(Department $department): void
     {
-        $stmt = $this->db->prepare("INSERT INTO setores (nome, nome_en, sigla, epis_json) VALUES (?, ?, ?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO setores (nome, nome_en, sigla, epis_json, filial_id) VALUES (?, ?, ?, ?, ?)");
         $params = [
             $department->getName(),
             $department->getNameEn(),
             $department->getCode(),
-            json_encode($department->getEpis())
+            json_encode($department->getEpis()),
+            $department->getFilialId()
         ];
         $stmt->execute($params);
 
@@ -124,12 +138,13 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
 
     public function update(Department $department): void
     {
-        $stmt = $this->db->prepare("UPDATE setores SET nome = ?, nome_en = ?, sigla = ?, epis_json = ? WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE setores SET nome = ?, nome_en = ?, sigla = ?, epis_json = ?, filial_id = ? WHERE id = ?");
         $params = [
             $department->getName(),
             $department->getNameEn(),
             $department->getCode(),
             json_encode($department->getEpis()),
+            $department->getFilialId(),
             $department->getId()
         ];
         $stmt->execute($params);
@@ -153,6 +168,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
             code: $row['sigla'],
             epis: $episList,
             nameEn: $row['nome_en'],
+            filialId: (int)($row['filial_id'] ?? 1),
             id: (int)$row['id'],
             createdAt: new \DateTimeImmutable($row['criado_em']),
             updatedAt: $row['atualizado_em'] ? new \DateTimeImmutable($row['atualizado_em']) : null

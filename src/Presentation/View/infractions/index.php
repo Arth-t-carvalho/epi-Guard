@@ -247,7 +247,8 @@ function formatInfractionDuration($start, $end = null) {
                                 <span><?= __('Tempo s/ EPI') ?>: <?= $durationText ?></span>
                             </div>
                             <div class="card-footer-premium">
-                                                $args = json_encode([
+                                <?php
+                                $args = json_encode([
                                     mb_check_encoding($infraction['funcionario_nome'], 'UTF-8') ? $infraction['funcionario_nome'] : utf8_encode($infraction['funcionario_nome']),
                                     mb_check_encoding($infraction['epi_nome'] ?? 'N/A', 'UTF-8') ? ($infraction['epi_nome'] ?? 'N/A') : utf8_encode($infraction['epi_nome'] ?? 'N/A'),
                                     date('d/m/Y H:i', strtotime($infraction['data_hora'])),
@@ -262,7 +263,7 @@ function formatInfractionDuration($start, $end = null) {
                                     mb_check_encoding($infraction['acao_obs'] ?? '', 'UTF-8') ? ($infraction['acao_obs'] ?? '') : utf8_encode($infraction['acao_obs'] ?? ''),
                                     mb_check_encoding($infraction['responsavel_nome'] ?? '', 'UTF-8') ? ($infraction['responsavel_nome'] ?? '') : utf8_encode($infraction['responsavel_nome'] ?? ''),
                                     mb_check_encoding($infraction['responsavel_cargo'] ?? '', 'UTF-8') ? ($infraction['responsavel_cargo'] ?? '') : utf8_encode($infraction['responsavel_cargo'] ?? '')
-                                ]);                     ]);
+                                ]);
                                 ?>
                                 <button class="btn-card-action-premium" title="<?= __('Ver detalhes') ?>"
                                     onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($args, ENT_QUOTES, 'UTF-8') ?>)"><i

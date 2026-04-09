@@ -28,25 +28,7 @@ class SettingsController
         // 4. Inject de Metadados da Página (Estilos, Títulos e Scripts)
         $pageTitle = 'Configurações - Facchini';
         
-        $extraScripts = '<script>
-            function toggleTheme() {
-                const isDark = document.documentElement.classList.toggle("dark-theme");
-                localStorage.setItem("Facchini-theme", isDark ? "dark" : "light");
-                
-                const themeIcon = document.getElementById("theme-icon-display");
-                if (themeIcon) {
-                    themeIcon.setAttribute("data-lucide", isDark ? "sun" : "moon");
-                }
-                const themeLabel = document.getElementById("theme-text-display");
-                if (themeLabel) {
-                    themeLabel.textContent = isDark ? "Tema Claro" : "Tema Escuro";
-                }
-                
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-            }
-        </script>';
+        $extraScripts = '';
         
         $extraHead = '<link rel="stylesheet" href="' . BASE_PATH . '/assets/css/settings.css">';
 
