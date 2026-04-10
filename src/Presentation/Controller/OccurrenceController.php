@@ -15,7 +15,6 @@ class OccurrenceController
         $epiRepo = new PostgreSQLEpiRepository();
 
         $departments = $deptRepo->findAll();
-        $employees = $empRepo->findAll();
         $epis = $epiRepo->findAll();
 
         require_once __DIR__ . '/../View/occurrences/list.php';

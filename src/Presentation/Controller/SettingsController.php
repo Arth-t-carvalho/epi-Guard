@@ -25,7 +25,28 @@ class SettingsController
             $currentUser = $userRepo->findById((int)$_SESSION['user_id']);
         }
 
-        // 4. Inject de Metadados da Página (Estilos, Títulos e Scripts)
+        // 5. Garantir e buscar a cor do Gráfico Total para a filial
+        $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
+        $db = \Facchini\Infrastructure\Database\Connection::getInstance();
+        try {
+            $db->exec("ALTER TABLE filiais ADD COLUMN IF NOT EXISTS cor_grafico_total VARCHAR(10) DEFAULT '#10B981'");
+        } catch (\Exception $e) { } // Ignore errors if it exists but syntax was unsupported
+
+        $totalColorStmt = $db->prepare("SELECT cor_grafico_total FROM filiais WHERE id = ? LIMIT 1");
+        $totalColorStmt->execute([$activeFilialId]);
+        $totalColor = $totalColorStmt->fetchColumn() ?: '#10B981';
+
+        // Injetar o Total no array de EPIs para usar a mesma UI
+        $episData[] = new \Facchini\Domain\Entity\EpiItem(
+            name: 'total',
+            color: $totalColor,
+            isRequired: false,
+            description: '',
+            nameEn: 'total',
+            id: -1 // Id fake para sinalizar Total
+        );
+
+        // 6. Inject de Metadados da Página (Estilos, Títulos e Scripts)
         $pageTitle = 'Configurações - Facchini';
         
         $extraScripts = '';

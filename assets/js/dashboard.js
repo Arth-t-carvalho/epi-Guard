@@ -303,7 +303,7 @@ function initDashboard() {
             // Modal Detalhes (Gráfico)
             const detModal = document.getElementById('detailModal');
             if (detModal && e.target === detModal) {
-                detModal.classList.remove('open');
+                detModal.classList.remove('active');
                 const mc = document.querySelector('.main-content');
                 if (mc) mc.style.overflow = '';
             }
@@ -351,18 +351,28 @@ function initDashboard() {
 }
 
 // --- GESTÃO DE EVENTOS DE CARREGAMENTO ---
+// Usa guard flag para evitar múltiplos listeners ao re-injetar o script via SPA.
 
-// Se o script rodar via SPA, o DOMContentLoaded já disparou.
-// Mas o navigation.js disparará o 'spaPageLoaded' após a transição.
-document.addEventListener('spaPageLoaded', initDashboard);
+if (!window._dashboardListenerBound) {
+    window._dashboardListenerBound = true;
+    document.addEventListener('spaPageLoaded', () => {
+        // Evita dupla chamada: se o setTimeout já chamou o init, não repete via evento
+        if (!window._dashboardInitCalled) {
+            initDashboard();
+        }
+        window._dashboardInitCalled = false; // Reseta para próxima navegação
+    });
+}
 
+// Se o script foi carregado com a página já pronta (hard-refresh ou carga via SPA),
+// chama o init diretamente.
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initDashboard);
 } else {
-    // Se já estiver pronto e NÃO fomos carregados via SPA (primeira carga), roda agora
-    if (!window._spaEngineLoaded || document.getElementById('mainChart')) {
-        initDashboard();
-    }
+    // Aguarda um tick para garantir que o DOM já foi injetado pelo SPA.
+    // Marca como chamado para que o listener spaPageLoaded não duplique.
+    window._dashboardInitCalled = true;
+    setTimeout(initDashboard, 0);
 }
 
 // ===============================
@@ -379,14 +389,13 @@ function loadCalendarData() {
             console.log('API CALENDAR DATA:', data);
             if (data && data.occurrences) {
                 allOccurrences = data.occurrences;
-                if (data.summary) {
-                    updateKPIElements(data.summary);
-                }
+                // Os cards KPI (hoje/semana/mês) são atualizados EXCLUSIVAMENTE pelo loadCharts().
+                // Isso evita oscilação entre os dois fetches paralelos.
             } else {
                 allOccurrences = Array.isArray(data) ? data : [];
             }
             console.log('ALL OCCURRENCES SET:', allOccurrences.length);
-            renderInterface(); // Atualiza tela
+            renderInterface(); // Atualiza apenas a lista de eventos do dia
         })
         .catch(err => {
             console.error('Erro calendário API:', err);
@@ -429,29 +438,28 @@ function renderInterface() {
             });
 
             if (dailyData.length > 0) {
-                const sectorsMap = {};
-                dailyData.forEach(item => {
-                    const sName = item.name || 'Setor Desconhecido';
-                    const sId = item.sector_id || 0;
-                    const mapKey = sId || sName;
-
-                    if (!sectorsMap[mapKey]) {
-                        sectorsMap[mapKey] = { id: sId, name: sName, count: 0, initials: sName.substring(0, 2).toUpperCase() };
-                    }
-                    sectorsMap[mapKey].count++;
-                });
-
                 let htmlBuffer = '';
-                Object.values(sectorsMap).forEach(s => {
-                    const countText = s.count === 1 ? '1 ocorrência encontrada' : `${s.count} ocorrências encontradas`;
+                
+                // Ordenar: mais recentes primeiro (assumindo que o ID ou data_hora cresce)
+                dailyData.sort((a, b) => b.id - a.id);
+
+                dailyData.forEach(item => {
+                    const statusVal = item.status || 'Pendente';
+                    const translatedStatus = statusVal === 'Pendente' ? (window.I18N?.labels?.pending || 'Pendente') : (statusVal === 'Resolvido' ? (window.I18N?.labels?.resolved || 'Resolvido') : statusVal);
+                    const statusClass = statusVal === 'Pendente' ? 'status-pendente' : 'status-resolvido';
+                    const initials = (item.employee || '??').substring(0, 2).toUpperCase();
+
                     htmlBuffer += `
-                        <div class="occurrence-item" onclick="redirectToInfractions('${s.id}', '${s.name}')" style="cursor:pointer;">
-                            <div class="occ-avatar">${s.initials}</div>
-                            <div class="occ-info">
-                                <span class="occ-name">${s.name}</span>
-                                <span class="occ-desc">${countText}</span>
+                        <div class="occurrence-item" onclick="redirectToInfractions('', '', '${item.id}')" style="cursor:pointer; padding: 10px 14px;">
+                            <div class="occ-avatar" style="background: var(--primary-light); color: var(--primary); font-weight: 800;">${initials}</div>
+                            <div class="occ-info" style="flex: 1; margin-left: 12px;">
+                                <span class="occ-name" style="font-size: 13px; font-weight: 700; color: var(--secondary); display: block;">${item.employee}</span>
+                                <span class="occ-desc" style="font-size: 11px; color: var(--text-muted); display: block;">${item.name || 'Setor'}</span>
                             </div>
-                            <div class="occ-time">❯</div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                                <span class="occ-time" style="font-size: 10px; font-weight: 700; color: var(--text-muted); opacity: 0.8;">${item.time}</span>
+                                <span class="status-badge ${statusClass}" style="zoom: 0.85;">${translatedStatus}</span>
+                            </div>
                         </div>`;
                 });
                 list.innerHTML = htmlBuffer;
@@ -1074,6 +1082,13 @@ function openDetailModal(monthIndex, monthName, epiName = '', filterSectorName =
     modal.classList.add('active');
     document.querySelector('.main-content').style.overflow = 'hidden';
 
+    // Resetar busca do modal de detalhes
+    const searchInput = document.getElementById('detailSearchInput');
+    if (searchInput) {
+        searchInput.value = '';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ root: modal });
+    }
+
     if (isGlobal) {
         thead.innerHTML = `<th>${window.I18N?.labels?.rank || 'Rank'}</th><th>${window.I18N?.labels?.course || 'Curso'}</th><th>${window.I18N?.labels?.infractions || 'Infrações'}</th><th>${window.I18N?.labels?.conformity || 'Conformidade'}</th><th>${window.I18N?.labels?.risk || 'Risco'}</th>`;
     } else {
@@ -1086,52 +1101,39 @@ function openDetailModal(monthIndex, monthName, epiName = '', filterSectorName =
 
     fetch(url)
         .then(res => res.json())
-        .then(data => {
+        .then(response => {
+            const dataArr = response.data || [];
             tbody.innerHTML = '';
-            if (!data || data.length === 0) {
+            
+            if (!dataArr || dataArr.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">${window.I18N?.labels?.no_records_found || 'Nenhum registro encontrado.'}</td></tr>`;
                 return;
             }
 
-            if (isGlobal) {
-                data.forEach((row, index) => {
-                    const totalAlunos = parseInt(row.total_alunos) || 1;
-                    const alunosComInfracao = parseInt(row.alunos_com_infracao) || 0;
-                    const conformidade = Math.round(((totalAlunos - alunosComInfracao) / totalAlunos) * 100);
-                    let riskIcon = '';
-                    if (conformidade < 50) riskIcon = '<span class="risk-triangle red">▲</span>';
-                    else if (conformidade < 70) riskIcon = '<span class="risk-triangle orange">▲</span>';
-                    else if (conformidade < 90) riskIcon = '<span class="risk-triangle yellow">▲</span>';
+            // Sempre mostrar lista de funcionários (infrações) quando clicado em gráficos
+            // Independente de ser Global ou não, pois o usuário quer ver os nomes.
+            thead.innerHTML = `
+                <th>${window.I18N?.labels?.date || 'Data'}</th>
+                <th>${window.I18N?.labels?.student || 'Aluno'}</th>
+                <th>${window.I18N?.labels?.infraction_epi || 'Infração (EPI)'}</th>
+                <th>${window.I18N?.labels?.time || 'Horário'}</th>
+                <th>${window.I18N?.labels?.status || 'Status'}</th>
+            `;
 
-                    tbody.innerHTML += `
-                        <tr onclick="selectSectorRecord(${row.curso_id}, '${row.curso_nome.replace(/'/g, "\\'")}')" style="cursor: pointer;">
-                            <td>#${index + 1}</td>
-                            <td style="font-weight:600;">${row.curso_nome}</td>
-                            <td>${row.total_infracoes}</td>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <div class="mini-progress-bar"><div class="mini-progress-fill" style="width:${conformidade}%"></div></div>
-                                    <span>${conformidade}%</span>
-                                </div>
-                            </td>
-                            <td style="text-align:center;">${riskIcon}</td>
-                        </tr>`;
-                });
-            } else {
-                data.forEach(row => {
-                    const statusTexto = row.status_formatado || row.status;
-                    const translatedStatus = statusTexto === 'Pendente' ? (window.I18N?.labels?.pending || 'Pendente') : (statusTexto === 'Resolvido' ? (window.I18N?.labels?.resolved || 'Resolvido') : statusTexto);
-                    let classeStatus = statusTexto === 'Pendente' ? 'status-pendente' : 'status-resolvido';
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${row.data}</td>
-                            <td style="font-weight:500;">${row.aluno}</td>
-                            <td>${row.epis}</td>
-                            <td>${row.hora}</td>
-                            <td><span class="status-badge ${classeStatus}">${translatedStatus}</span></td>
-                        </tr>`;
-                });
-            }
+            dataArr.forEach(row => {
+                const statusTexto = row.status_formatado || row.status || 'Pendente';
+                const translatedStatus = statusTexto === 'Pendente' ? (window.I18N?.labels?.pending || 'Pendente') : (statusTexto === 'Resolvido' ? (window.I18N?.labels?.resolved || 'Resolvido') : statusTexto);
+                let classeStatus = statusTexto === 'Pendente' ? 'status-pendente' : 'status-resolvido';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${row.data}</td>
+                        <td style="font-weight:600; color: var(--primary);">${row.aluno}</td>
+                        <td>${row.epis}</td>
+                        <td>${row.hora}</td>
+                        <td><span class="status-badge ${classeStatus}">${translatedStatus}</span></td>
+                    </tr>`;
+            });
         })
         .catch(err => {
             console.error(err);
@@ -1140,9 +1142,28 @@ function openDetailModal(monthIndex, monthName, epiName = '', filterSectorName =
 }
 
 function closeModal() {
-    const modals = document.querySelectorAll('.modal-premium, .modal-calendar, .modal-overlay-calendar');
+    const modals = document.querySelectorAll('.modal-premium, .modal-calendar, .modal-overlay-calendar, #detailModal');
     modals.forEach(m => m.classList.remove('active'));
     document.querySelector('.main-content').style.overflow = '';
+}
+
+/**
+ * Filtra a tabela do modal de detalhes do gráfico (Dashboard)
+ */
+function filterDetailModalTable(query) {
+    const term = query.toLowerCase().trim();
+    const rows = document.querySelectorAll('#modalTableBody tr');
+    
+    rows.forEach(row => {
+        // Pega todo o texto das células da linha para buscar o nome do funcionário ou setor
+        const searchableText = row.textContent.toLowerCase();
+        
+        if (searchableText.includes(term)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
 }
 
 function loadCharts() {
@@ -1216,17 +1237,34 @@ function loadCharts() {
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             tension: 0.4,
-                            onClick: (evt, active, chart) => {
-                                const points = chart.getElementsAtEventForMode(evt, 'index', { intersect: false }, true);
-                                if (points.length > 0) {
-                                    const monthIndex = points[0].index;
-                                    const exactPoints = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+                            onClick: (evt, elements, chart) => {
+                                // Tenta primeiro pegar o elemento exato clicado (barra ou bolhinha)
+                                const activeElements = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+                                
+                                // Tenta pegar a categoria (mês) clicada
+                                const categoryElements = chart.getElementsAtEventForMode(evt, 'index', { intersect: false }, true);
+                                
+                                if (categoryElements.length > 0) {
+                                    const monthIndex = categoryElements[0].index;
                                     let filterEPI = '';
-                                    if (exactPoints.length > 0) {
-                                        filterEPI = chart.data.datasets[exactPoints[0].datasetIndex]?.label || '';
+                                    
+                                    // Se clicou exatamente em uma barra/ponto, filtra por aquele EPI
+                                    if (activeElements.length > 0) {
+                                        const datasetIndex = activeElements[0].datasetIndex;
+                                        const label = chart.data.datasets[datasetIndex]?.label || '';
+                                        if (label !== 'Total' && label !== (window.I18N?.labels?.total || 'Total')) {
+                                            filterEPI = label;
+                                        }
                                     }
+                                    
                                     openDetailModal(monthIndex, monthsFull[monthIndex], filterEPI);
                                 }
+                            },
+                            onHover: (evt, active, chart) => {
+                                // Muda o cursor se estiver sobre um elemento clicável (barra ou ponto)
+                                // Usamos 'index' mode para o hover também para indicar que a coluna inteira é interativa
+                                const hasItems = chart.getElementsAtEventForMode(evt, 'index', { intersect: false }, true).length > 0;
+                                evt.native.target.style.cursor = hasItems ? 'pointer' : 'default';
                             },
                             plugins: { legend: { labels: { usePointStyle: true, padding: 20 } } },
                             scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
@@ -1253,6 +1291,9 @@ function loadCharts() {
                                     const label = chart.data.labels[active[0].index];
                                     openDetailModal(selectedDate.getMonth(), monthsFull[selectedDate.getMonth()], label);
                                 }
+                            },
+                            onHover: (evt, active, chart) => {
+                                evt.native.target.style.cursor = active.length > 0 ? 'pointer' : 'default';
                             }
                         }
                     });
@@ -1289,39 +1330,37 @@ function selectYear(year) {
     document.getElementById('yearDropdown').classList.remove('active');
 }
 
-function refreshBadgesJS(currentVal, previousVal, elementId) {
-    const badge = document.getElementById(elementId);
-    if (!badge) return;
-    let percent = 0;
-    if (previousVal > 0) percent = Math.round(((currentVal - previousVal) / previousVal) * 100);
-    else percent = currentVal * 100;
-    const isUp = percent >= 0;
-    badge.className = `badge ${isUp ? 'up' : 'down'}`;
-    badge.innerHTML = `${isUp ? '↗' : '↘'} ${Math.abs(percent)}%`;
-}
+function renderTrendBadge(trend, elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
 
-function updatePercentagesDinamicamente() {
-    const datePrevDay = new Date(selectedDate);
-    datePrevDay.setDate(selectedDate.getDate() - 1);
-    const startOfSelectedWeek = new Date(selectedDate);
-    startOfSelectedWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
-    const datePrevWeek = new Date(startOfSelectedWeek);
-    datePrevWeek.setDate(datePrevWeek.getDate() - 7);
+    if (!trend || trend.direction === 'stable') {
+        el.style.display = 'none';
+        return;
+    }
 
-    let totalOntem = 0, totalSemanaPassada = 0;
-    allOccurrences.forEach(item => {
-        const dateStr = item.full_date || item.data_hora || item.date;
-        if (!dateStr) return;
-        const itemDate = new Date(dateStr.replace(/-/g, '/'));
-        if (isSameDay(datePrevDay, itemDate)) totalOntem++;
-        if (isSameWeek(datePrevWeek, itemDate)) totalSemanaPassada++;
-    });
+    const { percent, direction, level } = trend;
+    const isUp = direction === 'up';
+    const isDown = direction === 'down';
+    
+    // Icone baseada na direção
+    let lucideIcon = 'minus';
+    if (isUp) lucideIcon = 'trending-up';
+    if (isDown) lucideIcon = 'trending-down';
 
-    const elDia = document.getElementById('kpiDia');
-    const elSemana = document.getElementById('kpiSemana');
-    if (elDia && elSemana) {
-        refreshBadgesJS(parseInt(elDia.innerText) || 0, totalOntem, 'badgeDia');
-        refreshBadgesJS(parseInt(elSemana.innerText) || 0, totalSemanaPassada, 'badgeSemana');
+    el.className = `kpi-trend-badge trend-${level}`;
+    el.style.display = 'flex';
+    el.innerHTML = `<i data-lucide="${lucideIcon}"></i> ${percent}%`;
+    
+    if (window.lucide) {
+        window.lucide.createIcons({
+            attrs: {
+                'stroke-width': 3,
+                'width': 12,
+                'height': 12
+            },
+            root: el
+        });
     }
 }
 
@@ -1341,23 +1380,10 @@ function updateKPIElements(summary) {
     if (elSemana) elSemana.innerText = summary.week ?? 0;
     if (elMes) elMes.innerText = summary.month ?? 0;
 
-    // Tornar cards clicáveis (Infrações) - Navegação Direta
-    const cardHoje = document.getElementById('cardKpiHoje');
-    if (cardHoje) {
-        cardHoje.onclick = () => window.location.href = `${window.BASE_PATH}/infractions?periodo=hoje`;
-        cardHoje.style.cursor = 'pointer';
-    }
-
-    const cardSemana = document.getElementById('cardKpiSemana');
-    if (cardSemana) {
-        cardSemana.onclick = () => window.location.href = `${window.BASE_PATH}/infractions?periodo=semana`;
-        cardSemana.style.cursor = 'pointer';
-    }
-
-    const cardMes = document.getElementById('cardKpiMes');
-    if (cardMes) {
-        cardMes.onclick = () => window.location.href = `${window.BASE_PATH}/infractions?periodo=mes`;
-        cardMes.style.cursor = 'pointer';
+    if (summary.trends) {
+        renderTrendBadge(summary.trends.today, 'trendKpiDia');
+        renderTrendBadge(summary.trends.week, 'trendKpiSemana');
+        renderTrendBadge(summary.trends.month, 'trendKpiMes');
     }
 
     if (elMedia && window.totalStudents > 0) {
@@ -1390,6 +1416,7 @@ function updateKPIElements(summary) {
     }
 }
 
+
 // --- REDIRECIONAMENTOS ---
 
 window.confirmRedirect = function (period) {
@@ -1409,13 +1436,18 @@ window.goToInfractions = function () {
     window.location.href = `${window.BASE_PATH}/infractions?periodo=${period}`;
 }
 
-window.redirectToInfractions = function (sectorId, sectorName) {
+window.redirectToInfractions = function (sectorId, sectorName, occurrenceId = null, employeeId = null) {
     const y = selectedDate.getFullYear();
     const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
     const d = String(selectedDate.getDate()).padStart(2, '0');
     const dStr = `${y}-${m}-${d}`;
 
-    const url = `${window.BASE_PATH}/infractions?setor_id=${sectorId}&periodo=personalizado&date_from=${dStr}&date_to=${dStr}`;
+    let url = `${window.BASE_PATH}/infractions?periodo=personalizado&date_from=${dStr}&date_to=${dStr}`;
+    
+    if (sectorId && sectorId !== 'all') url += `&setor_id=${sectorId}`;
+    if (employeeId) url += `&funcionario_id=${employeeId}`;
+    if (occurrenceId) url += `&highlight=${occurrenceId}`;
+    
     window.location.href = url;
 }
 
@@ -1429,9 +1461,4 @@ document.addEventListener('click', function unlockAudio() {
 }, { once: true });
 
 // Observer para disparar atualizações de badges
-const observer = new MutationObserver(() => updatePercentagesDinamicamente());
-const obsConfig = { childList: true, characterData: true, subtree: true };
-['kpiDia', 'kpiSemana', 'kpiMes'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el, obsConfig);
-});
+// Removido pois agora as tendências vêm diretamente do servidor no updateKPIElements.

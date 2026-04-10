@@ -99,6 +99,15 @@
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
+
+                    <!-- Barra de Busca Premium -->
+                    <div class="ps-search-wrapper" id="psSearchWrapper" style="display: none;">
+                        <div class="ps-search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="psSearchInput" placeholder="${window.I18N?.labels?.search_placeholder || 'Pesquisar...'}" onkeyup="filterPremiumOptions(this.value)">
+                        </div>
+                    </div>
+
                     <div class="premium-select-body" id="psModalBody">
                         <!-- Opções renderizadas aqui via JS -->
                     </div>
@@ -149,6 +158,28 @@
         // Preenche info do cabeçalho
         titleEl.textContent = props.title;
         subEl.textContent = props.subtitle;
+
+        // Resetar e Configurar Busca
+        const searchWrapper = document.getElementById('psSearchWrapper');
+        const searchInput = document.getElementById('psSearchInput');
+        if (searchInput) searchInput.value = '';
+
+        // Só mostrar busca para Setor, Funcionário e EPI
+        if (searchWrapper) {
+            const titleLower = props.title.toLowerCase();
+            const subtitleLower = props.subtitle.toLowerCase();
+            if (titleLower.includes('setor') || 
+                titleLower.includes('colaborador') || 
+                titleLower.includes('funcionário') || 
+                titleLower.includes('funcionario') || 
+                titleLower.includes('epi') ||
+                subtitleLower.includes('área') ||
+                subtitleLower.includes('pessoa')) {
+                searchWrapper.style.display = 'block';
+            } else {
+                searchWrapper.style.display = 'none';
+            }
+        }
 
         // Limpa opções antigas
         bodyEl.innerHTML = '';
@@ -212,6 +243,26 @@
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
+
+    /**
+     * Filtra os cartões de opções no modal premium
+     */
+    window.filterPremiumOptions = function(query) {
+        const term = query.toLowerCase().trim();
+        const cards = document.querySelectorAll('.premium-option-card');
+        
+        cards.forEach(card => {
+            const name = card.querySelector('.premium-option-name').textContent.toLowerCase();
+            // Também busca no ID/Subtitle se houver
+            const sub = card.querySelector('.premium-option-id')?.textContent.toLowerCase() || '';
+            
+            if (name.includes(term) || sub.includes(term)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    };
 
     /**
      * Aplica a seleção

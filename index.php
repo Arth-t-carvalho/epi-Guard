@@ -51,7 +51,7 @@ if ($basePath === '/') {
 
 define('BASE_PATH', $basePath);
 define('BASE_DIR', __DIR__);
-define('APP_VERSION', '1.0.5'); // Versão para Cache-Busting suave
+define('APP_VERSION', '1.0.7'); // Versão para Cache-Busting suave
 
 // Remover o basePath da URI para obter o caminho da rota
 $path = parse_url($uri, PHP_URL_PATH);

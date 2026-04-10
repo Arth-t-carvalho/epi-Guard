@@ -12,14 +12,16 @@ class InfractionController
 {
     private PostgreSQLOccurrenceRepository $occurrenceRepository;
     private PostgreSQLEpiRepository $epiRepository;
+    private PostgreSQLDepartmentRepository $departmentRepository;
+    private PostgreSQLEmployeeRepository $employeeRepository;
 
     public function __construct()
     {
-        $deptRepo = new PostgreSQLDepartmentRepository();
-        $employeeRepo = new PostgreSQLEmployeeRepository($deptRepo);
+        $this->departmentRepository = new PostgreSQLDepartmentRepository();
+        $this->employeeRepository = new PostgreSQLEmployeeRepository($this->departmentRepository);
         $userRepo = new PostgreSQLUserRepository();
         $this->epiRepository = new PostgreSQLEpiRepository();
-        $this->occurrenceRepository = new PostgreSQLOccurrenceRepository($employeeRepo, $userRepo, $this->epiRepository);
+        $this->occurrenceRepository = new PostgreSQLOccurrenceRepository($this->employeeRepository, $userRepo, $this->epiRepository);
     }
 
     public function index()
@@ -36,14 +38,21 @@ class InfractionController
             'order' => $_GET['order'] ?? 'recentes',
             'funcionario_id' => $_GET['funcionario_id'] ?? null,
             'setor_id' => $_GET['setor_id'] ?? ($_GET['sector_id'] ?? null),
-            'ref_date' => date('Y-m-d')
+            'ref_date' => date('Y-m-d'),
+            'filial_id' => $_SESSION['active_filial_id'] ?? 1
         ];
 
         $highlightId = $_GET['highlight'] ?? null;
 
         $infractions = $this->occurrenceRepository->findInfractions($filters);
         $episList = $this->epiRepository->findAll();
+        $sectorsList = $this->departmentRepository->findAll($filters['filial_id']);
         
+        $employeesList = [];
+        if (!empty($filters['setor_id']) && $filters['setor_id'] !== 'todos') {
+            $employeesList = $this->employeeRepository->findByDepartment((int)$filters['setor_id']);
+        }
+
         require_once __DIR__ . '/../View/infractions/index.php';
     }
 }

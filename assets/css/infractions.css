@@ -59,7 +59,7 @@ html.dark-theme {
 .filter-bar select {
     padding: 10px 14px;
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 0px;
     font-size: 13px;
     font-family: 'Inter', sans-serif;
     background: white;
@@ -88,7 +88,7 @@ html.dark-theme {
 .search-input-wrapper {
     background: white;
     border: 1px solid #e2e8f0;
-    border-radius: 4px;
+    border-radius: 0px;
     height: 42px;
     display: flex;
     align-items: center;
@@ -109,7 +109,7 @@ html.dark-theme .page-content {
     background: white;
     border: 1px solid #e2e8f0;
     padding: 0 15px;
-    border-radius: 4px;
+    border-radius: 0px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -189,6 +189,7 @@ html.dark-theme .modern-picker-trigger .trigger-value {
 /* Novo Wrapper de Seleção de Data */
 .date-input-wrapper {
     height: 50px !important;
+    border-radius: 0px !important;
 }
 
 /* =========================================
@@ -196,7 +197,7 @@ html.dark-theme .modern-picker-trigger .trigger-value {
    ========================================= */
 .table-card {
     background: var(--bg-card) !important;
-    border-radius: 4px !important;
+    border-radius: 0px !important;
     padding: 0 !important;
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
@@ -278,7 +279,7 @@ html.dark-theme .data-table tbody tr.is-bookmarked {
 .status-dot-premium {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: 0px;
 }
 
 .status-dot-premium.pending {
@@ -305,7 +306,7 @@ html.dark-theme .data-table tbody tr.is-bookmarked {
 .btn-action-premium {
     width: 32px;
     height: 32px;
-    border-radius: 4px;
+    border-radius: 0px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -371,7 +372,7 @@ html.dark-theme .btn-action-premium:hover {
 
 .infraction-card {
     background: var(--bg-card);
-    border-radius: 4px;
+    border-radius: 0px;
     overflow: hidden;
     border: 1px solid var(--border);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -417,7 +418,7 @@ html.dark-theme .infraction-card.is-bookmarked {
     top: 12px;
     right: 12px;
     padding: 6px 12px;
-    border-radius: 4px;
+    border-radius: 0px;
     font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
@@ -462,7 +463,7 @@ html.dark-theme .card-footer-premium {
 .btn-card-action-premium {
     width: 36px;
     height: 36px;
-    border-radius: 4px;
+    border-radius: 0px;
     background: var(--infra-btn-bg);
     border: 1px solid var(--infra-btn-border);
     color: var(--infra-btn-text);
@@ -480,4 +481,35 @@ html.dark-theme .card-footer-premium {
     color: var(--primary);
     border-color: var(--primary);
 }
+
+/* =========================================
+   DESTAQUE DE NOTIFICAÇÃO (HIGHLIGHT)
+   ========================================= */
+.infraction-card.highlight-notification,
+tr.highlight-notification {
+    border: 3px solid var(--primary) !important;
+    position: relative;
+    z-index: 10;
+    animation: highlightPulse 2s infinite;
+    box-shadow: 0 0 25px rgba(227, 6, 19, 0.4);
+    transform: scale(1.02);
+}
+
+tr.highlight-notification {
+    outline: 2px solid var(--primary);
+    background-color: rgba(227, 6, 19, 0.05) !important;
+}
+
+@keyframes highlightPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(227, 6, 19, 0.6);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(227, 6, 19, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(227, 6, 19, 0);
+    }
+}
+
 

@@ -21,7 +21,8 @@ function openModernPicker(type) {
         visualizacao: 'Tipo de Visualização',
         risk: 'Nível de Risco',
         cargo: 'Selecionar Cargo',
-        setor: 'Selecionar Setor'
+        setor: 'Selecionar Setor',
+        funcionario: 'Selecionar Funcionário'
     };
     
     const subtitles = {
@@ -31,11 +32,28 @@ function openModernPicker(type) {
         visualizacao: 'Escolha como os dados serão exibidos',
         risk: 'Filtre setores pelo nível de infrações',
         cargo: 'Filtre instrutores por nível hierárquico',
-        setor: 'Filtre instrutores por área de atuação'
+        setor: 'Filtre instrutores por área de atuação',
+        funcionario: 'Filtre por um colaborador específico'
     };
 
     title.textContent = titles[type] || 'Selecionar';
     subtitle.textContent = subtitles[type] || 'Escolha uma opção abaixo';
+
+    // Resetar busca
+    const searchWrapper = document.getElementById('pickerSearchWrapper');
+    const searchInput = document.getElementById('pickerSearchInput');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+
+    // Só mostrar busca para Setor, Funcionário e EPI
+    if (searchWrapper) {
+        if (['setor', 'funcionario', 'epi'].includes(type)) {
+            searchWrapper.style.display = 'block';
+        } else {
+            searchWrapper.style.display = 'none';
+        }
+    }
 
     // Capturar valor atual do campo oculto
     const inputId = `hidden${type.charAt(0).toUpperCase() + type.slice(1)}`;
@@ -72,12 +90,35 @@ function closeModernPicker() {
     }
 }
 
+/**
+ * Filtra as opções do picker em tempo real
+ */
+function filterPickerOptions(query) {
+    const term = query.toLowerCase().trim();
+    const options = document.querySelectorAll('.modern-picker-option');
+    
+    options.forEach(opt => {
+        const label = opt.querySelector('.option-label').textContent.toLowerCase();
+        if (label.includes(term)) {
+            opt.style.display = 'flex';
+        } else {
+            opt.style.display = 'none';
+        }
+    });
+}
+
 function selectModernOption(type, value, label) {
     const inputId = `hidden${type.charAt(0).toUpperCase() + type.slice(1)}`;
     const hiddenInput = document.getElementById(inputId);
     
     if (hiddenInput) {
         hiddenInput.value = value;
+    }
+
+    // Resetar funcionário se o setor mudar
+    if (type === 'setor') {
+        const funcInput = document.getElementById('hiddenFuncionario');
+        if (funcInput) funcInput.value = 'todos';
     }
 
     const labelId = `label-${type}`;

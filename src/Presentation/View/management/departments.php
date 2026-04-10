@@ -1051,16 +1051,18 @@ ob_start();
                         </td>
                         <td>
                             <div class="setor-actions">
-                                <button class="btn-machines" title="<?= __('Máquinas') ?>"
-                                    onclick="openMachineModal(<?= $setor['id'] ?>, '<?= htmlspecialchars($setor['nome']) ?>')">
-                                    <i class="fa-solid fa-gears"></i>
-                                </button>
-                                <button class="btn-edit" title="<?= __('Editar') ?>" onclick="editSetor(this)"
-                                    data-id="<?= $setor['id'] ?>" data-nome="<?= htmlspecialchars($setor['nome']) ?>"
-                                    data-nome-en="<?= htmlspecialchars($setor['nome_en'] ?? '') ?>"><i
-                                        class="fa-solid fa-pen"></i></button>
-                                <button class="btn-delete" title="<?= __('Excluir') ?>" onclick="deleteSetor(this)"
-                                    data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-trash"></i></button>
+                                <?php if ($setor['status'] === 'ATIVO'): ?>
+                                    <button class="btn-machines" title="<?= __('Máquinas') ?>"
+                                        onclick="openMachineModal(<?= $setor['id'] ?>, '<?= htmlspecialchars($setor['nome']) ?>')">
+                                        <i class="fa-solid fa-gears"></i>
+                                    </button>
+                                    <button class="btn-edit" title="<?= __('Editar') ?>" onclick="editSetor(this)"
+                                        data-id="<?= $setor['id'] ?>" data-nome="<?= htmlspecialchars($setor['nome']) ?>"
+                                        data-nome-en="<?= htmlspecialchars($setor['nome_en'] ?? '') ?>"><i
+                                            class="fa-solid fa-pen"></i></button>
+                                    <button class="btn-delete" title="<?= __('Excluir') ?>" onclick="deleteSetor(this)"
+                                        data-id="<?= $setor['id'] ?>"><i class="fa-solid fa-trash"></i></button>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -1093,11 +1095,6 @@ ob_start();
             <div class="upload-area" onclick="document.getElementById('fileUpload').click()">
                 <i class="fa-solid fa-file-lines"></i>
                 <span style="font-weight: 600;"><?= __('Adicionar funcionários via Excel / PDF') ?></span>
-            </div>
-            <div style="text-align: right; margin-top: -15px; margin-bottom: 20px;">
-                <a href="<?= BASE_PATH ?>/management/template-pdf" target="_blank" style="color: #64748b; font-size: 11px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                    <i class="fa-solid fa-download"></i> <?= __('Baixar modelo pronto para preencher') ?>
-                </a>
             </div>
             <input type="file" id="fileUpload" accept=".xlsx,.xls,.pdf,.csv" style="display: none;">
             <div id="uploadFeedback" style="margin-top: 8px; font-size: 13px; color: #10b981; display: none;">
@@ -1429,8 +1426,8 @@ ob_start();
             if (lowerNome.includes('soldagem tig')) nomeEn = 'TIG Welding';
             if (lowerNome.includes('soldagem mig')) nomeEn = 'MIG Welding';
 
-            if (!nome) {
-                showAlert('<?= __('Importante') ?>', '<?= __('Por favor, informe o nome do setor.') ?>', 'warning');
+            if (!nome || !nome.trim()) {
+                showAlert('<?= __('Importante') ?>', '<?= __('Por favor, informe um nome de setor válido.') ?>', 'warning');
                 return;
             }
 

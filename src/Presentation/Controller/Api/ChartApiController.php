@@ -30,8 +30,19 @@ class ChartApiController
         header('Content-Type: application/json');
         
         $sectorIds = null;
-        if (isset($_GET['sector_id']) && $_GET['sector_id'] !== 'all') {
+        if (isset($_GET['sector_id']) && $_GET['sector_id'] !== 'all' && trim($_GET['sector_id']) !== '') {
             $sectorIds = array_map('intval', explode(',', $_GET['sector_id']));
+        } else {
+            $filialId = $_SESSION['active_filial_id'] ?? 1;
+            $deptRepo = new PostgreSQLDepartmentRepository();
+            $departments = $deptRepo->findAll($filialId);
+            $sectorIds = [];
+            foreach ($departments as $dept) {
+                $sectorIds[] = $dept->getId();
+            }
+            if (empty($sectorIds)) {
+                $sectorIds = [-1]; // Prevenir que retorne vazio e busque de todas as filiais
+            }
         }
 
         $refDate = null;
@@ -41,6 +52,6 @@ class ChartApiController
         
         $data = $this->dashboardService->getChartData($sectorIds, $refDate);
 
-        echo json_encode($data);
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 }

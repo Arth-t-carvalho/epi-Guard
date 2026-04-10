@@ -95,7 +95,10 @@ function openExportModal() {
         </div>
     `;
 
-    document.getElementById('formatStep').style.display = 'none';
+    const employeeStep = document.getElementById('employeeStep');
+    const formatStep = document.getElementById('formatStep');
+    if (employeeStep) employeeStep.style.display = 'none';
+    if (formatStep) formatStep.style.display = 'none';
 
     // Desativar controles de busca e seleção
     const searchInput = document.getElementById('employeeSearchInput');
@@ -139,7 +142,9 @@ function closeExportModal() {
             `;
         }
 
+        const employeeStep = document.getElementById('employeeStep');
         const formatStep = document.getElementById('formatStep');
+        if (employeeStep) employeeStep.style.display = 'none';
         if (formatStep) formatStep.style.display = 'none';
 
         const searchInput = document.getElementById('employeeSearchInput');
@@ -165,7 +170,14 @@ function closeExportModal() {
 
 function onSectorSelectChange(selectEl) {
     const sectorId = selectEl.value;
-    if (!sectorId) return;
+    const employeeStep = document.getElementById('employeeStep');
+
+    if (!sectorId) {
+        if (employeeStep) employeeStep.style.display = 'none';
+        return;
+    }
+
+    if (employeeStep) employeeStep.style.display = 'block';
     loadEmployeesForExport(sectorId);
 }
 

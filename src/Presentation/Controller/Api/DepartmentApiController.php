@@ -47,7 +47,7 @@ class DepartmentApiController
             $input = json_decode(file_get_contents('php://input'), true);
 
             // Validação
-            if (empty($input['nome'])) {
+            if (!isset($input['nome']) || trim($input['nome']) === '') {
                 http_response_code(422);
                 echo json_encode(['success' => false, 'error' => 'O nome do setor é obrigatório.']);
                 return;
@@ -127,7 +127,7 @@ class DepartmentApiController
         try {
             $input = json_decode(file_get_contents('php://input'), true);
 
-            if (empty($input['id']) || empty($input['nome'])) {
+            if (empty($input['id']) || !isset($input['nome']) || trim($input['nome']) === '') {
                 http_response_code(422);
                 echo json_encode(['success' => false, 'error' => 'ID e nome são obrigatórios para atualizar.']);
                 return;

@@ -151,6 +151,60 @@ html.dark-theme .premium-select-modal {
     opacity: 1;
 }
 
+/* SEARCH BAR FOR PREMIUM MODAL */
+.ps-search-wrapper {
+    background: #d1d5db; /* Cor de transição para o corpo cinza */
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.ps-search-box {
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    height: 44px;
+    border: 1px solid #d1d5db;
+    transition: all 0.2s;
+}
+
+.ps-search-box:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.1);
+}
+
+.ps-search-box i {
+    color: #94a3b8;
+    margin-right: 12px;
+    font-size: 14px;
+}
+
+.ps-search-box input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+html.dark-theme .ps-search-wrapper {
+    background: #1f2937;
+    border-bottom-color: #374151;
+}
+
+html.dark-theme .ps-search-box {
+    background: #0f172a;
+    border-color: #374151;
+}
+
+html.dark-theme .ps-search-box input {
+    color: #f8fafc;
+}
+
 /* 6. Lista de Opções */
 .premium-select-body {
     padding: 24px;

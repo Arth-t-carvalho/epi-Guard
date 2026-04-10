@@ -156,6 +156,7 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@facchini.com.br';
                                     onclick="document.getElementById('picker-<?= $epi->getId() ?>').click()">
                                 </div>
                                 <input type="color" id="picker-<?= $epi->getId() ?>" value="<?= $epi->getColor() ?>"
+                                    data-old-color="<?= $epi->getColor() ?>"
                                     class="hidden-color-input"
                                     onchange="updateEpiSettings(<?= $epi->getId() ?>, this.value, null)">
                             </div>
@@ -483,10 +484,30 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@facchini.com.br';
 
     async function updateEpiSettings(id, color, nomeEn) {
         if (color) {
-            const preview = document.getElementById(`preview-${id}`);
-            if (preview) {
-                preview.style.backgroundColor = color;
+            // Validação de cor duplicada
+            const allColorInputs = document.querySelectorAll('.hidden-color-input');
+            let isDuplicate = false;
+            allColorInputs.forEach(input => {
+                if (input.id !== `picker-${id}` && input.value.toLowerCase() === color.toLowerCase()) {
+                    isDuplicate = true;
+                }
+            });
+
+            if (isDuplicate) {
+                showToast("<?= __('Esta cor já está sendo usada. Escolha outra.') ?>", "error");
+                const picker = document.getElementById(`picker-${id}`);
+                const preview = document.getElementById(`preview-${id}`);
+                if (picker && picker.dataset.oldColor) {
+                    picker.value = picker.dataset.oldColor;
+                    if(preview) preview.style.backgroundColor = picker.dataset.oldColor;
+                }
+                return;
             }
+
+            const preview = document.getElementById(`preview-${id}`);
+            const picker = document.getElementById(`picker-${id}`);
+            if (picker) picker.dataset.oldColor = color;
+            if (preview) preview.style.backgroundColor = color;
         }
 
         try {

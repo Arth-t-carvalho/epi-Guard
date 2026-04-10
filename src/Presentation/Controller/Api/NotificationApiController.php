@@ -35,7 +35,7 @@ class NotificationApiController
                     LEFT JOIN setores s ON f.setor_id = s.id
                     LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                     LEFT JOIN epis e ON oe.epi_id = e.id
-                    WHERE o.tipo = 'INFRACAO' AND o.oculto = FALSE AND o.filial_id = :filial
+                    WHERE o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = :filial
                     ORDER BY o.id DESC
                     LIMIT 50
                 ";
@@ -68,7 +68,7 @@ class NotificationApiController
                 LEFT JOIN setores s ON f.setor_id = s.id
                 LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                 LEFT JOIN epis e ON oe.epi_id = e.id
-                WHERE o.id > :last_id AND o.tipo = 'INFRACAO' AND o.oculto = FALSE AND o.filial_id = :filial
+                WHERE o.id > :last_id AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = :filial
                 ORDER BY o.id ASC
             ";
 

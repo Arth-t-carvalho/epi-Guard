@@ -279,18 +279,11 @@ ob_start();
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row" id="funcionario-field-wrapper" style="display: none;">
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label"><?= __('Funcionário') ?></label>
                         <select class="form-input" id="occ-funcionario">
                             <option value=""><?= __('Selecione um funcionário...') ?></option>
-                            <?php foreach ($employees as $emp): ?>
-                                <option value="<?= $emp->getId() ?>"
-                                    data-cpf="<?= htmlspecialchars($emp->getCpf()->getFormatted()) ?>"
-                                    data-id="<?= $emp->getId() ?>">
-                                    <?= htmlspecialchars($emp->getName()) ?>
-                                </option>
-                            <?php endforeach; ?>
                         </select>
 
                         <!-- Mini Tabela de Informações do Funcionário -->
@@ -424,14 +417,27 @@ ob_start();
 
         // Lógica de Filtro por Setor
         const selectSetor = document.getElementById('occ-setor');
+        const funcWrapper = document.getElementById('funcionario-field-wrapper');
+
         selectSetor.addEventListener('change', async function() {
             const sectorId = this.value;
+            
+            if (!sectorId) {
+                funcWrapper.style.display = 'none';
+                selectFunc.innerHTML = '<option value=""><?= __('Selecione um setor primeiro...') ?></option>';
+                detailsBox.style.display = 'none';
+                return;
+            }
+
+            funcWrapper.style.display = 'flex';
             selectFunc.innerHTML = '<option value=""><?= __('Carregando...') ?></option>';
             detailsBox.style.display = 'none';
 
-            if (!sectorId) {
-                selectFunc.innerHTML = '<option value=""><?= __('Selecione um setor primeiro...') ?></option>';
-                return;
+            // Refresh custom-select trigger if present
+            const trigger = selectFunc.nextElementSibling;
+            if (trigger && trigger.classList.contains('premium-select-trigger')) {
+                const span = trigger.querySelector('.trigger-value');
+                if (span) span.textContent = '<?= __('Carregando...') ?>';
             }
 
             try {
@@ -444,8 +450,17 @@ ob_start();
                         html += `<option value="${emp.id}" data-id="${emp.id}" data-cpf="123.456.789-01">${emp.nome}</option>`;
                     });
                     selectFunc.innerHTML = html;
+                    
+                    if (trigger && trigger.classList.contains('premium-select-trigger')) {
+                        const span = trigger.querySelector('.trigger-value');
+                        if (span) span.textContent = '<?= __('Selecione um funcionário...') ?>';
+                    }
                 } else {
                     selectFunc.innerHTML = '<option value=""><?= __('Nenhum funcionário neste setor') ?></option>';
+                    if (trigger && trigger.classList.contains('premium-select-trigger')) {
+                        const span = trigger.querySelector('.trigger-value');
+                        if (span) span.textContent = '<?= __('Nenhum funcionário neste setor') ?>';
+                    }
                 }
             } catch (error) {
                 console.error('Erro ao buscar funcionários:', error);
@@ -492,7 +507,11 @@ ob_start();
             const epiId = urlParams.get('epi_id');
             const datetime = urlParams.get('datetime');
 
-            if (sectorId) document.getElementById('occ-setor').value = sectorId;
+            if (sectorId) {
+                const s = document.getElementById('occ-setor');
+                s.value = sectorId;
+                s.dispatchEvent(new Event('change'));
+            }
             if (employeeId) {
                 document.getElementById('occ-funcionario').value = employeeId;
                 // Disparar evento change para atualizar a tabela de detalhes

@@ -50,6 +50,54 @@
     margin-top: 10px;
 }
 
+/* KPI TREND BADGES */
+.kpi-trend-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 4px; /* Slightly rounded for premium feel but squared enough */
+    transition: all 0.3s ease;
+    cursor: default;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.kpi-trend-badge i {
+    width: 12px;
+    height: 12px;
+}
+
+/* Severity Levels (Infractions Inverse Logic) */
+.trend-controlado {
+    background: rgba(34, 197, 94, 0.1);
+    color: #15803d;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.trend-moderado {
+    background: rgba(234, 179, 8, 0.1);
+    color: #a16207;
+    border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.trend-critico {
+    background: rgba(227, 6, 19, 0.08);
+    color: var(--primary);
+    border: 1px solid rgba(227, 6, 19, 0.15);
+}
+
+.kpi-trend-badge:hover {
+    transform: scale(1.05);
+    background: white;
+}
+
+
 /* CHART CARD */
 .chart-card {
     margin: 15px 0;
@@ -82,7 +130,7 @@
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid rgba(227, 6, 19, 0.1);
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 0px;
     font-size: 13px;
     font-weight: 700;
     color: var(--secondary);
@@ -147,7 +195,7 @@
     background: white;
     border: 1px solid var(--border);
     padding: 6px 14px;
-    border-radius: 4px;
+    border-radius: 0px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -253,14 +301,14 @@ html.dark-theme  {
     width: 60px;
     height: 8px;
     background: #e2e8f0;
-    border-radius: 2px;
+    border-radius: 0px;
     overflow: hidden;
 }
 
 .mini-progress-fill {
     height: 100%;
     background: var(--primary);
-    border-radius: 2px;
+    border-radius: 0px;
 }
 
 html.dark-theme .mini-progress-bar {
@@ -277,7 +325,7 @@ html.dark-theme .mini-progress-bar {
     margin-bottom: 15px;
     background: #f8fafc;
     padding: 12px;
-    border-radius: 4px;
+    border-radius: 0px;
     border: 1px solid var(--border);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
         0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -294,7 +342,7 @@ html.dark-theme .calendar-nav {
 .nav-btn {
     background: #efeff0;
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 0px;
     width: 36px;
     height: 36px;
     cursor: pointer;
@@ -355,7 +403,7 @@ html.dark-theme .date-month {
     color: #047857;
     background-color: #ECFDF5;
     padding: 2px 1px;
-    border-radius: 4px;
+    border-radius: 0px;
     box-shadow: 0 2px 6px rgba(4, 120, 87, 0.15),
         inset 0 1px 1px rgba(255, 255, 255, 0.8);
     letter-spacing: 0.5px;
@@ -443,7 +491,7 @@ html.dark-theme .occ-avatar {
     background: #fef2f2;
     border: 1px solid #fee2e2;
     color: #ef4444;
-    border-radius: 3px;
+    border-radius: 0px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -466,7 +514,7 @@ html.dark-theme .occ-avatar {
 .progress-bar {
     height: 8px;
     background: #e2e8f0;
-    border-radius: 2px;
+    border-radius: 0px;
     width: 80px;
     margin-left: auto;
     margin-right: 12px;
@@ -476,7 +524,7 @@ html.dark-theme .occ-avatar {
 
 .progress-fill {
     height: 100%;
-    border-radius: 2px;
+    border-radius: 0px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     background: #E30613;
 }
@@ -493,7 +541,7 @@ html.dark-theme .occ-avatar {
     height: 100%;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(8px);
-    border-radius: 4px;
+    border-radius: 0px;
     z-index: 10;
     align-items: center;
     justify-content: center;
@@ -504,7 +552,7 @@ html.dark-theme .occ-avatar {
     background: white;
     width: 85%;
     max-height: 90%;
-    border-radius: 4px;
+    border-radius: 0px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     border: 1px solid #e2e8f0;
     padding: 15px;
@@ -570,7 +618,7 @@ html.dark-theme .occ-avatar {
     font-size: 13px;
     color: #334155;
     padding: 8px;
-    border-radius: 3px;
+    border-radius: 0px;
     margin-bottom: 4px;
     background-color: #f8fafc;
     display: flex;
@@ -619,7 +667,7 @@ html.dark-theme .occ-avatar {
     align-items: center;
     gap: 6px;
     padding: 4px 5px;
-    border-radius: 4px;
+    border-radius: 0px;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -637,7 +685,7 @@ html.dark-theme .occ-avatar {
     background: #fee2e2;
     color: #ef4444;
     padding: 4px 12px;
-    border-radius: 4px;
+    border-radius: 0px;
     font-weight: 800;
     font-size: 12px;
 }
@@ -658,7 +706,7 @@ html.dark-theme .occ-avatar {
     gap: 15px;
     background: #ffffff;
     padding: 8px 18px;
-    border-radius: 4px;
+    border-radius: 0px;
     border: 1px solid #e2e8f0;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

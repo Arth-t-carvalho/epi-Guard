@@ -62,7 +62,7 @@ function formatInfractionDuration($start, $end = null) {
     <div class="header-actions">
         <!-- Botão Novo Exportar (Vermelho / Destaque) -->
         <button class="btn-primary" onclick="openExportModal()"
-            style="background: var(--primary); border-radius: 2px; font-weight: 800; padding: 12px 24px;">
+            style="background: var(--primary); border-radius: 0px; font-weight: 800; padding: 12px 24px;">
             <i class="fa-solid fa-plus"></i> <?= __('Exportar') ?>
         </button>
     </div>
@@ -92,8 +92,8 @@ function formatInfractionDuration($start, $end = null) {
         <input type="hidden" name="date_from" id="hiddenDate_from"
             value="<?= htmlspecialchars($filters['date_from']) ?>">
         <input type="hidden" name="date_to" id="hiddenDate_to" value="<?= htmlspecialchars($filters['date_to']) ?>">
-        <input type="hidden" name="order" id="hiddenOrder" value="<?= htmlspecialchars($filters['order']) ?>">
-        <input type="hidden" name="funcionario_id" id="hiddenFuncionarioId" value="<?= htmlspecialchars($filters['funcionario_id'] ?? '') ?>">
+        <input type="hidden" name="setor_id" id="hiddenSetor" value="<?= htmlspecialchars($filters['setor_id'] ?? '') ?>">
+        <input type="hidden" name="funcionario_id" id="hiddenFuncionario" value="<?= htmlspecialchars($filters['funcionario_id'] ?? '') ?>">
         <input type="hidden" id="highlightedOccurrenceId" value="<?= htmlspecialchars($highlightId ?? '') ?>">
 
         <!-- 1. PERÍODO -->
@@ -164,6 +164,54 @@ function formatInfractionDuration($start, $end = null) {
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
         </div>
+
+        <!-- 4. SETOR -->
+        <div class="filter-group">
+            <div class="modern-picker-trigger" onclick="openModernPicker('setor')">
+                <i class="fa-solid fa-building-user" style="color: var(--primary);"></i>
+                <div class="trigger-info">
+                    <span class="trigger-label"><?= __('SETOR') ?></span>
+                    <span class="trigger-value" id="label-setor">
+                        <?php
+                        $selectedSectorName = __('Todos os setores');
+                        foreach ($sectorsList as $s) {
+                            if ($s->getId() == $filters['setor_id']) {
+                                $selectedSectorName = htmlspecialchars(__db($s));
+                                break;
+                            }
+                        }
+                        echo $selectedSectorName;
+                        ?>
+                    </span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+
+        <?php if (!empty($filters['setor_id']) && $filters['setor_id'] !== 'todos' && !empty($employeesList)): ?>
+        <!-- 5. FUNCIONÁRIO -->
+        <div class="filter-group">
+            <div class="modern-picker-trigger" onclick="openModernPicker('funcionario')">
+                <i class="fa-solid fa-user-tag" style="color: var(--primary);"></i>
+                <div class="trigger-info">
+                    <span class="trigger-label"><?= __('FUNCIONÁRIO') ?></span>
+                    <span class="trigger-value" id="label-funcionario">
+                        <?php
+                        $selectedEmployeeName = __('Todos os funcionários');
+                        foreach ($employeesList as $e) {
+                            if ($e->getId() == $filters['funcionario_id']) {
+                                $selectedEmployeeName = htmlspecialchars($e->getName());
+                                break;
+                            }
+                        }
+                        echo $selectedEmployeeName;
+                        ?>
+                    </span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+        <?php endif; ?>
 
 
         <!-- 5. ORDENAR POR -->
@@ -265,21 +313,23 @@ function formatInfractionDuration($start, $end = null) {
                                     mb_check_encoding($infraction['responsavel_cargo'] ?? '', 'UTF-8') ? ($infraction['responsavel_cargo'] ?? '') : utf8_encode($infraction['responsavel_cargo'] ?? '')
                                 ]);
                                 ?>
-                                <button class="btn-card-action-premium" title="<?= __('Ver detalhes') ?>"
-                                    onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($args, ENT_QUOTES, 'UTF-8') ?>)"><i
-                                        class="fa-solid fa-eye"></i></button>
-                                <button
-                                    class="btn-card-action-premium secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
-                                    title="<?= __('Salvar para revisão') ?>"
-                                    onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
-                                        class="fa-solid fa-bookmark"></i></button>
-                                <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                    <button class="btn-card-action-premium success" title="<?= __('Resolver') ?>"><i
-                                            class="fa-solid fa-check"></i></button>
+                                <?php if (($filters['status'] ?? '') !== 'inativo'): ?>
+                                    <button class="btn-card-action-premium" title="<?= __('Ver detalhes') ?>"
+                                        onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($args, ENT_QUOTES, 'UTF-8') ?>)"><i
+                                            class="fa-solid fa-eye"></i></button>
+                                    <button
+                                        class="btn-card-action-premium secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
+                                        title="<?= __('Salvar para revisão') ?>"
+                                        onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
+                                            class="fa-solid fa-bookmark"></i></button>
+                                    <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
+                                        <button class="btn-card-action-premium success" title="<?= __('Resolver') ?>"><i
+                                                class="fa-solid fa-check"></i></button>
+                                    <?php endif; ?>
+                                    <button class="btn-card-action-premium danger" title="<?= __('Excluir') ?>"
+                                        onclick="confirmHideInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
+                                            class="fa-solid fa-trash"></i></button>
                                 <?php endif; ?>
-                                <button class="btn-card-action-premium danger" title="<?= __('Excluir') ?>"
-                                    onclick="confirmHideInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
-                                        class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                     </div>
@@ -291,11 +341,11 @@ function formatInfractionDuration($start, $end = null) {
                     <tr>
                         <th><?= __('DATA') ?></th>
                         <th><?= __('FUNCIONÁRIO') ?></th>
-                        <th><?= __('DEPARTMENT') ?></th>
-                        <th><?= __('PPE') ?></th>
+                        <th><?= __('DEPARTAMENTO') ?></th>
+                        <th><?= __('EPI') ?></th>
                         <th><?= __('HORÁRIO') ?></th>
                         <th><?= __('STATUS') ?></th>
-                        <th><?= __('AÇÕES') ?></th>
+                        <th style="text-align: left; padding-left: 20px;"><?php if (($filters['status'] ?? '') !== 'inativo') echo __('AÇÕES'); ?></th>
                     </tr>
                 </thead>
                 <tbody id="infractionsTableBody">
@@ -344,39 +394,41 @@ function formatInfractionDuration($start, $end = null) {
                                 </td>
                                 <td>
                                     <div class="table-actions-premium">
-                                        <?php
-                                        $argsTable = json_encode([
-                                            mb_check_encoding($infraction['funcionario_nome'], 'UTF-8') ? $infraction['funcionario_nome'] : utf8_encode($infraction['funcionario_nome']),
-                                            mb_check_encoding($infraction['epi_nome'] ?? 'N/A', 'UTF-8') ? ($infraction['epi_nome'] ?? 'N/A') : utf8_encode($infraction['epi_nome'] ?? 'N/A'),
-                                            date('d/m/Y H:i', strtotime($infraction['data_hora'])),
-                                            mb_check_encoding($infraction['setor_sigla'] ?? 'N/A', 'UTF-8') ? ($infraction['setor_sigla'] ?? 'N/A') : utf8_encode($infraction['setor_sigla'] ?? 'N/A'),
-                                            !empty($infraction['evidencia_foto']) ? BASE_PATH . '/' . ltrim(str_replace('\\', '/', $infraction['evidencia_foto']), '/') : '',
-                                            $infraction['id'],
-                                            $infraction['funcionario_id'],
-                                            $infraction['setor_id'] ?: null,
-                                            $infraction['epi_id'] ?: null,
-                                            $durationTextTable,
-                                            $infraction['acao_tipo'] ?? '',
-                                            mb_check_encoding($infraction['acao_obs'] ?? '', 'UTF-8') ? ($infraction['acao_obs'] ?? '') : utf8_encode($infraction['acao_obs'] ?? ''),
-                                            mb_check_encoding($infraction['responsavel_nome'] ?? '', 'UTF-8') ? ($infraction['responsavel_nome'] ?? '') : utf8_encode($infraction['responsavel_nome'] ?? ''),
-                                            mb_check_encoding($infraction['responsavel_cargo'] ?? '', 'UTF-8') ? ($infraction['responsavel_cargo'] ?? '') : utf8_encode($infraction['responsavel_cargo'] ?? '')
-                                        ]);
-                                        ?>
-                                        <button class="btn-action-premium" title="<?= __('Ver detalhes') ?>"
-                                            onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($argsTable, ENT_QUOTES, 'UTF-8') ?>)"><i
-                                                class="fa-solid fa-eye"></i></button>
-                                        <button
-                                            class="btn-action-premium secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
-                                            title="<?= __('Salvar para revisão') ?>"
-                                            onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
-                                                class="fa-solid fa-bookmark"></i></button>
-                                        <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                            <button class="btn-action-premium success" title="<?= __('Resolver') ?>"><i
-                                                    class="fa-solid fa-check"></i></button>
+                                        <?php if (($filters['status'] ?? '') !== 'inativo'): ?>
+                                            <?php
+                                            $argsTable = json_encode([
+                                                mb_check_encoding($infraction['funcionario_nome'], 'UTF-8') ? $infraction['funcionario_nome'] : utf8_encode($infraction['funcionario_nome']),
+                                                mb_check_encoding($infraction['epi_nome'] ?? 'N/A', 'UTF-8') ? ($infraction['epi_nome'] ?? 'N/A') : utf8_encode($infraction['epi_nome'] ?? 'N/A'),
+                                                date('d/m/Y H:i', strtotime($infraction['data_hora'])),
+                                                mb_check_encoding($infraction['setor_sigla'] ?? 'N/A', 'UTF-8') ? ($infraction['setor_sigla'] ?? 'N/A') : utf8_encode($infraction['setor_sigla'] ?? 'N/A'),
+                                                !empty($infraction['evidencia_foto']) ? BASE_PATH . '/' . ltrim(str_replace('\\', '/', $infraction['evidencia_foto']), '/') : '',
+                                                $infraction['id'],
+                                                $infraction['funcionario_id'],
+                                                $infraction['setor_id'] ?: null,
+                                                $infraction['epi_id'] ?: null,
+                                                $durationTextTable,
+                                                $infraction['acao_tipo'] ?? '',
+                                                mb_check_encoding($infraction['acao_obs'] ?? '', 'UTF-8') ? ($infraction['acao_obs'] ?? '') : utf8_encode($infraction['acao_obs'] ?? ''),
+                                                mb_check_encoding($infraction['responsavel_nome'] ?? '', 'UTF-8') ? ($infraction['responsavel_nome'] ?? '') : utf8_encode($infraction['responsavel_nome'] ?? ''),
+                                                mb_check_encoding($infraction['responsavel_cargo'] ?? '', 'UTF-8') ? ($infraction['responsavel_cargo'] ?? '') : utf8_encode($infraction['responsavel_cargo'] ?? '')
+                                            ]);
+                                            ?>
+                                            <button class="btn-action-premium" title="<?= __('Ver detalhes') ?>"
+                                                onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($argsTable, ENT_QUOTES, 'UTF-8') ?>)"><i
+                                                    class="fa-solid fa-eye"></i></button>
+                                            <button
+                                                class="btn-action-premium secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
+                                                title="<?= __('Salvar para revisão') ?>"
+                                                onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
+                                                    class="fa-solid fa-bookmark"></i></button>
+                                            <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
+                                                <button class="btn-action-premium success" title="<?= __('Resolver') ?>"><i
+                                                        class="fa-solid fa-check"></i></button>
+                                            <?php endif; ?>
+                                            <button class="btn-action-premium danger" title="<?= __('Excluir') ?>"
+                                                onclick="confirmHideInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
+                                                    class="fa-solid fa-trash"></i></button>
                                         <?php endif; ?>
-                                        <button class="btn-action-premium danger" title="<?= __('Excluir') ?>"
-                                            onclick="confirmHideInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
-                                                class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -419,7 +471,7 @@ function formatInfractionDuration($start, $end = null) {
             </div>
 
             <!-- Passo 2: Seleção de Funcionários com Pesquisa -->
-            <div class="export-step" id="employeeStep">
+            <div class="export-step" id="employeeStep" style="display: none;">
                 <label class="step-label"><i class="fa-solid fa-users"></i> <?= __('Selecionar Funcionários') ?></label>
                 <div class="employee-selection-wrapper">
                     <!-- Barra de Pesquisa -->
@@ -637,7 +689,7 @@ function formatInfractionDuration($start, $end = null) {
     .modal-confirmation-content,
     .export-modal-content {
         background: #fff;
-        border-radius: 32px;
+        border-radius: 0px;
         width: 100%;
         max-width: 600px;
         box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
@@ -667,7 +719,7 @@ function formatInfractionDuration($start, $end = null) {
         right: 20px;
         width: 44px;
         height: 44px;
-        border-radius: 50%;
+        border-radius: 0px;
         border: none;
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(8px);
@@ -728,7 +780,7 @@ function formatInfractionDuration($start, $end = null) {
     .item-icon {
         width: 32px;
         height: 32px;
-        border-radius: 8px;
+        border-radius: 0px;
         background: rgba(227, 6, 19, 0.05);
         color: var(--primary);
         display: flex;
@@ -746,7 +798,7 @@ function formatInfractionDuration($start, $end = null) {
         flex: 1;
         min-width: 100px;
         height: 48px;
-        border-radius: 12px;
+        border-radius: 0px;
         font-size: 13px;
         font-weight: 800;
         cursor: pointer;
@@ -785,7 +837,7 @@ function formatInfractionDuration($start, $end = null) {
     .resolution-summary-premium {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
+        border-radius: 0px;
         padding: 20px;
         margin-bottom: 24px;
         animation: slideUp 0.4s ease;
@@ -973,7 +1025,6 @@ function formatInfractionDuration($start, $end = null) {
         background: white;
         border: 1px solid #e2e8f0;
         padding: 8px 16px;
-        border-radius: 18px;
         align-items: center;
         gap: 12px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -1043,7 +1094,7 @@ function formatInfractionDuration($start, $end = null) {
     .date-input-wrapper .btn-apply-date {
         width: 32px;
         height: 32px;
-        border-radius: 50%;
+        border-radius: 0px;
         background: var(--primary);
         color: white;
         border: none;
@@ -1231,7 +1282,7 @@ function formatInfractionDuration($start, $end = null) {
             const resObs = document.getElementById('resObservations').textContent;
             
             resolutionHtml = `
-                <div style="margin-top: 30px; padding: 25px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div style="margin-top: 30px; padding: 25px; background: #f8fafc; border-radius: 0px; border: 1px solid #e2e8f0;">
                     <div style="border-bottom: 2px solid #1e293b; margin-bottom: 20px; padding-bottom: 10px;">
                         <h2 style="margin: 0; font-size: 18px; color: #1e293b;">REGISTRO DE RESOLUÇÃO</h2>
                     </div>
@@ -1279,7 +1330,7 @@ function formatInfractionDuration($start, $end = null) {
                 ${hasImg ? `
                 <div style="flex: 1; text-align: right;">
                     <span style="font-weight: 900; color: #64748b; font-size: 11px; display: block; margin-bottom: 10px;">EVIDÊNCIA FOTOGRÁFICA</span>
-                    <img src="${evidenceImg.src}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;" />
+                    <img src="${evidenceImg.src}" style="width: 100%; border-radius: 0px; border: 1px solid #e2e8f0;" />
                 </div>
                 ` : ''}
             </div>
@@ -1359,7 +1410,7 @@ function formatInfractionDuration($start, $end = null) {
                         .content { display: flex; gap: 40px; margin-top: 30px; align-items: flex-start; }
                         .info-section { flex: 1; }
                         .image-section { flex: 1; text-align: right; }
-                        .evidence-photo { max-width: 100%; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                        .evidence-photo { max-width: 100%; border-radius: 0px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
                         .info-row { margin-bottom: 20px; font-size: 16px; }
                         .label { font-weight: 800; color: #64748b; text-transform: uppercase; font-size: 11px; display: block; margin-bottom: 4px; letter-spacing: 0.5px; }
                         .value { font-weight: 600; color: #1e293b; font-size: 17px; }
@@ -1369,7 +1420,7 @@ function formatInfractionDuration($start, $end = null) {
                         .duration-badge { color: #E30613; font-weight: 800; font-size: 16px; margin-top: 10px; display: block; }
                         
                         /* Resolution Section in Print */
-                        .resolution-section { margin-top: 30px; padding: 25px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+                        .resolution-section { margin-top: 30px; padding: 25px; background: #f8fafc; border-radius: 0px; border: 1px solid #e2e8f0; }
                         .section-header { border-bottom: 2px solid #1e293b; margin-bottom: 20px; padding-bottom: 10px; }
                         .section-header h2 { margin: 0; font-size: 18px; color: #1e293b; }
                         .resolution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -1444,6 +1495,15 @@ function formatInfractionDuration($start, $end = null) {
             <h3 id="pickerTitle"><?= __('Selecionar') ?></h3>
             <p id="pickerSubtitle"><?= __('Escolha uma opção abaixo') ?></p>
         </div>
+
+        <!-- Barra de Busca do Picker -->
+        <div class="picker-search-wrapper" id="pickerSearchWrapper">
+            <div class="picker-search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="pickerSearchInput" placeholder="<?= __('Pesquisar...') ?>" onkeyup="filterPickerOptions(this.value)">
+            </div>
+        </div>
+
         <div class="modern-picker-options" id="pickerOptionsContainer">
             <!-- Opções injetadas via JS -->
         </div>
@@ -1481,6 +1541,18 @@ function formatInfractionDuration($start, $end = null) {
             { value: 'recentes', label: '<?= __('Mais Recentes') ?>' },
             { value: 'alfabetica', label: '<?= __('Ordem Alfabética') ?>' },
             { value: 'frequentes', label: '<?= __('Mais Frequentes') ?>' }
+        ],
+        setor: [
+            { value: 'todos', label: '<?= __('Todos os setores') ?>' },
+            <?php foreach ($sectorsList as $sector): ?>
+                { value: '<?= $sector->getId() ?>', label: '<?= htmlspecialchars(__db($sector)) ?>' },
+            <?php endforeach; ?>
+        ],
+        funcionario: [
+            { value: 'todos', label: '<?= __('Todos os funcionários') ?>' },
+            <?php foreach ($employeesList as $employee): ?>
+                { value: '<?= $employee->getId() ?>', label: '<?= htmlspecialchars($employee->getName()) ?>' },
+            <?php endforeach; ?>
         ]
     };
 

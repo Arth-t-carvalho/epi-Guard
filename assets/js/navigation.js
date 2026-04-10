@@ -165,6 +165,12 @@ async function navigateViaSPA(destino, options = {}) {
             // Aguarda CDNs do head carregarem antes de injetar scripts do body
             Promise.all(headScriptPromises).then(() => {
                 // F. Injeta Scripts do <body>
+                // Reseta flags de guard de páginas específicas para que cada navegação
+                // SPA registre corretamente os listeners da nova página.
+                window._dashboardListenerBound = false;
+                window._dashboardClickHandled = false;
+                window._dashboardInitCalled = false;
+
                 const newScripts = doc.querySelectorAll('body script');
                 newScripts.forEach(script => {
                     const src = script.getAttribute('src');

@@ -24,13 +24,53 @@ class SettingsApiController
         $color = $input['color'] ?? null;
         $nomeEn = $input['nome_en'] ?? null;
 
-        if ($id <= 0) {
+        // Se id for menor que -1 ou bater no else. -1 é usado como trigger do Total.
+        if (!isset($id) || (int)$id === 0 || (int)$id < -1) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'ID inválido.']);
             return;
         }
 
         try {
+            $db = \Facchini\Infrastructure\Database\Connection::getInstance();
+            
+            // Validação Back-end contra Cores Duplicadas (EPIs + Gráfico Total)
+            if ($color !== null && preg_match('/^#[a-fA-F0-9]{3,8}$/', $color)) {
+                $color = strtoupper($color); // padronizar cor uppercase na gravação para as verificações
+                
+                // Ver se algum outro EPI está usando essa cor
+                $stmtCheck = $db->prepare("SELECT id FROM epis WHERE cor ILIKE ? AND id != ?");
+                $stmtCheck->execute([$color, $id]);
+                if ($stmtCheck->fetch()) {
+                    http_response_code(409);
+                    echo json_encode(['success' => false, 'message' => 'Esta cor já está associada a um equipamento. Use uma cor exclusiva.']);
+                    return;
+                }
+
+                // Ver se a filial já usa essa cor no gráfico Total
+                if ($id !== -1) {
+                    $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
+                    $stmtCheckTotal = $db->prepare("SELECT id FROM filiais WHERE cor_grafico_total ILIKE ? AND id = ?");
+                    $stmtCheckTotal->execute([$color, $activeFilialId]);
+                    if ($stmtCheckTotal->fetch()) {
+                        http_response_code(409);
+                        echo json_encode(['success' => false, 'message' => 'Esta cor já é a cor padrão do gráfico Geral (Total). Use uma cor exclusiva.']);
+                        return;
+                    }
+                }
+            }
+
+            // Handler especial para o "Total" (ID -1 injetado pelo Frontend)
+            if ($id === -1) {
+                if ($color !== null) {
+                    $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
+                    $stmt = $db->prepare("UPDATE filiais SET cor_grafico_total = ? WHERE id = ?");
+                    $stmt->execute([$color, $activeFilialId]);
+                }
+                echo json_encode(['success' => true]);
+                return;
+            }
+
             $epi = $this->epiRepository->findById($id);
             if (!$epi) {
                 http_response_code(404);
@@ -38,7 +78,7 @@ class SettingsApiController
                 return;
             }
 
-            if ($color !== null && preg_match('/^#[a-fA-F0-9]{3,8}$/', $color)) {
+            if ($color !== null) {
                 $epi->setColor($color);
             }
 

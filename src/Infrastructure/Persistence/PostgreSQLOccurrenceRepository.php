@@ -72,208 +72,183 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
         return [];
     }
 
-    public function countDaily(DateTimeInterface $date, ?array $sectorIds = null): int
+    public function countDaily(DateTimeInterface $date, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE o.data_hora::date = ? AND o.tipo = 'INFRACAO'";
+                  WHERE o.data_hora::date = ? AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
+        
+        $params = [$date->format('Y-m-d'), $filialId];
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
-        $dateStr = $date->format('Y-m-d');
-        
-        $params = [$dateStr];
-        if (!empty($sectorIds)) {
             $params = array_merge($params, $sectorIds);
         }
-        
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
-    public function countWeekly(DateTimeInterface $date, ?array $sectorIds = null): int
+    public function countWeekly(DateTimeInterface $date, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE to_char(o.data_hora, 'IYYYIW') = to_char(?::date, 'IYYYIW') AND o.tipo = 'INFRACAO'";
+                  WHERE to_char(o.data_hora, 'IYYYIW') = to_char(?::date, 'IYYYIW') AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
+        
+        $params = [$date->format('Y-m-d'), $filialId];
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
-        $dateStr = $date->format('Y-m-d');
-        
-        $params = [$dateStr];
-        if (!empty($sectorIds)) {
             $params = array_merge($params, $sectorIds);
         }
         
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
-    public function countMonthly(DateTimeInterface $date, ?array $sectorIds = null): int
+    public function countMonthly(DateTimeInterface $date, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
                   WHERE EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM ?::date) 
-                  AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO'";
+                  AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
+        
+        $params = [$date->format('Y-m-d'), $date->format('Y-m-d'), $filialId];
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
-        $dateStr = $date->format('Y-m-d');
-        
-        $params = [$dateStr, $dateStr];
-        if (!empty($sectorIds)) {
             $params = array_merge($params, $sectorIds);
         }
         
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
-    public function countRange(DateTimeInterface $start, DateTimeInterface $end, ?array $sectorIds = null): int
+    public function countRange(DateTimeInterface $start, DateTimeInterface $end, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(*) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE o.data_hora::date BETWEEN ? AND ? AND o.tipo = 'INFRACAO'";
+                  WHERE o.data_hora::date BETWEEN ? AND ? AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
+        
+        $params = [$start->format('Y-m-d'), $end->format('Y-m-d'), $filialId];
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
-        $params = [$start->format('Y-m-d'), $end->format('Y-m-d')];
-        if (!empty($sectorIds)) {
             $params = array_merge($params, $sectorIds);
         }
         
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
-    public function countUniqueStudentsDaily(DateTimeInterface $date, ?array $sectorIds = null): int
+    public function countUniqueStudentsDaily(DateTimeInterface $date, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE o.data_hora::date = ? AND o.tipo = 'INFRACAO'";
+                  WHERE o.data_hora::date = ? AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
+        
+        $params = [$date->format('Y-m-d'), $filialId];
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
-        $params = [$date->format('Y-m-d')];
-        if (!empty($sectorIds)) {
             $params = array_merge($params, $sectorIds);
         }
         
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
-    public function countUniqueStudentsWeekly(DateTimeInterface $date, ?array $sectorIds = null): int
+    public function countUniqueStudentsWeekly(DateTimeInterface $date, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE to_char(o.data_hora, 'IYYYIW') = to_char(?::date, 'IYYYIW') AND o.tipo = 'INFRACAO'";
+                  WHERE to_char(o.data_hora, 'IYYYIW') = to_char(?::date, 'IYYYIW') AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
+        
+        $params = [$date->format('Y-m-d'), $filialId];
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
-        $params = [$date->format('Y-m-d')];
-        if (!empty($sectorIds)) {
             $params = array_merge($params, $sectorIds);
         }
         
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
-    public function countUniqueStudentsMonthly(DateTimeInterface $date, ?array $sectorIds = null): int
+    public function countUniqueStudentsMonthly(DateTimeInterface $date, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
                   WHERE EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM ?::date) 
-                  AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO'";
+                  AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
         
-        if (!empty($sectorIds)) {
-            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
-            $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
         $dateStr = $date->format('Y-m-d');
-        $params = [$dateStr, $dateStr];
+        $params = [$dateStr, $dateStr, $filialId];
+        
         if (!empty($sectorIds)) {
+            $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
+            $query .= " AND f.setor_id IN ($placeholders)";
             $params = array_merge($params, $sectorIds);
         }
         
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
-    public function countUniqueStudentsYearly(DateTimeInterface $date, ?array $sectorIds = null): int
+    public function countUniqueStudentsYearly(DateTimeInterface $date, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO'";
+                  WHERE EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date) AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
+        
+        $params = [$date->format('Y-m-d'), $filialId];
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
-        $params = [$date->format('Y-m-d')];
-        if (!empty($sectorIds)) {
             $params = array_merge($params, $sectorIds);
         }
         
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
     }
 
-    public function countUniqueStudentsRange(DateTimeInterface $start, DateTimeInterface $end, ?array $sectorIds = null): int
+    public function countUniqueStudentsRange(DateTimeInterface $start, DateTimeInterface $end, ?array $sectorIds = null, int $filialId = 1): int
     {
         $query = "SELECT COUNT(DISTINCT o.funcionario_id) as total FROM ocorrencias o 
                   JOIN funcionarios f ON o.funcionario_id = f.id 
-                  WHERE o.data_hora::date BETWEEN ? AND ? AND o.tipo = 'INFRACAO'";
+                  WHERE o.data_hora::date BETWEEN ? AND ? AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND o.filial_id = ?";
+        
+        $params = [$start->format('Y-m-d'), $end->format('Y-m-d'), $filialId];
         
         if (!empty($sectorIds)) {
             $placeholders = implode(',', array_fill(0, count($sectorIds), '?'));
             $query .= " AND f.setor_id IN ($placeholders)";
-        }
-        
-        $stmt = $this->db->prepare($query);
-        $params = [$start->format('Y-m-d'), $end->format('Y-m-d')];
-        if (!empty($sectorIds)) {
             $params = array_merge($params, $sectorIds);
         }
         
+        $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $res = $stmt->fetch();
         return (int) $res['total'];
@@ -327,7 +302,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             JOIN funcionarios f ON o.funcionario_id = f.id
             JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
             JOIN epis e ON oe.epi_id = e.id
-            WHERE EXTRACT(YEAR FROM o.data_hora) = ? AND o.tipo = 'INFRACAO'
+            WHERE EXTRACT(YEAR FROM o.data_hora) = ? AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL)
             $sectorClause
             $epiClause
             GROUP BY mes, epi_nome
@@ -350,7 +325,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             SELECT EXTRACT(MONTH FROM o.data_hora)::int as mes, COUNT(*) as qtd
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
-            WHERE EXTRACT(YEAR FROM o.data_hora) = ? AND o.tipo = 'INFRACAO'
+            WHERE EXTRACT(YEAR FROM o.data_hora) = ? AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL)
             $sectorClause
             GROUP BY mes
         ";
@@ -376,6 +351,13 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
         while ($row = $epiStmt->fetch()) {
             $epiColors[$row['nome']] = $row['cor'];
         }
+        
+        // Recuperar a cor configurada para o gráfico Total
+        $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
+        $totalColorStmt = $this->db->prepare("SELECT cor_grafico_total FROM filiais WHERE id = ?");
+        $totalColorStmt->execute([$activeFilialId]);
+        $totalColor = $totalColorStmt->fetchColumn();
+        $epiColors['Total'] = $totalColor ?: '#10B981';
 
         return [
             'stats' => $stats,
@@ -426,7 +408,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             JOIN funcionarios f ON o.funcionario_id = f.id
             JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
             JOIN epis e ON oe.epi_id = e.id
-            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = ?
+            WHERE o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND EXTRACT(YEAR FROM o.data_hora) = ?
             $sectorClause
             $epiClause
             GROUP BY e.nome
@@ -522,14 +504,34 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 (SELECT ev.caminho_imagem FROM evidencias ev WHERE ev.ocorrencia_id = o.id LIMIT 1) as evidencia_foto,
                 (CASE WHEN EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id) THEN 'resolvido' ELSE 'pendente' END) as status
                 FROM ocorrencias o
-                JOIN funcionarios f ON o.funcionario_id = f.id
+                LEFT JOIN funcionarios f ON o.funcionario_id = f.id
                 LEFT JOIN setores s ON f.setor_id = s.id
                 LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                 LEFT JOIN epis e ON oe.epi_id = e.id
-                WHERE o.tipo = 'INFRACAO' AND o.oculto = FALSE";
+                WHERE o.tipo = 'INFRACAO'";
 
         $params = [];
 
+        // Filtro de Visibilidade (Oculto) - Crucial: NULL no banco deve ser tratado como visível (FALSE)
+        if (!empty($filters['status']) && $filters['status'] === 'inativo') {
+            $sql .= " AND o.oculto = TRUE";
+        } else {
+            $sql .= " AND (o.oculto = FALSE OR o.oculto IS NULL)";
+        }
+        
+        // 1. Filtro por colaborador específico (notificações)
+        if (!empty($filters['funcionario_id']) && is_numeric($filters['funcionario_id'])) {
+            $sql .= " AND f.id = ?";
+            $params[] = $filters['funcionario_id'];
+        }
+
+        // 2. Filtro por Filial (Branch) - Uso direto da coluna na tabela ocorrencias
+        if (!empty($filters['filial_id'])) {
+            $sql .= " AND o.filial_id = ?";
+            $params[] = $filters['filial_id'];
+        }
+
+        // 3. Pesquisa textual
         if (!empty($filters['search'])) {
             $sql .= " AND (f.nome ILIKE ? OR s.sigla ILIKE ? OR s.nome ILIKE ?)";
             $searchTerm = "%" . $filters['search'] . "%";
@@ -538,32 +540,47 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             $params[] = $searchTerm;
         }
 
+        // 4. Filtro por EPI
         if (!empty($filters['epi']) && $filters['epi'] !== 'todos') {
             $sql .= " AND e.nome ILIKE ?";
             $params[] = "%" . $filters['epi'] . "%";
         }
 
+        // 5. Filtro por Período
         if (!empty($filters['periodo']) && $filters['periodo'] !== 'todos') {
             if ($filters['periodo'] === 'hoje') {
                 $sql .= " AND o.data_hora::date = CURRENT_DATE";
             } elseif ($filters['periodo'] === 'semana') {
                 $sql .= " AND to_char(o.data_hora, 'IYYYIW') = to_char(CURRENT_DATE, 'IYYYIW')";
             } elseif ($filters['periodo'] === 'mes') {
-                $sql .= " AND EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)";
-            } elseif ($filters['periodo'] === 'personalizado' && !empty($filters['data_inicio']) && !empty($filters['data_fim'])) {
-                $sql .= " AND o.data_hora::date BETWEEN ? AND ?";
-                $params[] = $filters['data_inicio'];
-                $params[] = $filters['data_fim'];
+                $sql .= " AND EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM CURRENT_DATE) 
+                          AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)";
+            } elseif ($filters['periodo'] === 'personalizado') {
+                $start = $filters['date_from'] ?? ($filters['data_inicio'] ?? null);
+                $end = $filters['date_to'] ?? ($filters['data_fim'] ?? null);
+                if ($start && $end) {
+                    $sql .= " AND o.data_hora::date BETWEEN ? AND ?";
+                    $params[] = $start;
+                    $params[] = $end;
+                }
             }
         }
 
+        // 6. Filtro por Resolvido/Pendente
+        if (!empty($filters['status']) && $filters['status'] !== 'todos' && $filters['status'] !== 'inativo') {
+            if ($filters['status'] === 'pendente') {
+                $sql .= " AND NOT EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id)";
+            } elseif ($filters['status'] === 'resolvido') {
+                $sql .= " AND EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id)";
+            }
+        }
+
+        // 7. Ordenação
         $orderBy = "o.favorito DESC, o.data_hora DESC";
-        if (!empty($filters['ordenacao'])) {
-            if ($filters['ordenacao'] === 'alfabetica') {
+        if (!empty($filters['order'])) {
+            if ($filters['order'] === 'alfabetica') {
                 $orderBy = "o.favorito DESC, f.nome ASC";
-            } elseif ($filters['ordenacao'] === 'tempo') {
-                $orderBy = "o.favorito DESC, o.data_hora DESC";
-            } elseif ($filters['ordenacao'] === 'frequente') {
+            } elseif ($filters['order'] === 'frequentes') {
                 $orderBy = "o.favorito DESC, (SELECT COUNT(*) FROM ocorrencias o2 WHERE o2.funcionario_id = f.id AND o2.tipo = 'INFRACAO') DESC, o.data_hora DESC";
             }
         }
@@ -583,7 +600,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 COUNT(*) as total
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
-            WHERE o.tipo = 'INFRACAO' AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)
+            WHERE o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)
         ";
         
         $params = [];
@@ -619,7 +636,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 LEFT JOIN setores s ON f.setor_id = s.id
                 LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                 LEFT JOIN epis e ON oe.epi_id = e.id
-                WHERE {$where} AND o.tipo = 'INFRACAO' AND o.oculto = FALSE
+                WHERE {$where} AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL)
                 ORDER BY o.id ASC";
 
         $stmt = $this->db->prepare($sql);
@@ -677,12 +694,12 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
         $resolved = [];
         foreach ($slugs as $slug) {
-            $normalizedSlug = strtolower($slug);
-            $fuzzySlug = str_replace(['ó', 'ò', 'ô', 'õ', 'á', 'à', 'â', 'ã', 'é', 'ê', 'í', 'ú'], ['o', 'o', 'o', 'o', 'a', 'a', 'a', 'a', 'e', 'e', 'i', 'u'], $normalizedSlug);
+            $normalizedSlug = mb_strtolower($slug, 'UTF-8');
+            $fuzzySlug = str_replace(['ó', 'ò', 'ô', 'õ', 'á', 'à', 'â', 'ã', 'é', 'ê', 'í', 'ú', 'ç'], ['o', 'o', 'o', 'o', 'a', 'a', 'a', 'a', 'e', 'e', 'i', 'u', 'c'], $normalizedSlug);
             
             foreach ($allEpiNames as $fullName) {
-                $normalizedName = strtolower($fullName);
-                $fuzzyName = str_replace(['ó', 'ò', 'ô', 'õ', 'á', 'à', 'â', 'ã', 'é', 'ê', 'í', 'ú'], ['o', 'o', 'o', 'o', 'a', 'a', 'a', 'a', 'e', 'e', 'i', 'u'], $normalizedName);
+                $normalizedName = mb_strtolower($fullName, 'UTF-8');
+                $fuzzyName = str_replace(['ó', 'ò', 'ô', 'õ', 'á', 'à', 'â', 'ã', 'é', 'ê', 'í', 'ú', 'ç'], ['o', 'o', 'o', 'o', 'a', 'a', 'a', 'a', 'e', 'e', 'i', 'u', 'c'], $normalizedName);
 
                 if (str_contains($fuzzyName, $fuzzySlug) || str_contains($fuzzySlug, $fuzzyName)) {
                     $resolved[] = $fullName;

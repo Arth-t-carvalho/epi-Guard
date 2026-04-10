@@ -258,7 +258,7 @@ class ExportApiController
             $query = "
                 SELECT 
                     f.nome as nome,
-                    f.cpf as cpf,
+                    NULL as cpf,
                     f.id as funcionario_id,
                     f.turno as turno,
                     f.status as status_funcionario,
@@ -344,7 +344,7 @@ class ExportApiController
                 FROM ocorrencias o
                 JOIN funcionarios f ON o.funcionario_id = f.id
                 LEFT JOIN setores s ON f.setor_id = s.id
-                WHERE o.funcionario_id IN ($placeholders) AND o.tipo = 'INFRACAO' AND o.oculto = FALSE $dateFilter
+                WHERE o.funcionario_id IN ($placeholders) AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) $dateFilter
                 ORDER BY o.data_hora DESC
             ";
 

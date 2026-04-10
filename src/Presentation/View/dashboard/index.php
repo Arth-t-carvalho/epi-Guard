@@ -72,6 +72,31 @@ ob_start();
         border-bottom-color: #334155;
     }
 
+    /* Estilo específico para a busca no modal de detalhes do gráfico */
+    #detailSearchInput {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 0px; /* Estilo Facchini strictly squared */
+        font-size: 14px;
+        color: #1e293b;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+    }
+
+    #detailSearchInput:focus {
+        outline: none;
+        border-color: #E30613;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(227, 6, 19, 0.05);
+    }
+
+    html.dark-theme #detailSearchInput {
+        background: #0f172a;
+        border-color: #334155;
+        color: #f8fafc;
+    }
+
     .selection-row.hidden {
         display: none;
     }
@@ -81,6 +106,7 @@ ob_start();
 <!-- KPI CARDS -->
 <div class="kpi-grid">
     <div class="kpi-card card" id="cardKpiHoje" onclick="window.location.href = '<?= BASE_PATH ?>/infractions?periodo=hoje'" style="cursor: pointer;">
+        <span class="kpi-trend-badge" id="trendKpiDia" style="display:none;"></span>
         <span class="kpi-header"><?= __('INFRAÇÕES HOJE') ?></span>
         <div class="kpi-value">
             <span id="kpiDia">0</span>
@@ -88,14 +114,15 @@ ob_start();
     </div>
 
     <div class="kpi-card card" id="cardKpiSemana" onclick="window.location.href = '<?= BASE_PATH ?>/infractions?periodo=semana'" style="cursor: pointer;">
+        <span class="kpi-trend-badge" id="trendKpiSemana" style="display:none;"></span>
         <span class="kpi-header"><?= __('INFRAÇÕES SEMANA') ?></span>
         <div class="kpi-value">
             <span id="kpiSemana">0</span>
-            <span class="badge" id="badgeSemana" style="display:none;">0%</span>
         </div>
     </div>
 
     <div class="kpi-card card" id="cardKpiMes" onclick="window.location.href = '<?= BASE_PATH ?>/infractions?periodo=mes'" style="cursor: pointer;">
+        <span class="kpi-trend-badge" id="trendKpiMes" style="display:none;"></span>
         <span class="kpi-header"><?= __('INFRAÇÕES MÊS') ?></span>
         <div class="kpi-value">
             <span id="kpiMes">0</span>
@@ -223,20 +250,34 @@ ob_start();
     </div>
 </div>
 
-<!-- Detail Modal -->
-<div id="detailModal" class="modal">
-    <div class="modal-content large">
-        <div class="modal-header">
-            <h2 id="modalMonthTitle"><?= __('Detalhes') ?></h2>
-            <button class="close-btn" onclick="closeModal()">&times;</button>
+<!-- Detail Modal (Premium) -->
+<div id="detailModal" class="modal-premium">
+    <div class="modal-premium-content" style="max-width: 900px;">
+        <div class="modal-premium-header">
+            <div>
+                <h2 id="modalMonthTitle"><?= __('Detalhes') ?></h2>
+                <p><?= __('Lista de funcionários e infrações detectadas') ?></p>
+            </div>
+            <button class="close-premium" onclick="closeModal()">&times;</button>
         </div>
-        <div class="modal-body">
-            <table class="custom-table">
-                <thead>
-                    <tr></tr>
-                </thead>
-                <tbody id="modalTableBody"></tbody>
-            </table>
+        <div class="modal-premium-body">
+            <!-- Barra de Pesquisa Detalhes Grafico -->
+            <div class="modal-search-wrapper" style="padding: 0 0 20px 0;">
+                <div class="search-input-group">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="detailSearchInput" placeholder="<?= __('Pesquisar na lista...') ?>"
+                        onkeyup="filterDetailModalTable(this.value)">
+                </div>
+            </div>
+
+            <div class="table-wrapper" style="max-height: 50vh;">
+                <table class="custom-table">
+                    <thead>
+                        <tr></tr>
+                    </thead>
+                    <tbody id="modalTableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

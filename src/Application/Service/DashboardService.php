@@ -101,7 +101,7 @@ class DashboardService
             'allowed_epis' => $barData['allowed_epis'],
             'epi_colors' => $barData['epi_colors'],
             'doughnut' => $this->occurrenceRepository->getInfractionDistributionByEpi($sectorIds),
-            'chart_style' => !empty($sectorIds) ? 'area' : $this->getChartStyleForCurrentUser()
+            'chart_style' => $this->getChartStyleForCurrentUser()
         ];
     }
 

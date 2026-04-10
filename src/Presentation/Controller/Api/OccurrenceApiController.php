@@ -48,14 +48,18 @@ class OccurrenceApiController
                 s.id AS sector_id,
                 to_char(o.data_hora, 'HH24:MI') AS time,
                 f.nome AS employee,
-                o.funcionario_id
+                o.funcionario_id,
+                CASE 
+                    WHEN EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id) THEN 'Resolvido'
+                    ELSE 'Pendente'
+                END AS status
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
-            JOIN setores s ON f.setor_id = s.id
+            LEFT JOIN setores s ON f.setor_id = s.id
             WHERE EXTRACT(MONTH FROM o.data_hora) = ? 
               AND EXTRACT(YEAR FROM o.data_hora) = ? 
               AND o.filial_id = ? 
-              AND o.oculto = FALSE
+              AND (o.oculto = FALSE OR o.oculto IS NULL)
         ";
 
         $params = [$month, $year, $activeFilial];
@@ -73,12 +77,63 @@ class OccurrenceApiController
         $occurrences = $stmt->fetchAll();
 
         // Calculate Summary for Dashboard Cards
+        // Usa SEMPRE $nowDt para todos os campos do summary,
+        // correspondendo exatamente ao que o /api/charts retorna.
         $nowDt = new \DateTime();
-        $refDt = new \DateTime("$year-$month-01");
+
+        // Se não há filtro de setor, aplica o filtro da filial ativa
+        // (igual à lógica do ChartApiController)
+        $summaryIds = $sectorIds;
+        if (empty($summaryIds)) {
+            $filialId = (int)($_SESSION['active_filial_id'] ?? 1);
+            $departments = $this->departmentRepo->findAll($filialId);
+            $summaryIds = array_map(fn($d) => $d->getId(), $departments);
+            if (empty($summaryIds)) {
+                $summaryIds = [-1];
+            }
+        }
+
+        $yesterdayDt = (clone $nowDt)->modify('-1 day');
+        $lastWeekDt  = (clone $nowDt)->modify('-1 week');
+        $refMonth    = (int) ($_GET['month'] ?? date('n'));
+        $refYear     = (int) ($_GET['year'] ?? date('Y'));
+        $currentMonthDt = new \DateTime("$refYear-$refMonth-01");
+        $lastMonthDt = (clone $currentMonthDt)->modify('-1 month');
+
+        $todayCount = $this->occurrenceRepo->countDaily($nowDt, $summaryIds, $activeFilial);
+        $prevToday   = $this->occurrenceRepo->countDaily($yesterdayDt, $summaryIds, $activeFilial);
+        
+        $weekCount  = $this->occurrenceRepo->countWeekly($nowDt, $summaryIds, $activeFilial);
+        $prevWeek    = $this->occurrenceRepo->countWeekly($lastWeekDt, $summaryIds, $activeFilial);
+        
+        $monthCount = $this->occurrenceRepo->countMonthly($currentMonthDt, $summaryIds, $activeFilial);
+        $prevMonthCount = $this->occurrenceRepo->countMonthly($lastMonthDt, $summaryIds, $activeFilial);
+
+        $calcTrend = function($curr, $prev) {
+            if ($prev == 0) return ['percent' => $curr > 0 ? 100 : 0, 'direction' => $curr > 0 ? 'up' : 'stable', 'level' => $curr > 0 ? 'critico' : 'controlado'];
+            $diff = (($curr - $prev) / $prev) * 100;
+            $dir = $diff > 0 ? 'up' : ($diff < 0 ? 'down' : 'stable');
+            
+            $level = 'controlado';
+            if ($diff > 20) $level = 'critico';
+            elseif ($diff > 5) $level = 'moderado';
+
+            return [
+                'percent' => round(abs($diff), 1),
+                'direction' => $dir,
+                'level' => $level
+            ];
+        };
+
         $summary = [
-            'today' => $this->occurrenceRepo->countDaily($nowDt, $sectorIds),
-            'week' => $this->occurrenceRepo->countWeekly($nowDt, $sectorIds),
-            'month' => $this->occurrenceRepo->countMonthly($refDt, $sectorIds)
+            'today' => $todayCount,
+            'week'  => $weekCount,
+            'month' => $monthCount,
+            'trends' => [
+                'today' => $calcTrend($todayCount, $prevToday),
+                'week'  => $calcTrend($weekCount, $prevWeek),
+                'month' => $calcTrend($monthCount, $prevMonthCount)
+            ]
         ];
 
         echo json_encode([
@@ -110,18 +165,22 @@ class OccurrenceApiController
                 f.nome AS aluno, 
                 f.id AS aluno_id, 
                 COALESCE(s.nome, 'Sem Setor') AS curso,
-                e.nome AS epis, 
+                COALESCE(STRING_AGG(e.nome, ', '), 'Sem EPI') AS epis, 
                 to_char(o.data_hora, 'HH24:MI') AS hora,
-                'Pendente' AS status_formatado
+                CASE 
+                    WHEN EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id) THEN 'Resolvido'
+                    ELSE 'Pendente'
+                END AS status_formatado
             FROM ocorrencias o
             JOIN funcionarios f ON o.funcionario_id = f.id
             LEFT JOIN setores s ON f.setor_id = s.id
-            JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
-            JOIN epis e ON oe.epi_id = e.id
+            LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
+            LEFT JOIN epis e ON oe.epi_id = e.id
             WHERE EXTRACT(MONTH FROM o.data_hora) = ? 
               AND EXTRACT(YEAR FROM o.data_hora) = ? 
               AND o.filial_id = ? 
-              AND o.oculto = FALSE
+              AND (o.oculto = FALSE OR o.oculto IS NULL)
+              AND o.tipo = 'INFRACAO'
         ";
 
         $params = [$month, $year, $activeFilial];
@@ -131,15 +190,24 @@ class OccurrenceApiController
             $query .= " AND s.id IN ($placeholders)";
             $params = array_merge($params, $sectorIds);
         }
+
         if (!empty($epiName)) {
-            $query .= " AND e.nome = ?";
+            // Se filtramos por um EPI específico no gráfico, 
+            // garantimos que ele está entre os agrupados
+            $query .= " AND EXISTS (
+                SELECT 1 FROM ocorrencia_epis oe2 
+                JOIN epis e2 ON oe2.epi_id = e2.id 
+                WHERE oe2.ocorrencia_id = o.id AND e2.nome = ?
+            )";
             $params[] = $epiName;
         }
+
         if (!empty($sectorName)) {
             $query .= " AND s.nome = ?";
             $params[] = $sectorName;
         }
 
+        $query .= " GROUP BY o.id, f.id, s.id";
         $query .= " ORDER BY o.data_hora DESC";
 
         $stmt = $db->prepare($query);
@@ -149,12 +217,12 @@ class OccurrenceApiController
         $nowDt = new \DateTime();
         $refDt = new \DateTime(date('Y-m-01', strtotime("$year-$month-01")));
         $summary = [
-            'today' => $this->occurrenceRepo->countDaily($nowDt, $sectorIds),
-            'week' => $this->occurrenceRepo->countWeekly($nowDt, $sectorIds),
-            'month' => $this->occurrenceRepo->countMonthly($refDt, $sectorIds),
-            'students_today' => $this->occurrenceRepo->countUniqueStudentsDaily($nowDt, $sectorIds),
-            'students_week' => $this->occurrenceRepo->countUniqueStudentsWeekly($nowDt, $sectorIds),
-            'students_month' => $this->occurrenceRepo->countUniqueStudentsMonthly($refDt, $sectorIds)
+            'today' => $this->occurrenceRepo->countDaily($nowDt, $sectorIds, $activeFilial),
+            'week' => $this->occurrenceRepo->countWeekly($nowDt, $sectorIds, $activeFilial),
+            'month' => $this->occurrenceRepo->countMonthly($refDt, $sectorIds, $activeFilial),
+            'students_today' => $this->occurrenceRepo->countUniqueStudentsDaily($nowDt, $sectorIds, $activeFilial),
+            'students_week' => $this->occurrenceRepo->countUniqueStudentsWeekly($nowDt, $sectorIds, $activeFilial),
+            'students_month' => $this->occurrenceRepo->countUniqueStudentsMonthly($refDt, $sectorIds, $activeFilial)
         ];
 
         echo json_encode([

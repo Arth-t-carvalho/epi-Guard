@@ -31,7 +31,7 @@ html.dark-theme .monitoring-title h1, p{
     background: rgba(227, 6, 19, 0.1);
     color: #E30613;
     border: 1px solid rgba(227, 6, 19, 0.2);
-    border-radius: 4px;
+    border-radius: 0px;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
@@ -54,7 +54,7 @@ html.dark-theme .monitoring-title h1, p{
 
 .camera-card {
     background: #000;
-    border-radius: 4px;
+    border-radius: 0px;
     overflow: hidden;
     position: relative;
     aspect-ratio: 16 / 9;
@@ -103,7 +103,7 @@ html.dark-theme .monitoring-title h1, p{
 .camera-tag {
     background: rgba(0, 0, 0, 0.7);
     padding: 4px 10px;
-    border-radius: 3px;
+    border-radius: 0px;
     font-size: 11px;
     font-weight: 700;
     backdrop-filter: blur(4px);
@@ -116,7 +116,7 @@ html.dark-theme .monitoring-title h1, p{
     gap: 6px;
     background: rgba(0, 0, 0, 0.7);
     padding: 4px 10px;
-    border-radius: 3px;
+    border-radius: 0px;
     font-size: 10px;
     font-weight: 800;
     color: #10b981;
@@ -127,7 +127,7 @@ html.dark-theme .monitoring-title h1, p{
     width: 6px;
     height: 6px;
     background: #10b981;
-    border-radius: 50%;
+    border-radius: 0px;
     animation: blink 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     will-change: opacity;
 }
