@@ -13,8 +13,8 @@ class Connection
     public static function getInstance(): PDO
     {
         if (self::$instance === null) {
-            // $host = getenv('DB_HOST') ?: '192.168.55.106';
-            $host = getenv('DB_HOST') ?: 'localhost';
+            $host = getenv('DB_HOST') ?: '192.168.55.106';
+            // $host = getenv('DB_HOST') ?: 'localhost';
             $user = getenv('DB_USER') ?: 'postgres';
             $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'F@cchini2025';
             $port = getenv('DB_PORT') ?: '5432';

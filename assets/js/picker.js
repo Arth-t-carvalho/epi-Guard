@@ -27,7 +27,7 @@ function openModernPicker(type) {
     
     const subtitles = {
         periodo: 'Filtre as informações por data',
-        status: 'Veja itens ativos, pendentes ou resolvidos',
+        status: 'Veja itens arquivados, pendentes ou resolvidos',
         epi: 'Escolha um equipamento específico',
         visualizacao: 'Escolha como os dados serão exibidos',
         risk: 'Filtre setores pelo nível de infrações',

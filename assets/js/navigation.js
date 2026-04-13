@@ -53,8 +53,8 @@ async function navigateViaSPA(destino, options = {}) {
 
     // 0. LIMPEZA NUCLEAR: Remove modais órfãos do body que persistem entre páginas
     const stickySelectors = [
-        '#evidenceModal', '#exportModal', '#modernPicker', '#confirmHideModal',
-        '.evidence-modal-overlay', '.modal-premium:not(#globalAlertModal)', '.modern-picker-backdrop', '.ai-backdrop'
+        '#evidenceModal', '#exportModal', '#modernPicker', '#confirmArchiveModal', '#calendarModal',
+        '.evidence-modal-overlay', '.modal-premium:not(#globalAlertModal)', '.modal-calendar', '.modern-picker-backdrop', '.ai-backdrop'
     ];
     
     // Only clean modals if not silent 

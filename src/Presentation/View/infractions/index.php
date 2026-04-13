@@ -141,7 +141,7 @@ function formatInfractionDuration($start, $end = null) {
                             'todos' => __('Todos os status'),
                             'pendente' => __('Pendente'),
                             'resolvido' => __('Resolvido'),
-                            'inativo' => __('Inativo')
+                            'inativo' => __('Arquivados')
                         ];
                         echo $statusLabels[$filters['status']] ?? __('Todos os status');
                         ?>
@@ -313,21 +313,19 @@ function formatInfractionDuration($start, $end = null) {
                                     mb_check_encoding($infraction['responsavel_cargo'] ?? '', 'UTF-8') ? ($infraction['responsavel_cargo'] ?? '') : utf8_encode($infraction['responsavel_cargo'] ?? '')
                                 ]);
                                 ?>
+                                <button
+                                    class="btn-card-action-premium secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
+                                    title="<?= __('Salvar para revisão') ?>"
+                                    onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
+                                        class="fa-solid fa-bookmark"></i></button>
+
                                 <?php if (($filters['status'] ?? '') !== 'inativo'): ?>
                                     <button class="btn-card-action-premium" title="<?= __('Ver detalhes') ?>"
                                         onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($args, ENT_QUOTES, 'UTF-8') ?>)"><i
                                             class="fa-solid fa-eye"></i></button>
-                                    <button
-                                        class="btn-card-action-premium secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
-                                        title="<?= __('Salvar para revisão') ?>"
-                                        onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
-                                            class="fa-solid fa-bookmark"></i></button>
-                                    <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                        <button class="btn-card-action-premium success" title="<?= __('Resolver') ?>"><i
-                                                class="fa-solid fa-check"></i></button>
-                                    <?php endif; ?>
-                                    <button class="btn-card-action-premium danger" title="<?= __('Excluir') ?>"
-                                        onclick="confirmHideInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
+
+                                    <button class="btn-card-action-premium danger" title="<?= __('Arquivar') ?>"
+                                        onclick="confirmArchiveInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
                                             class="fa-solid fa-trash"></i></button>
                                 <?php endif; ?>
                             </div>
@@ -345,7 +343,7 @@ function formatInfractionDuration($start, $end = null) {
                         <th><?= __('EPI') ?></th>
                         <th><?= __('HORÁRIO') ?></th>
                         <th><?= __('STATUS') ?></th>
-                        <th style="text-align: left; padding-left: 20px;"><?php if (($filters['status'] ?? '') !== 'inativo') echo __('AÇÕES'); ?></th>
+                        <th style="text-align: left; padding-left: 20px;"><?= __('AÇÕES') ?></th>
                     </tr>
                 </thead>
                 <tbody id="infractionsTableBody">
@@ -394,6 +392,12 @@ function formatInfractionDuration($start, $end = null) {
                                 </td>
                                 <td>
                                     <div class="table-actions-premium">
+                                        <button
+                                            class="btn-action-premium secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
+                                            title="<?= __('Salvar para revisão') ?>"
+                                            onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
+                                                class="fa-solid fa-bookmark"></i></button>
+
                                         <?php if (($filters['status'] ?? '') !== 'inativo'): ?>
                                             <?php
                                             $argsTable = json_encode([
@@ -416,17 +420,8 @@ function formatInfractionDuration($start, $end = null) {
                                             <button class="btn-action-premium" title="<?= __('Ver detalhes') ?>"
                                                 onclick="openEvidenceModal.apply(null, <?= htmlspecialchars($argsTable, ENT_QUOTES, 'UTF-8') ?>)"><i
                                                     class="fa-solid fa-eye"></i></button>
-                                            <button
-                                                class="btn-action-premium secondary<?= !empty($infraction['favorito']) ? ' active' : '' ?>"
-                                                title="<?= __('Salvar para revisão') ?>"
-                                                onclick="toggleBookmark(this, <?= $infraction['id'] ?>)"><i
-                                                    class="fa-solid fa-bookmark"></i></button>
-                                            <?php if (($infraction['status'] ?? 'pendente') !== 'resolvido'): ?>
-                                                <button class="btn-action-premium success" title="<?= __('Resolver') ?>"><i
-                                                        class="fa-solid fa-check"></i></button>
-                                            <?php endif; ?>
-                                            <button class="btn-action-premium danger" title="<?= __('Excluir') ?>"
-                                                onclick="confirmHideInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
+                                            <button class="btn-action-premium danger" title="<?= __('Arquivar') ?>"
+                                                onclick="confirmArchiveInfraction(<?= $infraction['id'] ?>, '<?= $infraction['funcionario_nome'] ?>')"><i
                                                     class="fa-solid fa-trash"></i></button>
                                         <?php endif; ?>
                                     </div>
@@ -519,23 +514,23 @@ function formatInfractionDuration($start, $end = null) {
     </div>
 </div>
 
-<!-- MODAL DE CONFIRMAÇÃO PARA OCULTAR INFRAÇÃO -->
-<div class="modal-premium" id="confirmHideModal">
+<!-- MODAL DE CONFIRMAÇÃO PARA ARQUIVAR INFRAÇÃO -->
+<div class="modal-premium" id="confirmArchiveModal">
     <div class="modal-confirmation-content">
         <i class="fa-solid fa-triangle-exclamation main-icon"
             style="color: #f59e0b; font-size: 48px; margin-bottom: 20px; display: block;"></i>
-        <h2><?= __('Ocultar Registro') ?></h2>
-        <p><?= __('O registro de') ?> <strong><span id="hideTargetName"></span></strong>
+        <h2><?= __('Arquivar Registro') ?></h2>
+        <p><?= __('O registro de') ?> <strong><span id="archiveTargetName"></span></strong>
             <?= __('deixará de aparecer na listagem, mas continuará salvo no histórico do banco de dados.') ?></p>
 
         <div class="confirmation-actions" style="margin-top: 30px; display: flex; flex-direction: column; gap: 12px;">
-            <button class="btn-liquid" id="btnDoHide" style="width: 100%;">
+            <button class="btn-liquid" id="btnDoArchive" style="width: 100%;">
                 <div class="btn-text">
                     <i class="fa-solid fa-check"></i>
-                    <span><?= __('Ocultar Registro') ?></span>
+                    <span><?= __('Arquivar Registro') ?></span>
                 </div>
             </button>
-            <button class="btn-light-shadow" onclick="closeConfirmHideModal()" style="width: 100%;">
+            <button class="btn-light-shadow" onclick="closeConfirmArchiveModal()" style="width: 100%;">
                 <?= __('Cancelar') ?>
             </button>
         </div>
@@ -545,11 +540,11 @@ function formatInfractionDuration($start, $end = null) {
 <script>
     // Fechar modais ao clicar fora
     window.addEventListener('click', (e) => {
-        const confirmModal = document.getElementById('confirmHideModal');
+        const confirmModal = document.getElementById('confirmArchiveModal');
         const evidenceModal = document.getElementById('evidenceModal');
         const exportModal = document.getElementById('exportModal');
 
-        if (e.target === confirmModal) closeConfirmHideModal();
+        if (e.target === confirmModal) closeConfirmArchiveModal();
         if (e.target === evidenceModal) closeEvidenceModal();
         if (e.target === exportModal) closeExportModal();
     });
@@ -652,7 +647,7 @@ function formatInfractionDuration($start, $end = null) {
     /* Força todos os modais premium (Exportação, Confirmação, Evidência) a se comportarem como globais */
     .modal-premium,
     #exportModal,
-    #confirmHideModal,
+    #confirmArchiveModal,
     #evidenceModal {
         position: fixed !important;
         top: 0 !important;
@@ -663,14 +658,14 @@ function formatInfractionDuration($start, $end = null) {
         justify-content: center !important;
         padding: 20px !important;
         overflow-y: auto !important;
-        z-index: 10000 !important; /* Padronizado para 10 mil */
+        z-index: 99999999 !important; /* Valor ultra-alto para garantir sobreposição total */
         background: rgba(15, 23, 42, 0.7) !important;
         display: none;
     }
 
     .modal-premium.active,
     #exportModal.active,
-    #confirmHideModal.active,
+    #confirmArchiveModal.active,
     #evidenceModal.active {
         display: flex !important;
     }
@@ -1150,7 +1145,7 @@ function formatInfractionDuration($start, $end = null) {
      * transformações de CSS (animações de página) quebrem o position: fixed.
      */
     function portalModals() {
-        const modalsToMove = ['evidenceModal', 'confirmHideModal', 'exportModal', 'modernPicker'];
+        const modalsToMove = ['evidenceModal', 'confirmArchiveModal', 'exportModal', 'modernPicker'];
         modalsToMove.forEach(id => {
             const modal = document.getElementById(id);
             if (modal && modal.parentNode !== document.body) {
@@ -1525,7 +1520,7 @@ function formatInfractionDuration($start, $end = null) {
             { value: 'todos', label: '<?= __('Todos os Status') ?>' },
             { value: 'pendente', label: '<?= __('Pendente') ?>' },
             { value: 'resolvido', label: '<?= __('Resolvido') ?>' },
-            { value: 'inativo', label: '<?= __('Inativo') ?>' }
+            { value: 'inativo', label: '<?= __('Arquivados') ?>' }
         ],
         epi: [
             { value: 'todos', label: '<?= __('Todos os EPIs') ?>' },

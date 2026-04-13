@@ -36,222 +36,307 @@ function destroyCharts() {
 }
 
 // ===============================
-// EXPORTAÇÃO NATIVA PARA PDF
+// EXPORTAÇÃO NATIVA PARA PDF (HD)
 // ===============================
+
+/**
+ * Captura um gráfico em alta resolução para exportação.
+ * Renderiza o gráfico em um canvas off-screen com escala aumentada.
+ */
+async function captureHighResChart(chartInstance, scale = 3) {
+    if (!chartInstance || !chartInstance.canvas) return null;
+
+    try {
+        const originalCanvas = chartInstance.canvas;
+        const offscreenCanvas = document.createElement('canvas');
+        
+        offscreenCanvas.width = originalCanvas.clientWidth * scale;
+        offscreenCanvas.height = originalCanvas.clientHeight * scale;
+        
+        const ctx = offscreenCanvas.getContext('2d');
+        const config = chartInstance.config;
+
+        // Opções simplificadas para exportação (Evita referências circulares)
+        const exportOptions = {
+            ...config.options, // Cópia rasa dos níveis de topo
+            animation: false,
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: {
+                ...config.options.plugins,
+                legend: {
+                    ...config.options.plugins?.legend,
+                    display: true,
+                    labels: {
+                        ...config.options.plugins?.legend?.labels,
+                        font: { 
+                            size: 13 * scale, 
+                            weight: 'bold' 
+                        }
+                    }
+                }
+            }
+        };
+
+        // Escalas (Tratando manualmente para evitar erros de clonagem)
+        if (config.options.scales) {
+            exportOptions.scales = {};
+            Object.keys(config.options.scales).forEach(key => {
+                const axis = config.options.scales[key];
+                exportOptions.scales[key] = {
+                    ...axis,
+                    ticks: {
+                        ...(axis.ticks || {}),
+                        font: { size: 10 * scale, weight: 'bold' }
+                    }
+                };
+            });
+        }
+
+        return new Promise((resolve) => {
+            try {
+                const tempChart = new Chart(ctx, {
+                    type: config.type,
+                    data: config.data,
+                    options: exportOptions,
+                    plugins: [{
+                        beforeDraw: (chart) => {
+                            const { ctx } = chart;
+                            ctx.save();
+                            ctx.fillStyle = 'white';
+                            ctx.fillRect(0, 0, chart.width, chart.height);
+                            ctx.restore();
+                        }
+                    }]
+                });
+
+                setTimeout(() => {
+                    const dataUrl = offscreenCanvas.toDataURL('image/png', 1.0);
+                    tempChart.destroy();
+                    resolve(dataUrl);
+                }, 150);
+            } catch (innerErr) {
+                console.warn('Erro na renderização temporária HD:', innerErr);
+                resolve(originalCanvas.toDataURL('image/png', 1.0)); // Fallback para captura de tela normal
+            }
+        });
+    } catch (e) {
+        console.warn('Falha no preparo do gráfico HD:', e);
+        return chartInstance.canvas.toDataURL('image/png', 1.0); // Fallback absoluto
+    }
+}
+
 window.exportDashboardData = async function () {
     toggleScroll(true);
+    const btn = document.querySelector('.btn-premium-filter');
+    const originalHTML = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando HD...';
+        btn.disabled = true;
+    }
 
     try {
         if (!window.jspdf || !window.jspdf.jsPDF) {
             throw new Error("Biblioteca jsPDF não carregada. Pressione F5 ou verifique a conexão.");
         }
 
-        // 1. Buscar Dados Consolidados do Backend (Insights)
+        // 1. Buscar Dados Consolidados
         const response = await fetch(`${window.BASE_PATH}/api/export/insights`);
-        const result = await response.json();
-
-        if (!result || result.status !== 'success') {
-            const errorMsg = result ? (result.message || result.error) : "Sem resposta do servidor";
-            throw new Error(`Falha ao carregar dados do Dashboard: ${errorMsg}`);
+        if (!response.ok) throw new Error(`Erro no servidor: ${response.status}`);
+        
+        const data = await response.json();
+        if (!data || (data.status && data.status === 'error')) {
+            throw new Error(data.message || "Dados do relatório indisponíveis.");
         }
 
-        const data = result;
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-            orientation: 'p',
-            unit: 'mm',
-            format: 'a4'
-        });
+        // Verificação de segurança para os gráficos
+        if (!mainChartInstance || !doughnutChartInstance) {
+            console.warn("Gráficos não inicializados. Tentando capturar estado atual...");
+        }
 
-        // Configurações Globais
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+        // Cores "Graphic Gorilla" / Facchini Premium
         const primaryColor = [227, 6, 19];
-        const textColor = [31, 41, 55];
-        const mutedColor = [107, 114, 128];
-        const grayBg = [248, 250, 252];
+        const textColor = [15, 23, 42];
+        const mutedColor = [100, 116, 139];
         const pageW = doc.internal.pageSize.getWidth();
         const pageH = doc.internal.pageSize.getHeight();
+        const margin = 14;
+        const contentW = pageW - (margin * 2);
 
-        // Helper para desenhar cabeçalho premium
-        const drawHeader = (title) => {
-            doc.setFillColor(...primaryColor);
-            doc.rect(0, 0, pageW, 45, 'F');
-            doc.setTextColor(255, 255, 255);
+        // Helper: Cabeçalho Limpo (Branco)
+        const drawCleanHeader = (title) => {
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(22);
-            doc.text(title, 14, 25);
-
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            const gerado = new Date().toLocaleString('pt-BR');
-            doc.text(`Gerado em: ${gerado}`, 14, 35);
-            doc.text(`Ano de Referência: ${data.year || currCalYear}`, 14, 41);
-        };
-
-        const drawSectionTitle = (y, text) => {
+            doc.setFontSize(26);
             doc.setTextColor(...textColor);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(16);
-            doc.text(text, 14, y);
-            const textWidth = doc.getTextWidth(text);
+            doc.text(title, pageW / 2, 25, { align: 'center' });
+            
             doc.setDrawColor(...primaryColor);
-            doc.setLineWidth(1);
-            doc.line(14, y + 2, 14 + textWidth, y + 2);
-            return y + 10;
+            doc.setLineWidth(1.2);
+            doc.line(margin, 30, pageW - margin, 30);
+            
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...mutedColor);
+            const gerado = new Date().toLocaleString('pt-BR');
+            doc.text(`Relatório Analítico de Segurança EPI | Facchini S/A | Gerado em: ${gerado}`, pageW / 2, 36, { align: 'center' });
         };
 
-        const drawCard = (y, rTitle, rValue, line1, line2) => {
-            const h = 25;
-            doc.setDrawColor(226, 232, 240);
-            doc.setFillColor(255, 255, 255);
-            doc.roundedRect(14, y, pageW - 28, h, 2, 2, 'FD');
-            doc.setFillColor(...primaryColor);
-            doc.rect(14, y, 3, h, 'F');
+        // Captura HD Otimizada (Escala 3x é o equilíbrio ideal entre HD e Memória)
+        let mainChartImg, doughnutChartImg;
+        try {
+            mainChartImg = await captureHighResChart(mainChartInstance, 3);
+            doughnutChartImg = await captureHighResChart(doughnutChartInstance, 3);
+        } catch (captureErr) {
+            console.warn("Falha na captura HD, tentando captura padrão...", captureErr);
+            mainChartImg = mainChartInstance?.canvas?.toDataURL('image/png', 1.0);
+            doughnutChartImg = doughnutChartInstance?.canvas?.toDataURL('image/png', 1.0);
+        }
 
+        // =============================================
+        // PÁGINA 1: DASHBOARD EXECUTIVO (IDENTIDADE ORIGINAL)
+        // =============================================
+        drawCleanHeader(`Análise Anual de Segurança - ${data.year}`);
+
+        let y = 50;
+
+        // Bloco de Resumo (Topo)
+        doc.setFontSize(12);
+        doc.setTextColor(...textColor);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Visão Geral e Insights do Período', margin, y);
+        y += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...mutedColor);
+        const introText = `Este relatório compila os dados de conformidade capturados pelo sistema epi-Guard. Abaixo, apresentamos a evolução mensal das infrações, permitindo identificar picos sazonais e a eficácia das medidas preventivas adotadas pela Facchini S/A.`;
+        const lines = doc.splitTextToSize(introText, contentW);
+        doc.text(lines, margin, y);
+        y += (lines.length * 5) + 8;
+
+        // MÉTRICA PRINCIPAL (CARRINHO / KPI)
+        doc.setDrawColor(240, 240, 240);
+        doc.setFillColor(252, 252, 252);
+        doc.roundedRect(margin, y, contentW, 25, 2, 2, 'FD');
+        
+        doc.setTextColor(...primaryColor);
+        doc.setFontSize(28);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${data.total_year || 0}`, margin + 10, y + 15);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(...textColor);
+        doc.text('TOTAL DE INFRAÇÕES REGISTRADAS NO ANO', margin + 10, y + 21);
+        
+        y += 35;
+
+        // GRÁFICO PRINCIPAL EM LARGURA TOTAL (Padrão Dashboard Original)
+        if (mainChartImg) {
+            doc.setFontSize(13);
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(10);
-            doc.setTextColor(15, 23, 42);
-            doc.text(rTitle, 22, y + 8);
+            doc.text('1. Evolução Mensal de Ocorrências (Jan - Dez)', margin, y);
+            y += 6;
+            
+            const chartW = contentW;
+            const chartH = 75; // Altura generosa para legibilidade
+            doc.addImage(mainChartImg, 'PNG', margin, y, chartW, chartH, undefined, 'SLOW');
+            y += chartH + 15;
+        }
 
-            doc.setFontSize(14);
-            doc.setTextColor(...primaryColor);
-            doc.text(rValue, 22, y + 15);
+        // Seção de Destaques Críticos (Cards)
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('2. Pontos Críticos Identificados', margin, y);
+        y += 8;
 
-            doc.setFont('helvetica', 'normal');
+        const cardW = (contentW - 6) / 2;
+        const drawMiniCard = (cx, cy, label, value) => {
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(230, 230, 230);
+            doc.roundedRect(cx, cy, cardW, 18, 1, 1, 'FD');
             doc.setFontSize(8);
             doc.setTextColor(...mutedColor);
-            doc.text(line1, 22, y + 20);
-            if (line2) doc.text(line2, 22, y + 24);
-            return y + h + 8;
+            doc.text(label.toUpperCase(), cx + 5, cy + 6);
+            doc.setFontSize(11);
+            doc.setTextColor(...textColor);
+            doc.setFont('helvetica', 'bold');
+            doc.text(value, cx + 5, cy + 13);
         };
 
-        // =============================
-        // PÁGINA 1: RESUMO EXECUTIVO (PORTUGUÊS)
-        // =============================
-        drawHeader('Relatório de Desempenho EPI');
+        const worstMonth = data.worst_month?.nome || '---';
+        const worstSector = data.worst_sector?.nome || '---';
 
-        let cursorY = 55;
-        cursorY = drawSectionTitle(cursorY, 'Resumo Executivo Anual');
-        cursorY += 5;
+        drawMiniCard(margin, y, 'Mês mais crítico', worstMonth);
+        drawMiniCard(margin + cardW + 6, y, 'Setor com mais alertas', worstSector);
+        y += 24;
 
-        // Cards Baseados nos Dados do Backend
-        cursorY = drawCard(cursorY, 'Setor com Mais Infrações', data.worst_sector.nome,
-            `Total de ${data.worst_sector.total} infrações detectadas este ano.`,
-            'Este setor apresenta a maior taxa de não conformidade no uso de EPIs.'
-        );
-
-        const primaryEpi = data.worst_epis[0] ? data.worst_epis[0].nome : 'Nenhum dado';
-        const primaryEpiTotal = data.worst_epis[0] ? data.worst_epis[0].total : 0;
-
-        cursorY = drawCard(cursorY, 'EPI Mais Negligenciado', primaryEpi,
-            `Total: ${primaryEpiTotal} ocorrências de não uso.`,
-            'Equipamento com o maior índice de ausência detectado pelo sistema.'
-        );
-
-        cursorY = drawCard(cursorY, 'Mês Crítico do Ano', data.worst_month.nome,
-            `Total de ${data.worst_month.total} infrações no mês.`,
-            'Período do ano com a maior concentração histórica de alertas.'
-        );
-
-        cursorY = drawCard(cursorY, 'Dia de Maior Ocorrência', data.worst_day_of_week.nome,
-            `Dia da semana com pico de alertas (${data.worst_day_of_week.total}).`,
-            'Tendência semanal identificada para reforço de fiscalização.'
-        );
-
-        // =============================
-        // PÁGINA 2: RANKINGS (PORTUGUÊS)
-        // =============================
+        // =============================================
+        // PÁGINA 2: DISTRIBUIÇÃO E RANKINGS
+        // =============================================
         doc.addPage();
-        drawHeader('Análise de Rankings');
-        cursorY = 55;
+        drawCleanHeader('Distribuição e Prevenção');
+        y = 50;
 
-        cursorY = drawSectionTitle(cursorY, 'Ranking de Infrações por Setor');
-        cursorY += 5;
+        // Gráfico de Rosca (Centralizado e Grande)
+        if (doughnutChartImg) {
+            doc.setFontSize(13);
+            doc.setFont('helvetica', 'bold');
+            doc.text('3. Distribuição de Infrações por Tipo de EPI', pageW / 2, y, { align: 'center' });
+            y += 8;
+            
+            const dogSize = 90;
+            const dogX = (pageW - dogSize) / 2;
+            doc.addImage(doughnutChartImg, 'PNG', dogX, y, dogSize, dogSize, undefined, 'SLOW');
+            y += dogSize + 15;
+        }
 
-        const sectorTableData = data.sectors_ranking.map((s, i) => {
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('4. Ranking de Conformidade por Setor', margin, y);
+        y += 8;
+
+        const fullSectorData = (data.sectors_ranking || []).map((s, i) => {
             let risk = 'CONTROLADO';
             if (s.total >= 50) risk = 'CRÍTICO';
             else if (s.total >= 20) risk = 'ALTO';
-            else if (s.total >= 10) risk = 'MODERADO';
             return [i + 1, s.nome, s.total, risk];
         });
 
         doc.autoTable({
-            startY: cursorY,
-            head: [['#', 'Setor Fabril', 'Total de Infrações', 'Nível de Risco']],
-            body: sectorTableData,
+            startY: y,
+            head: [['#', 'Setor Fabril', 'Total de Infrações', 'Status de Risco']],
+            body: fullSectorData,
             theme: 'grid',
-            headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+            headStyles: { fillColor: primaryColor, textColor: 255 },
             styles: { fontSize: 9 },
-            alternateRowStyles: { fillColor: grayBg },
-            margin: { left: 14, right: 14 }
+            alternateRowStyles: { fillColor: [248, 250, 252] }
         });
 
-        cursorY = doc.lastAutoTable.finalY + 15;
-
-        cursorY = drawSectionTitle(cursorY, 'Ranking de EPIs Ausentes');
-        cursorY += 5;
-
-        const epiTableData = data.epis_ranking.map((e, i) => [i + 1, e.nome, e.total]);
-
-        doc.autoTable({
-            startY: cursorY,
-            head: [['#', 'Equipamento (EPI)', 'Total de Ocorrências']],
-            body: epiTableData,
-            theme: 'grid',
-            headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
-            styles: { fontSize: 9 },
-            alternateRowStyles: { fillColor: grayBg },
-            margin: { left: 14, right: 14 }
-        });
-
-        // =============================
-        // PÁGINA 3: ANÁLISE GRÁFICA
-        // =============================
-        if (mainChartInstance || doughnutChartInstance) {
-            doc.addPage();
-            drawHeader('Análise Visual de Tendências');
-            cursorY = 55;
-
-            if (mainChartInstance && mainChartInstance.canvas) {
-                doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
-                doc.setTextColor(...textColor);
-                doc.text('Distribuição Mensal (Consolidado)', 14, cursorY);
-                cursorY += 8;
-
-                // Usando canvas.toDataURL para máxima compatibilidade
-                const img1 = mainChartInstance.canvas.toDataURL('image/png', 1.0);
-                const contentW = pageW - 28;
-                doc.addImage(img1, 'PNG', 14, cursorY, contentW, contentW * 0.4);
-                cursorY += (contentW * 0.4) + 20;
-            }
-
-            if (doughnutChartInstance && doughnutChartInstance.canvas && cursorY < pageH - 100) {
-                doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
-                doc.setTextColor(...textColor);
-                doc.text('Distribuição por Tipo de EPI', 14, cursorY);
-                cursorY += 8;
-
-                const img2 = doughnutChartInstance.canvas.toDataURL('image/png', 1.0);
-                const dSize = 85;
-                doc.addImage(img2, 'PNG', (pageW / 2) - (dSize / 2), cursorY, dSize, dSize);
-            }
-        }
-
-        // Rodapé em todas as páginas
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
+        // Rodapé Global
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
             doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Página ${i} de ${pageCount}`, pageW / 2, pageH - 10, { align: 'center' });
-            doc.text("Facchini © 2026 - Proteção e Tecnologia", 14, pageH - 10);
+            doc.setTextColor(160, 160, 160);
+            doc.text(`Facchini S/A - Segurança do Trabalho | Documento Gerado pelo Sistema epi-Guard | Página ${i} de ${totalPages}`, pageW / 2, pageH - 10, { align: 'center' });
         }
 
-        doc.save(`Relatorio_Dashboard_${data.year}_${new Date().toISOString().split('T')[0]}.pdf`);
+        doc.save(`Analise_Seguranca_Facchini_${data.year}.pdf`);
+
+        if (btn) {
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        }
 
     } catch (e) {
-        console.error("Erro na Exportação PDF:", e);
-        showAlert(window.I18N?.labels?.error || 'Erro', "Erro ao tentar gerar o PDF do Dashboard. Por favor, tente novamente.", 'error');
+        console.error("Erro Exportação:", e);
+        const detailedError = e.message || "Erro desconhecido";
+        showAlert('Erro', `Falha ao gerar relatório: ${detailedError}. Verifique sua conexão e tente novamente.`, 'error');
+        if (btn) {
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        }
     } finally {
         toggleScroll(false);
     }
@@ -1019,36 +1104,43 @@ function exportData() {
                 });
             }
 
-            // ================= PÁGINA 3: GRÁFICOS =================
-            if (mainChartImg || doughnutChartImg) {
+                // ================= PÁGINA 3: ANÁLISE GRÁFICA (FULL PAGE FOCUS) =================
                 doc.addPage();
                 doc.setFillColor(...primaryColor);
-                doc.rect(0, 0, pageWidth, 30, 'F');
+                doc.rect(0, 0, pageWidth, 45, 'F');
                 doc.setTextColor(255, 255, 255);
-                doc.setFontSize(18);
+                doc.setFontSize(22);
                 doc.setFont(undefined, 'bold');
-                doc.text('Analise Grafica', margin, 20);
+                doc.text('Analise Grafica de Desempenho', margin, 25);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text('Visualize abaixo a evolucao temporal e a distribuicao por tipo de EPI.', margin, 35);
 
-                let gCursor = 45;
+                let gCursor = 65;
 
                 if (mainChartImg) {
                     doc.setTextColor(...darkColor);
-                    doc.setFontSize(12);
-                    doc.text('Infracoes por Mes (Geral vs EPIs)', margin, gCursor);
-                    const chartHeight = 75;
-                    doc.addImage(mainChartImg, 'PNG', margin, gCursor + 5, contentWidth, chartHeight);
-                    gCursor += chartHeight + 20;
+                    doc.setFontSize(16);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('1. Evolucao Mensal de Infracoes', margin, gCursor);
+                    
+                    // Aumentado significativamente para legibilidade máxima (quase metade da página)
+                    const chartHeight = 85; 
+                    const chartWidth = contentWidth;
+                    doc.addImage(mainChartImg, 'PNG', margin, gCursor + 8, chartWidth, chartHeight, undefined, 'SLOW');
+                    gCursor += chartHeight + 35;
                 }
 
-                if (doughnutChartImg && gCursor < 250) {
+                if (doughnutChartImg && gCursor < 200) {
                     doc.setTextColor(...darkColor);
-                    doc.setFontSize(12);
-                    doc.text('Distribuicao Total de EPIs Ausentes', margin, gCursor);
-                    const dogHeight = 70;
-                    // Doughnut usually proportional
-                    doc.addImage(doughnutChartImg, 'PNG', margin + (contentWidth / 2) - 35, gCursor + 5, 70, dogHeight);
+                    doc.setFontSize(16);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('2. Distribuicao por Equipamento (EPI)', margin, gCursor);
+                    
+                    const dogSize = 90; // Tamanho grande para legibilidade das legendas internas
+                    const dogX = margin + (contentWidth - dogSize) / 2;
+                    doc.addImage(doughnutChartImg, 'PNG', dogX, gCursor + 8, dogSize, dogSize, undefined, 'SLOW');
                 }
-            }
 
             // 4. Concluir e Baixar o Arquivo
             doc.save(`relatorio_${data.year}.pdf`);

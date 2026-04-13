@@ -25,10 +25,15 @@ class ExportApiController
         $year = (int) date('Y');
 
         try {
+            // Calcula total anual somando os meses
+            $monthlyTotals = $this->getMonthlyTotals($year, $activeFilial);
+            $totalYear = array_sum($monthlyTotals);
+
             $response = [
                 'status' => 'success',
                 'generated_at' => date('d/m/Y H:i'),
                 'year' => $year,
+                'total_year' => $totalYear,
                 'active_filial_id' => $activeFilial,
                 'worst_sector' => $this->getWorstSector($year, $activeFilial),
                 'worst_epis' => $this->getWorstEpis($year, $activeFilial),
@@ -36,7 +41,7 @@ class ExportApiController
                 'worst_day_of_week' => $this->getWorstDayOfWeek($year, $activeFilial),
                 'sectors_ranking' => $this->getSectorsRanking($year, $activeFilial),
                 'epis_ranking' => $this->getEpisRanking($year, $activeFilial),
-                'monthly_totals' => $this->getMonthlyTotals($year, $activeFilial),
+                'monthly_totals' => $monthlyTotals,
             ];
 
             echo json_encode($response);

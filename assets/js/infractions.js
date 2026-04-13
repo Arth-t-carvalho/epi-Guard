@@ -640,14 +640,14 @@ async function toggleBookmark(btn, occId) {
 }
 
 /* ==============================
-   OCULTAR INFRAÇÃO (SOFT DELETE)
+   ARQUIVAR INFRAÇÃO (SOFT DELETE)
    ============================== */
-let hideTargetId = null;
+let archiveTargetId = null;
 
-function confirmHideInfraction(id, name) {
-    hideTargetId = id;
-    const modal = document.getElementById('confirmHideModal');
-    const nameEl = document.getElementById('hideTargetName');
+function confirmArchiveInfraction(id, name) {
+    archiveTargetId = id;
+    const modal = document.getElementById('confirmArchiveModal');
+    const nameEl = document.getElementById('archiveTargetName');
     
     if (nameEl) nameEl.textContent = name;
     if (modal) {
@@ -656,27 +656,27 @@ function confirmHideInfraction(id, name) {
     }
     
     // Configurar o botão de confirmação
-    const btnDoHide = document.getElementById('btnDoHide');
-    if (btnDoHide) {
-        btnDoHide.onclick = () => doHideInfraction(id);
+    const btnDoArchive = document.getElementById('btnDoArchive');
+    if (btnDoArchive) {
+        btnDoArchive.onclick = () => doArchiveInfraction(id);
     }
 }
 
-function closeConfirmHideModal() {
-    const modal = document.getElementById('confirmHideModal');
+function closeConfirmArchiveModal() {
+    const modal = document.getElementById('confirmArchiveModal');
     if (modal) {
         modal.classList.remove('active');
         toggleScroll(false);
     }
-    hideTargetId = null;
+    archiveTargetId = null;
 }
 
-async function doHideInfraction(id) {
-    const btn = document.getElementById('btnDoHide');
+async function doArchiveInfraction(id) {
+    const btn = document.getElementById('btnDoArchive');
     const originalText = btn.querySelector('.btn-text').innerHTML;
     
     btn.disabled = true;
-    btn.querySelector('.btn-text').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${window.I18N?.labels?.hiding || 'Ocultando...'}`;
+    btn.querySelector('.btn-text').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${window.I18N?.labels?.archiving || 'Arquivando...'}`;
 
     try {
         const formData = new FormData();
@@ -690,7 +690,7 @@ async function doHideInfraction(id) {
 
         if (result.success) {
             // Fechar modal
-            closeConfirmHideModal();
+            closeConfirmArchiveModal();
             
             // Remover da tela com animação
             const card = document.getElementById(`card-infraction-${id}`);
@@ -705,7 +705,7 @@ async function doHideInfraction(id) {
                 setTimeout(() => row.remove(), 500);
             }
         } else {
-            showAlert(window.I18N?.labels?.error || 'Erro', 'Erro ao ocultar: ' + (result.message || 'Erro desconhecido'), 'error');
+            showAlert(window.I18N?.labels?.error || 'Erro', 'Erro ao arquivar: ' + (result.message || 'Erro desconhecido'), 'error');
         }
     } catch (error) {
         console.error('Erro:', error);

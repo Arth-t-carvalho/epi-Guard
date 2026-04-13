@@ -233,6 +233,28 @@
             </div>
         </div>
     </div>
+    <script>
+        /**
+         * SISTEMA PORTAL GLOBAL
+         * Garante que todas as modais sejam movidas para o final do <body>
+         * para evitar que transformações ou overflow:hidden em contêineres pai as cortem.
+         */
+        function globalPortalSystem() {
+            const modals = document.querySelectorAll('.modal-premium, .modal-calendar, .evidence-modal-overlay, .modern-picker');
+            modals.forEach(modal => {
+                if (modal && modal.parentNode !== document.body) {
+                    document.body.appendChild(modal);
+                }
+            });
+        }
+
+        // Executar na carga inicial e em cada navegação SPA
+        document.addEventListener('DOMContentLoaded', globalPortalSystem);
+        window.addEventListener('spaPageLoaded', globalPortalSystem);
+        
+        // Polling de segurança para modais injetados dinamicamente
+        setInterval(globalPortalSystem, 1000);
+    </script>
 </body>
 
 </html>

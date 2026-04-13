@@ -173,42 +173,7 @@ $userEmail = $_SESSION['user_email'] ?? 'admin@facchini.com.br';
             </div>
         </div>
 
-        <!-- CARD 4: Notificações -->
-        <div class="settings-card">
-            <div class="settings-card-header">
-                <div class="icon-wrapper alert-icon">
-                    <i data-lucide="bell"></i>
-                </div>
-                <h2><?= __('Notificações') ?></h2>
-            </div>
-            <div class="settings-card-body">
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <h3><?= __('Alertas de Infração por E-mail') ?></h3>
-                        <p><?= __('Receba um e-mail imediato sempre que uma infração Grave for registrada.') ?></p>
-                    </div>
-                    <div class="setting-action">
-                        <label class="switch">
-                            <input type="checkbox" checked>
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
 
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <h3><?= __('Resumo Semanal') ?></h3>
-                        <p><?= __('Relatório de conformidade enviado toda sexta-feira.') ?></p>
-                    </div>
-                    <div class="setting-action">
-                        <label class="switch">
-                            <input type="checkbox" checked>
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- CARD 5: Informações da Conta -->
         <div class="settings-card">
