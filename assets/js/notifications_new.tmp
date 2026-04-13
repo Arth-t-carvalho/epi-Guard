@@ -1,0 +1,145 @@
+        try {
+            const response = await fetch(`${window.BASE_PATH || ''}/api/simulate-occurrence`);
+            const result = await response.json();
+            if (!result.success) {
+                showAlert(window.I18N?.labels?.error || 'Erro', 'Erro na simulação: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('[Simulation]', error);
+        }
+    };
+
+    /**
+     * MODAL DE ALERTA GLOBAL (Substitui o alert nativo)
+     */
+    window.showAlert = function(title, message, type = 'info') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('globalAlertModal');
+            const titleEl = document.getElementById('globalAlertTitle');
+            const msgEl = document.getElementById('globalAlertMessage');
+            const iconEl = document.getElementById('globalAlertIcon');
+            const iconWrapper = document.getElementById('globalAlertIconWrapper');
+            const cancelBtn = document.getElementById('globalAlertCancelBtn');
+            const confirmText = document.getElementById('globalAlertConfirmText');
+
+            if (!modal || !titleEl || !msgEl || !iconEl || !iconWrapper) {
+                console.warn('Global Alert Modal elements not found.');
+                alert(`${title}: ${message}`);
+                resolve(true);
+                return;
+            }
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            if (confirmText) confirmText.textContent = window.I18N?.labels?.confirm || 'Continuar';
+
+            // Cores e Ícones baseados no tipo
+            let iconName = 'info';
+            let bgColor = '#f0f9ff';
+            let iconColor = '#0ea5e9';
+
+            switch (type) {
+                case 'success':
+                    iconName = 'check-circle';
+                    bgColor = '#ecfdf5';
+                    iconColor = '#10b981';
+                    break;
+                case 'error':
+                    iconName = 'x-circle';
+                    bgColor = '#fef2f2';
+                    iconColor = '#ef4444';
+                    break;
+                case 'warning':
+                    iconName = 'alert-triangle';
+                    bgColor = '#fffbeb';
+                    iconColor = '#f59e0b';
+                    break;
+            }
+
+            iconWrapper.style.backgroundColor = bgColor;
+            iconEl.style.color = iconColor;
+            iconEl.setAttribute('data-lucide', iconName);
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            window._currentAlertResolve = resolve;
+            modal.classList.add('active');
+        });
+    };
+
+    /**
+     * MODAL DE CONFIRMAÇÃO GLOBAL (Substitui o confirm nativo)
+     */
+    window.showConfirm = function(title, message, type = 'warning') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('globalAlertModal');
+            const titleEl = document.getElementById('globalAlertTitle');
+            const msgEl = document.getElementById('globalAlertMessage');
+            const iconEl = document.getElementById('globalAlertIcon');
+            const iconWrapper = document.getElementById('globalAlertIconWrapper');
+            const cancelBtn = document.getElementById('globalAlertCancelBtn');
+            const confirmText = document.getElementById('globalAlertConfirmText');
+
+            if (!modal || !titleEl || !msgEl || !iconEl || !iconWrapper) {
+                const res = confirm(`${title}\n\n${message}`);
+                resolve(res);
+                return;
+            }
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+
+            if (cancelBtn) cancelBtn.style.display = 'block';
+            if (confirmText) confirmText.textContent = window.I18N?.labels?.confirm || 'Confirmar';
+
+            // Cores e Ícones (Confirm geralmente é warning)
+            let iconName = 'help-circle';
+            let bgColor = '#f0f9ff';
+            let iconColor = '#0ea5e9';
+
+            if (type === 'warning') {
+                iconName = 'alert-triangle';
+                bgColor = '#fffbeb';
+                iconColor = '#f59e0b';
+            } else if (type === 'error' || type === 'danger') {
+                iconName = 'trash-2';
+                bgColor = '#fef2f2';
+                iconColor = '#ef4444';
+            }
+
+            iconWrapper.style.backgroundColor = bgColor;
+            iconEl.style.color = iconColor;
+            iconEl.setAttribute('data-lucide', iconName);
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            window._currentAlertResolve = resolve;
+            modal.classList.add('active');
+        });
+    };
+
+    window.closeGlobalAlert = function(result = true) {
+        const modal = document.getElementById('globalAlertModal');
+        if (modal) {
+            modal.classList.remove('active');
+            if (window._currentAlertResolve) {
+                window._currentAlertResolve(result);
+                window._currentAlertResolve = null;
+            }
+        }
+    };
+}
+
+// O motor SPA despacha este evento ao carregar cada página localmente.
+// Então hidratamos os elementos com os dados em cache!
+document.addEventListener('DOMContentLoaded', function() {
+    if (window._refreshNotifSPA) {
+        window._refreshNotifSPA();
+    }
+});

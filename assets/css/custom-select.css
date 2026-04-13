@@ -1,0 +1,337 @@
+/**
+ * ==========================================================
+ * CUSTOM SELECT PREMIUM MODALS
+ * ==========================================================
+ * Estilos para substituir selects nativos por uma interface
+ * de aplicativo touch-friendly inspirada no mockup.
+ */
+
+/* 1. O Botão Trigger que substitui o <select> em formulários */
+.premium-select-trigger {
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--text-main);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: border-color, box-shadow;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.premium-select-trigger:hover,
+.premium-select-trigger:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.1);
+    outline: none;
+}
+
+.premium-select-trigger .trigger-value {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.premium-select-trigger .lucide {
+    color: var(--text-muted);
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.premium-select-trigger.active .lucide {
+    transform: rotate(180deg);
+}
+
+html.dark-theme .premium-select-trigger {
+    background: var(--bg-card);
+    border-color: var(--border);
+}
+
+/* 2. O Modal Backdrop */
+.premium-select-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999999999; /* Um pouco abaixo do Picker mas acima dos modais normais */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    will-change: opacity;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-select-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 3. A Janela do Modal */
+.premium-select-modal {
+    width: 100%;
+    max-width: 440px;
+    background: #e5e7eb; /* Cinza claro da imagem do mockup */
+    border-radius: 4px;
+    overflow: hidden;
+    transform: translateY(30px) scale(0.95);
+    will-change: transform, opacity;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+html.dark-theme .premium-select-modal {
+    background: #111827; /* Fundo escuro condizente */
+    border: 1px solid var(--border);
+}
+
+.premium-select-backdrop.active .premium-select-modal {
+    transform: translateY(0) scale(1);
+}
+
+/* 4. Cabeçalho (Header Principal em Vermelho) */
+.premium-select-header {
+    background: var(--primary);
+    padding: 24px;
+    position: relative;
+    color: white;
+}
+
+.premium-select-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    padding-right: 40px;
+}
+
+.premium-select-subtitle {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* 5. Botão de Fechar no Header */
+.premium-select-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+    opacity: 0.8;
+}
+
+.premium-select-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    opacity: 1;
+}
+
+/* SEARCH BAR FOR PREMIUM MODAL */
+.ps-search-wrapper {
+    background: #d1d5db; /* Cor de transição para o corpo cinza */
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.ps-search-box {
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    height: 44px;
+    border: 1px solid #d1d5db;
+    transition: all 0.2s;
+}
+
+.ps-search-box:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.1);
+}
+
+.ps-search-box i {
+    color: #94a3b8;
+    margin-right: 12px;
+    font-size: 14px;
+}
+
+.ps-search-box input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+html.dark-theme .ps-search-wrapper {
+    background: #1f2937;
+    border-bottom-color: #374151;
+}
+
+html.dark-theme .ps-search-box {
+    background: #0f172a;
+    border-color: #374151;
+}
+
+html.dark-theme .ps-search-box input {
+    color: #f8fafc;
+}
+
+/* 6. Lista de Opções */
+.premium-select-body {
+    padding: 24px;
+    max-height: 60vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.premium-select-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.premium-select-body::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 2px;
+}
+
+/* 7. Cards de Opções */
+.premium-option-card {
+    background: white;
+    border-radius: 4px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    will-change: transform, box-shadow, border-color;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+.premium-option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.premium-option-card.selected {
+    border-color: var(--primary);
+    background: #fffafa;
+}
+
+html.dark-theme .premium-option-card {
+    background: var(--bg-card);
+}
+html.dark-theme .premium-option-card.selected {
+    background: #2a1114;
+    border-color: var(--primary);
+}
+
+/* 8. Ícone do Card */
+.premium-option-icon {
+    width: 44px;
+    height: 44px;
+    background: #f8fafc;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #94a3b8;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.premium-option-icon svg, .premium-option-icon i {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+}
+
+.premium-option-card.selected .premium-option-icon {
+    background: var(--primary);
+    color: white;
+}
+
+html.dark-theme .premium-option-icon {
+    background: #1f2937;
+    color: #6b7280;
+}
+
+html.dark-theme .premium-option-card.selected .premium-option-icon {
+    background: var(--primary);
+    color: white;
+}
+
+/* 9. Textos do Card */
+.premium-option-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.premium-option-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.premium-option-id {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+html.dark-theme .premium-option-name {
+    color: var(--text-main);
+}
+
+html.dark-theme .premium-option-id {
+    color: #6b7280;
+}
+
+/* Responsividade Mobile Extra */
+@media (max-width: 600px) {
+    .premium-select-modal {
+        margin: auto 0 0 0;
+        border-radius: 4px 4px 0 0;
+        max-width: 100%;
+    }
+    .premium-select-backdrop {
+        align-items: flex-end;
+    }
+    .premium-select-body {
+        padding: 24px 20px;
+        max-height: 70vh;
+    }
+}

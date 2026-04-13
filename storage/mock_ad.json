@@ -1,0 +1,42 @@
+[
+    {
+        "username": "arthur.m",
+        "password": "123",
+        "name": "Arthur Martins",
+        "email": "arthur.m@facchini.local",
+        "department": "Segurança",
+        "cpf": "11122233344"
+    },
+    {
+        "username": "josue.m",
+        "password": "123",
+        "name": "Josue",
+        "email": "josue.m@facchini.local",
+        "department": "Manutenção",
+        "cpf": "12345678901"
+    },
+    {
+        "username": "nahyron.s",
+        "password": "123",
+        "name": "Nahyron",
+        "email": "nahyron.s@facchini.local",
+        "department": "Manutenção",
+        "cpf": "12345678901"
+    },
+    {
+        "username": "beatriz164",
+        "password": "1234",
+        "name": "Beatriz",
+        "email": "bia@facchini.com",
+        "cpf": "12345678910",
+        "department": "TI"
+    },
+    {
+        "username": "pietrabezerra240",
+        "password": "12345",
+        "name": "pietra Bezerra",
+        "email": "pietra.12@facchini.com",
+        "cpf": "54920041829",
+        "department": "Produção"
+    }
+]
