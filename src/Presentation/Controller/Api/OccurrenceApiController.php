@@ -2,27 +2,27 @@
 
 namespace Facchini\Presentation\Controller\Api;
 
-use Facchini\Infrastructure\Persistence\PostgreSQLOccurrenceRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLUserRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
+use Facchini\Infrastructure\Persistence\MySQLOccurrenceRepository;
+use Facchini\Infrastructure\Persistence\MySQLEmployeeRepository;
+use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\MySQLUserRepository;
+use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
 use Facchini\Infrastructure\Database\Connection;
 
 class OccurrenceApiController
 {
-    private PostgreSQLOccurrenceRepository $occurrenceRepo;
-    private PostgreSQLDepartmentRepository $departmentRepo;
+    private MySQLOccurrenceRepository $occurrenceRepo;
+    private MySQLDepartmentRepository $departmentRepo;
     private \Facchini\Application\Service\DashboardService $dashboardService;
 
     public function __construct()
     {
         $db = Connection::getInstance();
-        $deptRepo = new PostgreSQLDepartmentRepository();
-        $employeeRepo = new PostgreSQLEmployeeRepository($deptRepo);
-        $userRepo = new PostgreSQLUserRepository();
-        $epiRepo = new PostgreSQLEpiRepository();
-        $this->occurrenceRepo = new PostgreSQLOccurrenceRepository($employeeRepo, $userRepo, $epiRepo);
+        $deptRepo = new MySQLDepartmentRepository();
+        $employeeRepo = new MySQLEmployeeRepository($deptRepo);
+        $userRepo = new MySQLUserRepository();
+        $epiRepo = new MySQLEpiRepository();
+        $this->occurrenceRepo = new MySQLOccurrenceRepository($employeeRepo, $userRepo, $epiRepo);
         $this->departmentRepo = $deptRepo;
         $this->dashboardService = new \Facchini\Application\Service\DashboardService($employeeRepo, $this->occurrenceRepo, $userRepo);
     }

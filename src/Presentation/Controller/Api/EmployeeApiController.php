@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Facchini\Presentation\Controller\Api;
 
-use Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\MySQLEmployeeRepository;
+use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
 use Facchini\Domain\Entity\Employee;
 use Facchini\Domain\Entity\Department;
 use Facchini\Domain\ValueObject\CPF;
@@ -13,16 +13,16 @@ use DateTimeImmutable;
 
 class EmployeeApiController
 {
-    private PostgreSQLEmployeeRepository $repository;
-    private PostgreSQLDepartmentRepository $deptRepository;
+    private MySQLEmployeeRepository $repository;
+    private MySQLDepartmentRepository $deptRepository;
     private \Facchini\Application\Service\AuditService $auditService;
     private array $config;
 
     public function __construct()
     {
-        $this->deptRepository = new PostgreSQLDepartmentRepository();
-        $this->repository = new PostgreSQLEmployeeRepository($this->deptRepository);
-        $this->auditService = new \Facchini\Application\Service\AuditService(new \Facchini\Infrastructure\Persistence\PostgreSQLAuditLogRepository());
+        $this->deptRepository = new MySQLDepartmentRepository();
+        $this->repository = new MySQLEmployeeRepository($this->deptRepository);
+        $this->auditService = new \Facchini\Application\Service\AuditService(new \Facchini\Infrastructure\Persistence\MySQLAuditLogRepository());
         $this->config = require __DIR__ . '/../../../../config/app.php';
     }
 

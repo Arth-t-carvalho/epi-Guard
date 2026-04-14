@@ -14,7 +14,7 @@ use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 use DateTimeInterface;
 
-class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
+class MySQLOccurrenceRepository implements OccurrenceRepositoryInterface
 {
     private \PDO $db;
     private EmployeeRepositoryInterface $employeeRepository;
@@ -90,25 +90,49 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
         switch ($period) {
             case 'daily':
+                // MySQL
+                $query .= " AND DATE(o.data_hora) = ?";
+                /*
+                // PostgreSQL (Commented)
                 $query .= " AND o.data_hora::date = ?";
+                */
                 $params[] = $date->format('Y-m-d');
                 break;
             case 'weekly':
+                // MySQL
+                $query .= " AND YEARWEEK(o.data_hora, 3) = YEARWEEK(?, 3)";
+                /*
+                // PostgreSQL (Commented)
                 $query .= " AND to_char(o.data_hora, 'IYYYIW') = to_char(?::date, 'IYYYIW')";
+                */
                 $params[] = $date->format('Y-m-d');
                 break;
             case 'monthly':
-                $query .= " AND EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM ?::date) 
-                            AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date)";
+                // MySQL
+                $query .= " AND MONTH(o.data_hora) = MONTH(?) AND YEAR(o.data_hora) = YEAR(?)";
+                /*
+                // PostgreSQL (Commented)
+                $query .= " AND EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM ?::date) AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date)";
+                */
                 $params[] = $date->format('Y-m-d');
                 $params[] = $date->format('Y-m-d');
                 break;
             case 'yearly':
+                // MySQL
+                $query .= " AND YEAR(o.data_hora) = YEAR(?)";
+                /*
+                // PostgreSQL (Commented)
                 $query .= " AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM ?::date)";
+                */
                 $params[] = $date->format('Y-m-d');
                 break;
             case 'range':
+                // MySQL
+                $query .= " AND DATE(o.data_hora) BETWEEN ? AND ?";
+                /*
+                // PostgreSQL (Commented)
                 $query .= " AND o.data_hora::date BETWEEN ? AND ?";
+                */
                 $params[] = $date->format('Y-m-d');
                 $params[] = $end->format('Y-m-d');
                 break;
@@ -209,6 +233,24 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             $epiParams = array_merge($epiParams, $allowedEpiNames);
         }
 
+        // MySQL Version
+        $query = "
+            SELECT 
+                MONTH(o.data_hora) as mes,
+                e.nome as epi_nome,
+                COUNT(*) as total
+            FROM ocorrencias o
+            JOIN funcionarios f ON o.funcionario_id = f.id
+            JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
+            JOIN epis e ON oe.epi_id = e.id
+            WHERE YEAR(o.data_hora) = ? AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL)
+            $sectorClause
+            $epiClause
+            GROUP BY mes, epi_nome
+        ";
+
+        /*
+        // PostgreSQL (Commented)
         $query = "
             SELECT 
                 EXTRACT(MONTH FROM o.data_hora)::int as mes,
@@ -223,6 +265,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             $epiClause
             GROUP BY mes, epi_nome
         ";
+        */
 
         $stmt = $this->db->prepare($query);
         $stmt->execute($epiParams);
@@ -237,6 +280,18 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             }
         }
 
+        // MySQL Version
+        $queryTotal = "
+            SELECT MONTH(o.data_hora) as mes, COUNT(*) as qtd
+            FROM ocorrencias o
+            JOIN funcionarios f ON o.funcionario_id = f.id
+            WHERE YEAR(o.data_hora) = ? AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL)
+            $sectorClause
+            GROUP BY mes
+        ";
+        
+        /*
+        // PostgreSQL (Commented)
         $queryTotal = "
             SELECT EXTRACT(MONTH FROM o.data_hora)::int as mes, COUNT(*) as qtd
             FROM ocorrencias o
@@ -245,6 +300,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             $sectorClause
             GROUP BY mes
         ";
+        */
         
         $totalParams = [$year];
         if (!empty($sectorIds)) {
@@ -316,6 +372,23 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             $params = array_merge($params, $allowedEpiNames);
         }
 
+        // MySQL Version
+        $query = "
+            SELECT 
+                e.nome,
+                COUNT(*) as total
+            FROM ocorrencias o
+            JOIN funcionarios f ON o.funcionario_id = f.id
+            JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
+            JOIN epis e ON oe.epi_id = e.id
+            WHERE o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND YEAR(o.data_hora) = ?
+            $sectorClause
+            $epiClause
+            GROUP BY e.nome
+        ";
+
+        /*
+        // PostgreSQL (Commented)
         $query = "
             SELECT 
                 e.nome,
@@ -329,6 +402,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             $epiClause
             GROUP BY e.nome
         ";
+        */
 
         $stmt = $this->db->prepare($query);
         $stmt->execute($params);
@@ -369,11 +443,12 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
     public function save(Occurrence $occurrence): void
     {
-        $stmt = $this->db->prepare("INSERT INTO ocorrencias (funcionario_id, tipo, data_hora) VALUES (?, ?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO ocorrencias (funcionario_id, tipo, data_hora, foto_evidencia) VALUES (?, ?, ?, ?)");
         $params = [
             $occurrence->getEmployee()->getId(),
             $occurrence->getType()->getValue(),
-            $occurrence->getDate()->format('Y-m-d H:i:s')
+            $occurrence->getDate()->format('Y-m-d H:i:s'),
+            $occurrence->getPrimaryEvidencePath()
         ];
         $stmt->execute($params);
         $occurrence->setId((int) $this->db->lastInsertId());
@@ -381,11 +456,12 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
     public function update(Occurrence $occurrence): void
     {
-        $stmt = $this->db->prepare("UPDATE ocorrencias SET funcionario_id = ?, tipo = ?, data_hora = ? WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE ocorrencias SET funcionario_id = ?, tipo = ?, data_hora = ?, foto_evidencia = ? WHERE id = ?");
         $params = [
             $occurrence->getEmployee()->getId(),
             $occurrence->getType()->getValue(),
             $occurrence->getDate()->format('Y-m-d H:i:s'),
+            $occurrence->getPrimaryEvidencePath(),
             $occurrence->getId()
         ];
         $stmt->execute($params);
@@ -405,7 +481,12 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
     public function toggleFavorite(int $id): array
     {
+        // MySQL/MariaDB standard: FAVORITO = NOT FAVORITO usually works if it's a boolean-like column, but for clarity:
+        $stmt = $this->db->prepare("UPDATE ocorrencias SET favorito = CASE WHEN favorito = 1 THEN 0 ELSE 1 END WHERE id = ?");
+        /*
+        // PostgreSQL (Commented)
         $stmt = $this->db->prepare("UPDATE ocorrencias SET favorito = NOT favorito WHERE id = ?");
+        */
         $stmt->execute([$id]);
 
         $stmt2 = $this->db->prepare("SELECT favorito FROM ocorrencias WHERE id = ?");
@@ -417,7 +498,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
     public function findInfractions(array $filters = []): array
     {
         $sql = "SELECT o.id, o.data_hora, o.tipo, o.favorito, f.id as funcionario_id, f.nome as funcionario_nome, f.foto_referencia as funcionario_foto, s.id as setor_id, s.sigla as setor_sigla, s.nome as setor_nome, e.id as epi_id, e.nome as epi_nome, o.criado_em,
-                (SELECT ev.caminho_imagem FROM evidencias ev WHERE ev.ocorrencia_id = o.id LIMIT 1) as evidencia_foto,
+                o.foto_evidencia as evidencia_foto,
                 (CASE WHEN EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id) THEN 'resolvido' ELSE 'pendente' END) as status
                 FROM ocorrencias o
                 LEFT JOIN funcionarios f ON o.funcionario_id = f.id
@@ -428,61 +509,66 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
         $params = [];
 
-        // Filtro de Visibilidade (Oculto) - Crucial: NULL no banco deve ser tratado como visível (FALSE)
+        // Filtro de Visibilidade (Oculto)
         if (!empty($filters['status']) && $filters['status'] === 'inativo') {
-            $sql .= " AND o.oculto = TRUE";
+            $sql .= " AND o.oculto = 1";
+            /* PostgreSQL: o.oculto = TRUE */
         } else {
-            $sql .= " AND (o.oculto = FALSE OR o.oculto IS NULL)";
+            $sql .= " AND (o.oculto = 0 OR o.oculto IS NULL)";
+            /* PostgreSQL: (o.oculto = FALSE OR o.oculto IS NULL) */
         }
         
-        // 1. Filtro por colaborador específico (notificações)
         if (!empty($filters['funcionario_id']) && is_numeric($filters['funcionario_id'])) {
             $sql .= " AND f.id = ?";
             $params[] = $filters['funcionario_id'];
         }
 
-        // 2. Filtro por Filial (Branch) - Uso direto da coluna na tabela ocorrencias
         if (!empty($filters['filial_id'])) {
             $sql .= " AND o.filial_id = ?";
             $params[] = $filters['filial_id'];
         }
 
-        // 3. Pesquisa textual
         if (!empty($filters['search'])) {
-            $sql .= " AND (f.nome ILIKE ? OR s.sigla ILIKE ? OR s.nome ILIKE ?)";
+            // MySQL: LIKE instead of ILIKE (MySQL is generally case-insensitive unless using binary collation)
+            $sql .= " AND (f.nome LIKE ? OR s.sigla LIKE ? OR s.nome LIKE ?)";
+            /* PostgreSQL: (f.nome ILIKE ? OR s.sigla ILIKE ? OR s.nome ILIKE ?) */
             $searchTerm = "%" . $filters['search'] . "%";
             $params[] = $searchTerm;
             $params[] = $searchTerm;
             $params[] = $searchTerm;
         }
 
-        // 4. Filtro por EPI
         if (!empty($filters['epi']) && $filters['epi'] !== 'todos') {
-            $sql .= " AND e.nome ILIKE ?";
+            $sql .= " AND e.nome LIKE ?";
             $params[] = "%" . $filters['epi'] . "%";
         }
 
-        // 5. Filtro por Período
         if (!empty($filters['periodo']) && $filters['periodo'] !== 'todos') {
             if ($filters['periodo'] === 'hoje') {
-                $sql .= " AND o.data_hora::date = CURRENT_DATE";
+                // MySQL
+                $sql .= " AND DATE(o.data_hora) = CURRENT_DATE";
+                /* PostgreSQL: $sql .= " AND o.data_hora::date = CURRENT_DATE"; */
             } elseif ($filters['periodo'] === 'semana') {
-                $sql .= " AND to_char(o.data_hora, 'IYYYIW') = to_char(CURRENT_DATE, 'IYYYIW')";
+                // MySQL
+                $sql .= " AND YEARWEEK(o.data_hora, 3) = YEARWEEK(CURRENT_DATE, 3)";
+                /* PostgreSQL: $sql .= " AND to_char(o.data_hora, 'IYYYIW') = to_char(CURRENT_DATE, 'IYYYIW')"; */
             } elseif ($filters['periodo'] === 'mes') {
-                $sql .= " AND EXTRACT(MONTH FROM o.data_hora) = EXTRACT(MONTH FROM CURRENT_DATE) 
-                          AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)";
+                // MySQL
+                $sql .= " AND MONTH(o.data_hora) = MONTH(CURRENT_DATE) AND YEAR(o.data_hora) = YEAR(CURRENT_DATE)";
+                /* PostgreSQL: $sql .= " AND EXTRACT(MONTH FROM o.data_hora) = ..."; */
             } elseif ($filters['periodo'] === 'personalizado') {
                 $start = $filters['date_from'] ?? ($filters['data_inicio'] ?? null);
                 $end = $filters['date_to'] ?? ($filters['data_fim'] ?? null);
                 if ($start && $end) {
-                    $sql .= " AND o.data_hora::date BETWEEN ? AND ?";
+                    // MySQL
+                    $sql .= " AND DATE(o.data_hora) BETWEEN ? AND ?";
+                    /* PostgreSQL: $sql .= " AND o.data_hora::date BETWEEN ? AND ?"; */
                     $params[] = $start;
                     $params[] = $end;
                 }
             }
         }
 
-        // 6. Filtro por Resolvido/Pendente
         if (!empty($filters['status']) && $filters['status'] !== 'todos' && $filters['status'] !== 'inativo') {
             if ($filters['status'] === 'pendente') {
                 $sql .= " AND NOT EXISTS (SELECT 1 FROM acoes_ocorrencia ao WHERE ao.ocorrencia_id = o.id)";
@@ -491,7 +577,6 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             }
         }
 
-        // 7. Ordenação
         $orderBy = "o.favorito DESC, o.data_hora DESC";
         if (!empty($filters['order'])) {
             if ($filters['order'] === 'alfabetica') {
@@ -510,6 +595,17 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
 
     public function getWorstMonth(?array $sectorIds = null): array
     {
+        // MySQL Version
+        $query = "
+            SELECT 
+                MONTH(o.data_hora) as mes,
+                COUNT(*) as total
+            FROM ocorrencias o
+            JOIN funcionarios f ON o.funcionario_id = f.id
+            WHERE o.tipo = 'INFRACAO' AND (o.oculto = 0 OR o.oculto IS NULL) AND YEAR(o.data_hora) = YEAR(CURRENT_DATE)
+        ";
+        /*
+        // PostgreSQL (Commented)
         $query = "
             SELECT 
                 EXTRACT(MONTH FROM o.data_hora)::int as mes,
@@ -518,6 +614,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             JOIN funcionarios f ON o.funcionario_id = f.id
             WHERE o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL) AND EXTRACT(YEAR FROM o.data_hora) = EXTRACT(YEAR FROM CURRENT_DATE)
         ";
+        */
         
         $params = [];
         if (!empty($sectorIds)) {
@@ -540,7 +637,9 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
     {
         $params = [];
         if ($lastId === -1) {
-            $where = "o.data_hora >= NOW() - INTERVAL '24 hours'";
+            // MySQL
+            $where = "o.data_hora >= NOW() - INTERVAL 24 HOUR";
+            /* PostgreSQL: $where = "o.data_hora >= NOW() - INTERVAL '24 hours'"; */
         } else {
             $where = "o.id > ?";
             $params[] = $lastId;
@@ -552,7 +651,7 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
                 LEFT JOIN setores s ON f.setor_id = s.id
                 LEFT JOIN ocorrencia_epis oe ON o.id = oe.ocorrencia_id
                 LEFT JOIN epis e ON oe.epi_id = e.id
-                WHERE {$where} AND o.tipo = 'INFRACAO' AND (o.oculto = FALSE OR o.oculto IS NULL)
+                WHERE {$where} AND o.tipo = 'INFRACAO' AND (o.oculto = 0 OR o.oculto IS NULL)
                 ORDER BY o.id ASC";
 
         $stmt = $this->db->prepare($sql);
@@ -579,7 +678,8 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
             description: "Ocorrência registrada via sistema",
             date: new DateTimeImmutable($row['data_hora']),
             id: (int) $row['id'],
-            createdAt: new DateTimeImmutable($row['criado_em'])
+            createdAt: new DateTimeImmutable($row['criado_em']),
+            primaryEvidencePath: $row['foto_evidencia'] ?? null
         );
     }
 
@@ -626,4 +726,3 @@ class PostgreSQLOccurrenceRepository implements OccurrenceRepositoryInterface
         return array_unique($resolved);
     }
 }
-

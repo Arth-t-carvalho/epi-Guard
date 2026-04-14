@@ -10,7 +10,7 @@ use Facchini\Domain\Repository\UserRepositoryInterface;
 use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 
-class PostgreSQLUserRepository implements UserRepositoryInterface
+class MySQLUserRepository implements UserRepositoryInterface
 {
     private \PDO $db;
 
@@ -21,7 +21,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     public function findById(int $id): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, criado_em, atualizado_em FROM usuarios WHERE id = ? AND deletado_em IS NULL");
+        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, filial_id, criado_em, atualizado_em FROM usuarios WHERE id = ? AND deletado_em IS NULL");
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch()) {
@@ -33,7 +33,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     public function findByEmail(Email $email): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO' AND deletado_em IS NULL");
+        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, filial_id, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO' AND deletado_em IS NULL");
         $stmt->execute([$email->getValue()]);
 
         if ($row = $stmt->fetch()) {
@@ -45,7 +45,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     public function findByUsername(string $username): ?User
     {
-        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO' AND deletado_em IS NULL");
+        $stmt = $this->db->prepare("SELECT id, nome, usuario, senha, cargo, pref_grafico, filial_id, criado_em, atualizado_em FROM usuarios WHERE usuario = ? AND status = 'ATIVO' AND deletado_em IS NULL");
         $stmt->execute([$username]);
 
         if ($row = $stmt->fetch()) {
@@ -58,7 +58,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
     /** @return User[] */
     public function findAll(): array
     {
-        $stmt = $this->db->query("SELECT id, nome, usuario, senha, cargo, pref_grafico, criado_em, atualizado_em FROM usuarios WHERE deletado_em IS NULL ORDER BY nome ASC");
+        $stmt = $this->db->query("SELECT id, nome, usuario, senha, cargo, pref_grafico, filial_id, criado_em, atualizado_em FROM usuarios WHERE deletado_em IS NULL ORDER BY nome ASC");
         $users = [];
         while ($row = $stmt->fetch()) {
             $users[] = $this->hydrate($row);
@@ -68,7 +68,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     public function save(User $user): void
     {
-        $stmt = $this->db->prepare("INSERT INTO usuarios (nome, usuario, senha, cargo, criado_em) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO usuarios (nome, usuario, senha, cargo, filial_id, criado_em) VALUES (?, ?, ?, ?, ?, ?)");
         
         $roleVal = $user->getRole()->getValue();
         $dbRole = 'SUPERVISOR';
@@ -85,6 +85,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
             $user->getEmail()->getValue(),
             $user->getPasswordHash(),
             $dbRole,
+            $user->getFilialId() ?? 1,
             $user->getCreatedAt()->format('Y-m-d H:i:s')
         ];
         
@@ -98,7 +99,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     public function update(User $user): void
     {
-        $stmt = $this->db->prepare("UPDATE usuarios SET nome = ?, usuario = ?, senha = ?, cargo = ?, atualizado_em = ? WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE usuarios SET nome = ?, usuario = ?, senha = ?, cargo = ?, filial_id = ?, atualizado_em = ? WHERE id = ?");
         
         $roleVal = $user->getRole()->getValue();
         $dbRole = 'SUPERVISOR';
@@ -115,6 +116,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
             $user->getEmail()->getValue(),
             $user->getPasswordHash(),
             $dbRole,
+            $user->getFilialId() ?? 1,
             (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             $user->getId()
         ];
@@ -139,8 +141,7 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
 
     private function hydrate(array $row): User
     {
-        // Mapeamento de cargo para UserRole (suportando os cargos antigos)
-        $cargo = strtolower($row['cargo']);
+        $cargo = strtolower($row['cargo'] ?? '');
         if ($cargo === 'super_admin' || $cargo === 'admin') {
             $role = new UserRole(UserRole::ADMIN);
         } elseif ($cargo === 'supervisor' || $cargo === 'operator') {
@@ -159,8 +160,8 @@ class PostgreSQLUserRepository implements UserRepositoryInterface
             chartPreference: $row['pref_grafico'] ?? 'bar',
             id: (int) $row['id'],
             createdAt: new DateTimeImmutable($row['criado_em']),
-            updatedAt: $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null
+            updatedAt: $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null,
+            filialId: (int)($row['filial_id'] ?? 1)
         );
     }
 }
-

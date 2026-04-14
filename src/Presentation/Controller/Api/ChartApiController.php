@@ -3,11 +3,11 @@
 namespace Facchini\Presentation\Controller\Api;
 
 use Facchini\Application\Service\DashboardService;
-use Facchini\Infrastructure\Persistence\PostgreSQLOccurrenceRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLUserRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
+use Facchini\Infrastructure\Persistence\MySQLOccurrenceRepository;
+use Facchini\Infrastructure\Persistence\MySQLEmployeeRepository;
+use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\MySQLUserRepository;
+use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
 
 class ChartApiController
 {
@@ -16,11 +16,11 @@ class ChartApiController
     public function __construct()
     {
         // Injeção de dependências manual para o contexto desse projeto PHP puro
-        $deptRepo = new PostgreSQLDepartmentRepository();
-        $employeeRepo = new PostgreSQLEmployeeRepository($deptRepo);
-        $userRepo = new PostgreSQLUserRepository();
-        $epiRepo = new PostgreSQLEpiRepository();
-        $occurrenceRepo = new PostgreSQLOccurrenceRepository($employeeRepo, $userRepo, $epiRepo);
+        $deptRepo = new MySQLDepartmentRepository();
+        $employeeRepo = new MySQLEmployeeRepository($deptRepo);
+        $userRepo = new MySQLUserRepository();
+        $epiRepo = new MySQLEpiRepository();
+        $occurrenceRepo = new MySQLOccurrenceRepository($employeeRepo, $userRepo, $epiRepo);
         
         $this->dashboardService = new DashboardService($employeeRepo, $occurrenceRepo, $userRepo);
     }
@@ -34,7 +34,7 @@ class ChartApiController
             $sectorIds = array_map('intval', explode(',', $_GET['sector_id']));
         } else {
             $filialId = $_SESSION['active_filial_id'] ?? 1;
-            $deptRepo = new PostgreSQLDepartmentRepository();
+            $deptRepo = new MySQLDepartmentRepository();
             $departments = $deptRepo->findAll($filialId);
             $sectorIds = [];
             foreach ($departments as $dept) {

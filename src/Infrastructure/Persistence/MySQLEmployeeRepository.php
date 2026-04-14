@@ -10,7 +10,7 @@ use Facchini\Domain\Repository\DepartmentRepositoryInterface;
 use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 
-class PostgreSQLEmployeeRepository implements EmployeeRepositoryInterface
+class MySQLEmployeeRepository implements EmployeeRepositoryInterface
 {
     private \PDO $db;
     private DepartmentRepositoryInterface $departmentRepository;
@@ -138,4 +138,3 @@ class PostgreSQLEmployeeRepository implements EmployeeRepositoryInterface
         );
     }
 }
-

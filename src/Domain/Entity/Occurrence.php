@@ -20,6 +20,7 @@ class Occurrence
     private DateTimeImmutable $date;
     private DateTimeImmutable $createdAt;
     private ?DateTimeImmutable $updatedAt;
+    private ?string $primaryEvidencePath;
 
     /** @var Evidence[] */
     private array $evidences = [];
@@ -37,7 +38,8 @@ class Occurrence
         ?OccurrenceStatus $status = null,
         ?int $id = null,
         ?DateTimeImmutable $createdAt = null,
-        ?DateTimeImmutable $updatedAt = null
+        ?DateTimeImmutable $updatedAt = null,
+        ?string $primaryEvidencePath = null
         )
     {
         $this->employee = $employee;
@@ -50,6 +52,7 @@ class Occurrence
         $this->id = $id;
         $this->createdAt = $createdAt ?? new DateTimeImmutable();
         $this->updatedAt = $updatedAt;
+        $this->primaryEvidencePath = $primaryEvidencePath;
     }
 
     public function getId(): ?int
@@ -131,5 +134,15 @@ class Occurrence
     public function addAction(OccurrenceAction $action): void
     {
         $this->actions[] = $action;
+    }
+
+    public function getPrimaryEvidencePath(): ?string
+    {
+        return $this->primaryEvidencePath;
+    }
+
+    public function setPrimaryEvidencePath(?string $path): void
+    {
+        $this->primaryEvidencePath = $path;
     }
 }

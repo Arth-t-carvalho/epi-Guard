@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Facchini\Presentation\Controller\Api;
 
-use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
+use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
 
 class EpiApiController
 {
@@ -19,7 +19,7 @@ class EpiApiController
             return;
         }
 
-        $repo = new PostgreSQLEpiRepository();
+        $repo = new MySQLEpiRepository();
         
         try {
             foreach ($colors as $item) {

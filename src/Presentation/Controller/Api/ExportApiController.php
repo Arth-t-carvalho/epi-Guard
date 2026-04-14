@@ -290,7 +290,7 @@ class ExportApiController
             $stmt = $this->db->prepare($query);
             
             // Re-order params based on query: [subParams x 4 times for subqueries, then ids]
-            // Actually, in PostgreSQL with parameters inside subqueries, it can be tricky.
+            // Actually, in MySQL with parameters inside subqueries, it can be tricky.
             // Let's adjust the query to not use parameters in subqueries if possible, or repeat them.
             $allParams = [];
             // Subquery total_infracoes

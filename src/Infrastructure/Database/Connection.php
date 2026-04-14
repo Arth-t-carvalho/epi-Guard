@@ -16,7 +16,7 @@ class Connection
             $host = getenv('DB_HOST');
             $user = getenv('DB_USER');
             $pass = getenv('DB_PASS');
-            $port = getenv('DB_PORT') ?: '5432';
+            $port = getenv('DB_PORT') ?: '3306';
             $db = getenv('DB_NAME');
 
             if (!$host || !$user) {
@@ -24,14 +24,25 @@ class Connection
             }
 
             try {
+                // MySQL Connection
+                $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+                self::$instance = new PDO($dsn, $user, $pass, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]);
+
+                /* 
+                // PostgreSQL Connection (Commented)
                 $dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=disable";
                 self::$instance = new PDO($dsn, $user, $pass, [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_EMULATE_PREPARES => false,
                 ]);
+                */
             } catch (PDOException $e) {
-                throw new Exception("Falha na conexão PostgreSQL (PDO): " . $e->getMessage());
+                throw new Exception("Falha na conexão Banco de Dados (PDO): " . $e->getMessage());
             }
         }
 

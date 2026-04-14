@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace Facchini\Presentation\Controller\Api;
 
-use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
+use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
 
 class SettingsApiController
 {
-    private PostgreSQLEpiRepository $epiRepository;
+    private MySQLEpiRepository $epiRepository;
 
     public function __construct()
     {
-        $this->epiRepository = new PostgreSQLEpiRepository();
+        $this->epiRepository = new MySQLEpiRepository();
     }
 
     public function updateEpiColor()
@@ -131,7 +131,7 @@ class SettingsApiController
         }
 
         try {
-            $userRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLUserRepository();
+            $userRepo = new \Facchini\Infrastructure\Persistence\MySQLUserRepository();
             $success = $userRepo->updateChartPreference((int) $_SESSION['user_id'], $style);
             echo json_encode(['success' => $success]);
         } catch (\Exception $e) {

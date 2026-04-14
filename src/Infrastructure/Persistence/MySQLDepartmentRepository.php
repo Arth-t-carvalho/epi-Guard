@@ -7,7 +7,7 @@ use Facchini\Domain\Entity\Department;
 use Facchini\Domain\Repository\DepartmentRepositoryInterface;
 use Facchini\Infrastructure\Database\Connection;
 
-class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
+class MySQLDepartmentRepository implements DepartmentRepositoryInterface
 {
     private \PDO $db;
 
@@ -79,6 +79,24 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
      */
     public function findAllWithStats(array $filters = []): array
     {
+        // MySQL Version
+        $sql = "SELECT s.id, s.nome, s.nome_en, s.sigla, s.status, s.epis_json, s.criado_em, s.atualizado_em, 
+                       (SELECT COUNT(*) FROM funcionarios WHERE setor_id = s.id AND deletado_em IS NULL) as total_funcionarios,
+                       COALESCE(risk_data.risk_p, 0) as risk_p
+                FROM setores s 
+                LEFT JOIN (
+                    SELECT f_calc.setor_id, 
+                           (COUNT(DISTINCT occ_calc.funcionario_id) / 
+                            NULLIF((SELECT COUNT(*) FROM funcionarios f_total WHERE f_total.setor_id = f_calc.setor_id AND f_total.deletado_em IS NULL), 0) * 100) as risk_p
+                    FROM funcionarios f_calc
+                    JOIN ocorrencias occ_calc ON f_calc.id = occ_calc.funcionario_id
+                    WHERE occ_calc.tipo = 'INFRACAO' AND f_calc.deletado_em IS NULL
+                    GROUP BY f_calc.setor_id
+                ) as risk_data ON s.id = risk_data.setor_id
+                WHERE s.deletado_em IS NULL";
+
+        /*
+        // PostgreSQL (Commented)
         $sql = "SELECT s.id, s.nome, s.nome_en, s.sigla, s.status, s.epis_json, s.criado_em, s.atualizado_em, 
                        (SELECT COUNT(*) FROM funcionarios WHERE setor_id = s.id AND deletado_em IS NULL) as total_funcionarios,
                        COALESCE(risk_data.risk_p, 0) as risk_p
@@ -93,6 +111,7 @@ class PostgreSQLDepartmentRepository implements DepartmentRepositoryInterface
                     GROUP BY f_calc.setor_id
                 ) as risk_data ON s.id = risk_data.setor_id
                 WHERE s.deletado_em IS NULL";
+        */
 
         $params = [];
         if (!empty($filters['filial_id'])) {

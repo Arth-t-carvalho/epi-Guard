@@ -2,27 +2,27 @@
 
 namespace Facchini\Presentation\Controller\Api;
 
-use Facchini\Infrastructure\Persistence\PostgreSQLOccurrenceRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLUserRepository;
+use Facchini\Infrastructure\Persistence\MySQLOccurrenceRepository;
+use Facchini\Infrastructure\Persistence\MySQLEmployeeRepository;
+use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
+use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\MySQLUserRepository;
 use Facchini\Infrastructure\Database\Connection;
 
 class SimulationApiController
 {
-    private PostgreSQLOccurrenceRepository $occurrenceRepository;
-    private PostgreSQLEmployeeRepository $employeeRepository;
-    private PostgreSQLEpiRepository $epiRepository;
+    private MySQLOccurrenceRepository $occurrenceRepository;
+    private MySQLEmployeeRepository $employeeRepository;
+    private MySQLEpiRepository $epiRepository;
 
     public function __construct()
     {
         $db = Connection::getInstance();
-        $deptRepo = new PostgreSQLDepartmentRepository();
-        $this->employeeRepository = new PostgreSQLEmployeeRepository($deptRepo);
-        $userRepo = new PostgreSQLUserRepository();
-        $this->epiRepository = new PostgreSQLEpiRepository();
-        $this->occurrenceRepository = new PostgreSQLOccurrenceRepository($this->employeeRepository, $userRepo, $this->epiRepository);
+        $deptRepo = new MySQLDepartmentRepository();
+        $this->employeeRepository = new MySQLEmployeeRepository($deptRepo);
+        $userRepo = new MySQLUserRepository();
+        $this->epiRepository = new MySQLEpiRepository();
+        $this->occurrenceRepository = new MySQLOccurrenceRepository($this->employeeRepository, $userRepo, $this->epiRepository);
     }
 
     public function simulate()

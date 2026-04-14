@@ -2,26 +2,26 @@
 
 namespace Facchini\Presentation\Controller;
 
-use Facchini\Infrastructure\Persistence\PostgreSQLOccurrenceRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLUserRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLEpiRepository;
-use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\MySQLOccurrenceRepository;
+use Facchini\Infrastructure\Persistence\MySQLEmployeeRepository;
+use Facchini\Infrastructure\Persistence\MySQLUserRepository;
+use Facchini\Infrastructure\Persistence\MySQLEpiRepository;
+use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
 
 class InfractionController
 {
-    private PostgreSQLOccurrenceRepository $occurrenceRepository;
-    private PostgreSQLEpiRepository $epiRepository;
-    private PostgreSQLDepartmentRepository $departmentRepository;
-    private PostgreSQLEmployeeRepository $employeeRepository;
+    private MySQLOccurrenceRepository $occurrenceRepository;
+    private MySQLEpiRepository $epiRepository;
+    private MySQLDepartmentRepository $departmentRepository;
+    private MySQLEmployeeRepository $employeeRepository;
 
     public function __construct()
     {
-        $this->departmentRepository = new PostgreSQLDepartmentRepository();
-        $this->employeeRepository = new PostgreSQLEmployeeRepository($this->departmentRepository);
-        $userRepo = new PostgreSQLUserRepository();
-        $this->epiRepository = new PostgreSQLEpiRepository();
-        $this->occurrenceRepository = new PostgreSQLOccurrenceRepository($this->employeeRepository, $userRepo, $this->epiRepository);
+        $this->departmentRepository = new MySQLDepartmentRepository();
+        $this->employeeRepository = new MySQLEmployeeRepository($this->departmentRepository);
+        $userRepo = new MySQLUserRepository();
+        $this->epiRepository = new MySQLEpiRepository();
+        $this->occurrenceRepository = new MySQLOccurrenceRepository($this->employeeRepository, $userRepo, $this->epiRepository);
     }
 
     public function index()

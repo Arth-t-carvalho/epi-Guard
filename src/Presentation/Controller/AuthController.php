@@ -3,7 +3,7 @@
 namespace Facchini\Presentation\Controller;
 
 use Facchini\Infrastructure\Database\Connection;
-use Facchini\Infrastructure\Persistence\PostgreSQLUserRepository;
+use Facchini\Infrastructure\Persistence\MySQLUserRepository;
 use Facchini\Domain\Entity\User;
 use Facchini\Domain\ValueObject\Email;
 use Facchini\Domain\ValueObject\UserRole;
@@ -13,12 +13,12 @@ use DateTimeImmutable;
 
 class AuthController
 {
-    private PostgreSQLUserRepository $userRepository;
+    private MySQLUserRepository $userRepository;
     private array $config;
 
     public function __construct()
     {
-        $this->userRepository = new PostgreSQLUserRepository();
+        $this->userRepository = new MySQLUserRepository();
         $this->config = require __DIR__ . '/../../../config/app.php';
     }
 

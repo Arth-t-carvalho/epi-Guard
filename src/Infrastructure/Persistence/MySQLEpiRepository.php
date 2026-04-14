@@ -7,7 +7,7 @@ use Facchini\Domain\Entity\EpiItem;
 use Facchini\Domain\Repository\EpiRepositoryInterface;
 use Facchini\Infrastructure\Database\Connection;
 
-class PostgreSQLEpiRepository implements EpiRepositoryInterface
+class MySQLEpiRepository implements EpiRepositoryInterface
 {
     private \PDO $db;
 
@@ -18,7 +18,11 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
 
     public function findById(int $id): ?EpiItem
     {
+        $stmt = $this->db->prepare("SELECT id, nome, nome_en, descricao, cor, status, criado_em, atualizado_em FROM epis WHERE id = ? AND deletado_em IS NULL");
+        /*
+        // PostgreSQL (Commented)
         $stmt = $this->db->prepare("SELECT id, nome, nome_en, descricao, cor, status FROM epis WHERE id = ? AND deletado_em IS NULL");
+        */
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch()) {
@@ -31,7 +35,11 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
     /** @return EpiItem[] */
     public function findAll(): array
     {
+        $stmt = $this->db->query("SELECT id, nome, nome_en, descricao, cor, status, criado_em, atualizado_em FROM epis WHERE status = 'ATIVO' AND deletado_em IS NULL ORDER BY nome ASC");
+        /*
+        // PostgreSQL (Commented)
         $stmt = $this->db->query("SELECT id, nome, nome_en, descricao, cor, status FROM epis WHERE status = 'ATIVO' AND deletado_em IS NULL ORDER BY nome ASC");
+        */
         $epis = [];
 
         while ($row = $stmt->fetch()) {
@@ -106,6 +114,10 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
     public function delete(EpiItem $epiItem): void
     {
         $stmt = $this->db->prepare("UPDATE epis SET deletado_em = CURRENT_TIMESTAMP, status = 'INATIVO' WHERE id = ?");
+        /*
+        // PostgreSQL (Commented)
+        $stmt = $this->db->prepare("UPDATE epis SET deletado_em = CURRENT_TIMESTAMP, status = 'INATIVO' WHERE id = ?");
+        */
         $stmt->execute([$epiItem->getId()]);
     }
 
@@ -159,9 +171,10 @@ class PostgreSQLEpiRepository implements EpiRepositoryInterface
             name: $row['nome'],
             color: $row['cor'] ?? '#E30613',
             isRequired: true, // Padrao
-            description: $row['descricao'],
-            nameEn: $row['nome_en'],
-            id: (int) $row['id']
+            description: $row['descricao'] ?? '',
+            nameEn: $row['nome_en'] ?? '',
+            id: (int) $row['id'],
+            createdAt: isset($row['criado_em']) ? new \DateTimeImmutable($row['criado_em']) : new \DateTimeImmutable()
         );
     }
 }

@@ -95,8 +95,16 @@ class OccurrenceStoreApiController
 
                     if (move_uploaded_file($tmpName, $destPath)) {
                         $caminhoRelativo = '/uploads/evidencias/' . $filename;
+                        
+                        // 1. Inserir na tabela de evidências (histórico/múltiplas fotos)
                         $stmtEv = $this->db->prepare("INSERT INTO evidencias (ocorrencia_id, caminho_imagem) VALUES (?, ?)");
                         $stmtEv->execute([$ocorrenciaId, $caminhoRelativo]);
+
+                        // 2. Otimização: Se for a primeira foto, salvar também na tabela ocorrencias para acesso rápido
+                        if ($index === 0) {
+                            $stmtUpdateOccurrence = $this->db->prepare("UPDATE ocorrencias SET foto_evidencia = ? WHERE id = ?");
+                            $stmtUpdateOccurrence->execute([$caminhoRelativo, $ocorrenciaId]);
+                        }
                     }
                 }
             }

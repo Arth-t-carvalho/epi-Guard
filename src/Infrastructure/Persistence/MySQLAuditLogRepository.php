@@ -9,7 +9,7 @@ use Facchini\Infrastructure\Database\Connection;
 use DateTimeImmutable;
 use PDO;
 
-class PostgreSQLAuditLogRepository implements AuditLogRepositoryInterface
+class MySQLAuditLogRepository implements AuditLogRepositoryInterface
 {
     private PDO $db;
 
@@ -66,6 +66,15 @@ class PostgreSQLAuditLogRepository implements AuditLogRepositoryInterface
 
     public function save(AuditLog $auditLog): void
     {
+        /*
+        // PostgreSQL (Commented)
+        $stmt = $this->db->prepare("
+            INSERT INTO audit_logs (usuario_id, acao, tipo_entidade, entidade_id, valores_antigos, valores_novos, endereco_ip, criado_em)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        */
+
+        // MySQL
         $stmt = $this->db->prepare("
             INSERT INTO audit_logs (usuario_id, acao, tipo_entidade, entidade_id, valores_antigos, valores_novos, endereco_ip, criado_em)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -100,4 +109,3 @@ class PostgreSQLAuditLogRepository implements AuditLogRepositoryInterface
         );
     }
 }
-

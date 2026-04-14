@@ -2,7 +2,7 @@
 
 namespace Facchini\Presentation\Controller\Api;
 
-use Facchini\Infrastructure\Persistence\PostgreSQLDepartmentRepository;
+use Facchini\Infrastructure\Persistence\MySQLDepartmentRepository;
 use Facchini\Domain\Entity\Department;
 use Facchini\Infrastructure\Database\Connection;
 
@@ -17,7 +17,7 @@ class DepartmentApiController
 
         try {
             $activeFilialId = $_SESSION['active_filial_id'] ?? 1;
-            $repo = new PostgreSQLDepartmentRepository();
+            $repo = new MySQLDepartmentRepository();
             $departments = $repo->findAll($activeFilialId);
 
             $data = array_map(function (Department $dept) {
@@ -58,7 +58,7 @@ class DepartmentApiController
             $sigla = trim($input['sigla'] ?? '');
             $epis = $input['epis'] ?? [];
 
-            $repo = new PostgreSQLDepartmentRepository();
+            $repo = new MySQLDepartmentRepository();
 
             $activeFilial = $_SESSION['active_filial_id'] ?? 1;
             // Verificar duplicata por nome na mesma filial
@@ -88,7 +88,7 @@ class DepartmentApiController
 
             // Salvar funcionários importados (se houver)
             if (!empty($input['employees']) && is_array($input['employees'])) {
-                $employeeRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository($repo);
+                $employeeRepo = new \Facchini\Infrastructure\Persistence\MySQLEmployeeRepository($repo);
                 foreach ($input['employees'] as $nomeFunc) {
                     if (empty($nomeFunc) || strlen($nomeFunc) < 2) continue;
                     
@@ -139,7 +139,7 @@ class DepartmentApiController
             $sigla = trim($input['sigla'] ?? '');
             $epis = $input['epis'] ?? [];
 
-            $repo = new PostgreSQLDepartmentRepository();
+            $repo = new MySQLDepartmentRepository();
             $department = $repo->findById($id);
 
             if (!$department) {
@@ -171,7 +171,7 @@ class DepartmentApiController
 
             // Salvar novos funcionários importados (se houver)
             if (!empty($input['employees']) && is_array($input['employees'])) {
-                $employeeRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository($repo);
+                $employeeRepo = new \Facchini\Infrastructure\Persistence\MySQLEmployeeRepository($repo);
                 foreach ($input['employees'] as $nomeFunc) {
                     if (empty($nomeFunc) || strlen($nomeFunc) < 2) continue;
                     
@@ -209,7 +209,7 @@ class DepartmentApiController
             }
 
             $id = (int)$input['id'];
-            $repo = new PostgreSQLDepartmentRepository();
+            $repo = new MySQLDepartmentRepository();
             
             $department = $repo->findById($id);
             if (!$department) {
@@ -238,8 +238,8 @@ class DepartmentApiController
                 return;
             }
 
-            $deptRepo = new PostgreSQLDepartmentRepository();
-            $employeeRepo = new \Facchini\Infrastructure\Persistence\PostgreSQLEmployeeRepository($deptRepo);
+            $deptRepo = new MySQLDepartmentRepository();
+            $employeeRepo = new \Facchini\Infrastructure\Persistence\MySQLEmployeeRepository($deptRepo);
             
             $employees = $employeeRepo->findByDepartment($id);
             $data = array_map(fn($e) => [

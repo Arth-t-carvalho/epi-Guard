@@ -6,9 +6,8 @@ namespace Facchini\Infrastructure\Persistence;
 use Facchini\Domain\Entity\Machine;
 use Facchini\Domain\Repository\MachineRepositoryInterface;
 use Facchini\Infrastructure\Database\Connection;
-use DateTimeImmutable;
 
-class PostgreSQLMachineRepository implements MachineRepositoryInterface
+class MySQLMachineRepository implements MachineRepositoryInterface
 {
     private \PDO $db;
 
@@ -19,7 +18,7 @@ class PostgreSQLMachineRepository implements MachineRepositoryInterface
 
     public function findById(int $id): ?Machine
     {
-        $stmt = $this->db->prepare("SELECT id, nome, setor_id, epi_id, criado_em, atualizado_em FROM maquinas WHERE id = ? AND deletado_em IS NULL");
+        $stmt = $this->db->prepare("SELECT id, nome, ip_camera, status, setor_id FROM maquinas WHERE id = ?");
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch()) {
@@ -29,13 +28,25 @@ class PostgreSQLMachineRepository implements MachineRepositoryInterface
         return null;
     }
 
-    /** @return Machine[] */
     public function findByDepartment(int $departmentId): array
     {
-        $stmt = $this->db->prepare("SELECT id, nome, setor_id, epi_id, criado_em, atualizado_em FROM maquinas WHERE setor_id = ? AND deletado_em IS NULL ORDER BY nome ASC");
+        $stmt = $this->db->prepare("SELECT id, nome, ip_camera, status, setor_id FROM maquinas WHERE setor_id = ? ORDER BY nome ASC");
         $stmt->execute([$departmentId]);
-
+        
         $machines = [];
+        while ($row = $stmt->fetch()) {
+            $machines[] = $this->hydrate($row);
+        }
+
+        return $machines;
+    }
+
+    /** @return Machine[] */
+    public function findAll(): array
+    {
+        $stmt = $this->db->query("SELECT id, nome, ip_camera, status, setor_id FROM maquinas ORDER BY nome ASC");
+        $machines = [];
+
         while ($row = $stmt->fetch()) {
             $machines[] = $this->hydrate($row);
         }
@@ -45,20 +56,21 @@ class PostgreSQLMachineRepository implements MachineRepositoryInterface
 
     public function save(Machine $machine): void
     {
-        $stmt = $this->db->prepare("INSERT INTO maquinas (nome, setor_id, epi_id) VALUES (?, ?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO maquinas (nome, ip_camera, status, setor_id) VALUES (?, ?, ?, ?)");
         $params = [
             $machine->getName(),
-            $machine->getDepartmentId(),
-            $machine->getEpiId()
+            $machine->getCameraIp(),
+            $machine->getStatus(),
+            $machine->getSectorId()
         ];
         $stmt->execute($params);
 
-        $machine->setId((int) $this->db->lastInsertId());
+        $machine->setId((int)$this->db->lastInsertId());
     }
 
     public function delete(int $id): void
     {
-        $stmt = $this->db->prepare("UPDATE maquinas SET deletado_em = CURRENT_TIMESTAMP WHERE id = ?");
+        $stmt = $this->db->prepare("DELETE FROM maquinas WHERE id = ?");
         $stmt->execute([$id]);
     }
 
@@ -66,11 +78,10 @@ class PostgreSQLMachineRepository implements MachineRepositoryInterface
     {
         return new Machine(
             name: $row['nome'],
-            departmentId: (int) $row['setor_id'],
-            epiId: $row['epi_id'] ? (int) $row['epi_id'] : null,
-            id: (int) $row['id'],
-            createdAt: new DateTimeImmutable($row['criado_em']),
-            updatedAt: $row['atualizado_em'] ? new DateTimeImmutable($row['atualizado_em']) : null
+            cameraIp: $row['ip_camera'],
+            status: $row['status'],
+            sectorId: (int)$row['setor_id'],
+            id: (int)$row['id']
         );
     }
 }
