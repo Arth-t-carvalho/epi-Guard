@@ -1,0 +1,13 @@
+.env
+/vendor/
+/public/uploads/evidencias/*
+!/public/uploads/evidencias/.gitkeep
+/scratch/
+/tmp/
+.DS_Store
+Thumbs.db
+.gemini/
+__pycache__/
+*.pyc
+.vscode/
+.idea/
